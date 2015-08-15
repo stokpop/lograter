@@ -1,0 +1,3 @@
+# lograter
+A Java tool to parse logfiles and output performance characteristics.
+More soon...
