@@ -1,0 +1,25 @@
+#Software: Microsoft Internet Information Services 7.0
+#Version: 1.0
+#Date: 2019-08-14 00:00:00
+#Fields: date time cs-method cs-uri-stem cs-uri-query s-port c-ip cs-version cs(User-Agent) cs(Cookie) cs(Referer) sc-status sc-substatus sc-win32-status sc-bytes cs-bytes time-taken
+2019-08-14 00:00:00 GET /kir/ - 81 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 83 15
+2019-08-14 00:00:04 GET /dev/aid/ire/wry/mid/bel/you/doc/pro/ lug=587&hah=53 80 1.2.3.126 HTTP/1.1 Rec/53.48+(wry;+BAS;+CUB+wry+LOG+gos+hem+Dif+LOG+BED;+dos-pul)+Eve/564.57+(LAX,+hem+Bes)+Awa/52.48.53+Mus/vex+Cos/277.600.55+(lib;+Mis-Mus/50.49;++gun://sat.ecu.mar/nib.bye) - - 200 0 0 19392 549 483
+2019-08-14 00:00:05 GET /dev/aid/ire/wry/lum/bel/axe/doc/cog/ lug=263&hah=50 80 1.2.3.195 HTTP/1.1 Rec/53.48+(lib;+Mis/50.49;++gun://sat.ecu.mar/nib.bye) - - 200 0 0 18859 414 499
+2019-08-14 00:00:06 GET /kir/ - 81 1.2.3.78 HTTP/1.1 - - - 200 0 0 341 72 0
+2019-08-14 00:00:07 GET /kir/ - 80 1.2.3.78 HTTP/1.1 - - - 200 0 0 341 72 0
+2019-08-14 00:00:07 GET /naw/fob/49/air.jpg - 81 1.2.3.22 HTTP/1.1 Rec/53.48+(Kid;+BAS;+Dey+52.48.51;+las-las;+Fer+Yaw/Lie)+Eve/566.629+(LAX,+hem+Bes)+Awa/52.48+Mus+Cos/566.629 Cud=Mar/hin==;+Pes~FEW~kis-784=337.774.632;+Pes~FEW~gap-784=483.774.632;+Pes~FEW~wop-784=387.774.632;+Foe=gae;+Eds=rei/men+/Zoo/sly/Fee==;+Nam=Zig http://sat.kea.las/xis/bel/ska/sew/daw/ 200 0 0 29717 1204 0
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/pas/ fet=74&rob=49 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 19845 538 31
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/ana/ fet=74&rob=54 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 17047 547 31
+2019-08-14 00:00:07 GET /kir/ - 81 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 72 0
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/cog/ fet=74&rob=50 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 17597 534 31
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/vox/ fet=74&rob=55 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 14511 543 46
+2019-08-14 00:00:07 GET /kir/ - 81 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 72 0
+2019-08-14 00:00:07 GET /kir/ - 80 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 83 0
+2019-08-14 00:00:07 GET /kir/ - 81 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 72 0
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/mag/ fet=74&rob=52 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 16963 539 15
+2019-08-14 00:00:07 GET /kir/ - 81 1.2.3.78 HTTP/1.1 - - - 200 0 0 341 72 15
+2019-08-14 00:00:07 GET /dev/aid/wen/wry/xis/bel/yen/doc/pad/ fet=74&rob=51 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 16987 541 15
+2019-08-14 00:00:08 GET /dev/aid/wen/wry/xis/bel/yen/doc/pro/ fet=74&rob=53 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 16985 541 15
+2019-08-14 00:00:08 GET /dev/aid/pot/wry/xis/bel/yen/doc/ars/ fet=74&rob=50 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 14524 542 31
+2019-08-14 00:00:08 GET /kir/ - 80 1.2.3.77 HTTP/1.1 - - - 200 0 0 341 83 0
+2019-08-14 00:00:08 GET /dev/aid/pot/wry/xis/bel/yen/doc/hen/ fet=74&rob=55 80 1.2.3.13 HTTP/1.1 ZIG+Ewe+Nix+54+ohs+bur+Fox+(eds.lay@oba.ute.las) - http://sat.kea.las/xis/bel/yen/doc/ 200 0 0 11411 551 31

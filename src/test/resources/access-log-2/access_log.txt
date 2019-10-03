@@ -1,0 +1,2 @@
+1.2.3.14 lam.stokpop.nl - - [09/Aug/2013:00:01:05 +0200] "POST /way/rom/net/pen HTTP/1.1" 200 481 12259 "JpyFScZiSLEx==" "http://owe.stokpop.nl:80" "http://lam.stokpop.nl/xis/luv/mug/waw" "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.2.3.3) Gecko/20100401 Firefox/3.6.3"
+1.2.3.14 lam.stokpop.nl - - [09/Aug/2013:00:01:06 +0200] "GET /xis/luv/mug/waw HTTP/1.1" 200 4677 3730 "-" "http://lam.stokpop.nl:80" "-" "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.2.3.3) Gecko/20100401 Firefox/3.6.3"

@@ -1,0 +1,66 @@
+************ Start Display Current Environment ************
+Log file started at: [8/11/14 14:49:25:717 CEST]
+************* End Display Current Environment *************
+JVMDUMP039I Processing dump event "allocation", detail "10273296 bytes, type byte[]" at 2014/08/11 17:10:33 - please wait.
+Thread=pool-3-thread-149 (00002AE7D3D4A450) Status=Running
+	at org/apache/commons/fileupload/disk/DiskFileItem.get()[B (DiskFileItem.java:339)
+	at java/util/concurrent/FutureTask$Sync.innerRun()V (FutureTask.java:314) (Compiled Code)
+	at java/util/concurrent/FutureTask.run()V (FutureTask.java:149) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.runTask(Ljava/lang/Runnable;)V (ThreadPoolExecutor.java:897) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.run()V (ThreadPoolExecutor.java:919) (Compiled Code)
+	at java/lang/Thread.run()V (Thread.java:738)
+JVMDUMP013I Processed dump event "allocation", detail "10273296 bytes, type byte[]".
+JVMDUMP039I Processing dump event "allocation", detail "8388624 bytes, type byte[]" at 2014/08/11 17:10:33 - please wait.
+Thread=pool-3-thread-149 (00002AE7D3D4A450) Status=Running
+	at java/util/Arrays.copyOfRange([BII)[B (Arrays.java:4138) (Compiled Code)
+	at java/util/Arrays.copyOf([BI)[B (Arrays.java:3870) (Compiled Code)
+	at java/io/ByteArrayOutputStream.write([BII)V (ByteArrayOutputStream.java:119) (Compiled Code)
+	at org/springframework/util/FileCopyUtils.copy(Ljava/io/InputStream;Ljava/io/OutputStream;)I (FileCopyUtils.java:113) (Compiled Code)
+	at org/springframework/http/converter/ResourceHttpMessageConverter.writeInternal(Lorg/springframework/core/io/Resource;Lorg/springframework/http/HttpOutputMessage;)V (ResourceHttpMessageConverter.java:87)
+	at org/springframework/http/converter/ResourceHttpMessageConverter.writeInternal(Ljava/lang/Object;Lorg/springframework/http/HttpOutputMessage;)V (ResourceHttpMessageConverter.java:1)
+	at org/springframework/http/converter/AbstractHttpMessageConverter.write(Ljava/lang/Object;Lorg/springframework/http/MediaType;Lorg/springframework/http/HttpOutputMessage;)V (AbstractHttpMessageConverter.java:179)
+	at org/springframework/web/client/RestTemplate$HttpEntityRequestCallback.doWithRequest(Lorg/springframework/http/client/ClientHttpRequest;)V (RestTemplate.java:596)
+	at org/springframework/web/client/RestTemplate.doExecute(Ljava/net/URI;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;)Ljava/lang/Object; (RestTemplate.java:444)
+	at org/springframework/web/client/RestTemplate.execute(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;[Ljava/lang/Object;)Ljava/lang/Object; (RestTemplate.java:409)
+	at org/springframework/web/client/RestTemplate.exchange(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/http/HttpEntity;Ljava/lang/Class;[Ljava/lang/Object;)Lorg/springframework/http/ResponseEntity; (RestTemplate.java:385)
+        at java/util/concurrent/FutureTask$Sync.innerRun()V (FutureTask.java:314) (Compiled Code)
+	at java/util/concurrent/FutureTask.run()V (FutureTask.java:149) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.runTask(Ljava/lang/Runnable;)V (ThreadPoolExecutor.java:897) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.run()V (ThreadPoolExecutor.java:919) (Compiled Code)
+	at java/lang/Thread.run()V (Thread.java:738)
+JVMDUMP013I Processed dump event "allocation", detail "8388624 bytes, type byte[]".
+JVMDUMP039I Processing dump event "allocation", detail "16777232 bytes, type byte[]" at 2014/08/11 17:10:33 - please wait.
+Thread=pool-3-thread-149 (00002AE7D3D4A450) Status=Running
+	at java/util/Arrays.copyOfRange([BII)[B (Arrays.java:4138) (Compiled Code)
+	at java/util/Arrays.copyOf([BI)[B (Arrays.java:3870) (Compiled Code)
+	at java/io/ByteArrayOutputStream.write([BII)V (ByteArrayOutputStream.java:119) (Compiled Code)
+	at org/springframework/util/FileCopyUtils.copy(Ljava/io/InputStream;Ljava/io/OutputStream;)I (FileCopyUtils.java:113) (Compiled Code)
+	at org/springframework/http/converter/ResourceHttpMessageConverter.writeInternal(Lorg/springframework/core/io/Resource;Lorg/springframework/http/HttpOutputMessage;)V (ResourceHttpMessageConverter.java:87)
+	at org/springframework/http/converter/ResourceHttpMessageConverter.writeInternal(Ljava/lang/Object;Lorg/springframework/http/HttpOutputMessage;)V (ResourceHttpMessageConverter.java:1)
+	at org/springframework/http/converter/AbstractHttpMessageConverter.write(Ljava/lang/Object;Lorg/springframework/http/MediaType;Lorg/springframework/http/HttpOutputMessage;)V (AbstractHttpMessageConverter.java:179)
+	at org/springframework/web/client/RestTemplate$HttpEntityRequestCallback.doWithRequest(Lorg/springframework/http/client/ClientHttpRequest;)V (RestTemplate.java:596)
+	at org/springframework/web/client/RestTemplate.doExecute(Ljava/net/URI;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;)Ljava/lang/Object; (RestTemplate.java:444)
+	at org/springframework/web/client/RestTemplate.execute(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;[Ljava/lang/Object;)Ljava/lang/Object; (RestTemplate.java:409)
+	at org/springframework/web/client/RestTemplate.exchange(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/http/HttpEntity;Ljava/lang/Class;[Ljava/lang/Object;)Lorg/springframework/http/ResponseEntity; (RestTemplate.java:385)
+	at java/util/concurrent/FutureTask$Sync.innerRun()V (FutureTask.java:314) (Compiled Code)
+	at java/util/concurrent/FutureTask.run()V (FutureTask.java:149) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.runTask(Ljava/lang/Runnable;)V (ThreadPoolExecutor.java:897) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.run()V (ThreadPoolExecutor.java:919) (Compiled Code)
+	at java/lang/Thread.run()V (Thread.java:738)
+JVMDUMP013I Processed dump event "allocation", detail "16777232 bytes, type byte[]".
+JVMDUMP039I Processing dump event "allocation", detail "10273296 bytes, type byte[]" at 2014/08/11 17:10:33 - please wait.
+Thread=pool-3-thread-149 (00002AE7D3D4A450) Status=Running
+	at java/util/Arrays.copyOfRange([BII)[B (Arrays.java:4138) (Compiled Code)
+	at java/util/Arrays.copyOf([BI)[B (Arrays.java:3870) (Compiled Code)
+	at java/io/ByteArrayOutputStream.toByteArray()[B (ByteArrayOutputStream.java:158) (Compiled Code)
+	at org/springframework/http/client/AbstractBufferingClientHttpRequest.executeInternal(Lorg/springframework/http/HttpHeaders;)Lorg/springframework/http/client/ClientHttpResponse; (AbstractBufferingClientHttpRequest.java:42)
+	at org/springframework/http/client/AbstractClientHttpRequest.execute()Lorg/springframework/http/client/ClientHttpResponse; (AbstractClientHttpRequest.java:49)
+	at org/springframework/web/client/RestTemplate.doExecute(Ljava/net/URI;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;)Ljava/lang/Object; (RestTemplate.java:446)
+	at org/springframework/web/client/RestTemplate.execute(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/web/client/RequestCallback;Lorg/springframework/web/client/ResponseExtractor;[Ljava/lang/Object;)Ljava/lang/Object; (RestTemplate.java:409)
+	at org/springframework/web/client/RestTemplate.exchange(Ljava/lang/String;Lorg/springframework/http/HttpMethod;Lorg/springframework/http/HttpEntity;Ljava/lang/Class;[Ljava/lang/Object;)Lorg/springframework/http/ResponseEntity; (RestTemplate.java:385)
+	at java/util/concurrent/FutureTask$Sync.innerRun()V (FutureTask.java:314) (Compiled Code)
+	at java/util/concurrent/FutureTask.run()V (FutureTask.java:149) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.runTask(Ljava/lang/Runnable;)V (ThreadPoolExecutor.java:897) (Compiled Code)
+	at java/util/concurrent/ThreadPoolExecutor$Worker.run()V (ThreadPoolExecutor.java:919) (Compiled Code)
+	at java/lang/Thread.run()V (Thread.java:738)
+JVMDUMP013I Processed dump event "allocation", detail "10273296 bytes, type byte[]".

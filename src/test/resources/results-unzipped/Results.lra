@@ -1,0 +1,65 @@
+﻿[Workspace]
+SessionStartTime=0
+SessionEndTime=31069
+VerNo=13
+IsSummaryData=0
+TimeFormat=0
+SesLang=NLD
+ABuild=0
+DataBaseName=res123164867DB
+DBType=3
+CurrServer=XX847
+CurrUser=YY
+CurrPswd=XX
+StorageLoc=\\XX847\Data\
+PhStorageLoc=C:\MSSQL7\Data\
+LocStorageLoc=
+LocPhStorageLoc=
+WinIntSec=0
+UseNetworkMode=0
+UseParallel=1
+UseManagedIndexes=1
+UseSpecMSSQLParams=1
+NumResults=1
+
+[Data Config]
+CollectionMode=3
+IngnoreFlds=Vuser ID
+IngnoreUIFlds=VuserID
+AggSecGran=34
+TransAgg=1
+DataPointAgg=1
+WebAgg=1
+MonAgg=0
+ErrAgg=0
+FilterEdge=0
+FSartTime=0
+FEndTime=84600
+
+[Result0]
+LRRID=
+ResultPath=C:\Users\user\AppData\Local\Temp\TD_80\qc\ZYX\Application\tests\191\Run_1624\Results\RawResults\res1624.lrr
+ResultTDPath=
+NumFilters=0
+ScenarioTimeZone=-3600
+DaylightSavingSecsAddition=3600
+ScenarioStartTime=1473609699
+ScenarioEndTime=1473640768
+ResInSD=0
+WebGran=0
+FilterEdge=0
+FSartTime=0
+FEndTime=0
+TDTestID=-1
+TDRunID=-1
+IsProTuneResult=0
+Scenario Type=Manual
+Schedule Name=Group schedule for: ZYX_v05
+Mode=Group Scheduling
+Load Behavior=Defined per scenario group
+Scenario Duration=Unknown duration
+NumGraphs=5
+
+[DimensionFunctions]
+DimeFuncCount=0
+

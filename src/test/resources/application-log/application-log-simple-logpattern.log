@@ -1,0 +1,21 @@
+2017-03-21 21:00:00.031 [WebContainer : 3691] INFO  [reqId=abcxyz] [sessionId=11317] n.v.b.t.s.vla.VlaHelper - unknown
+2017-03-21 21:00:00.039 [WebContainer : 3691] INFO  [reqId=abcxyz] [sessionId=11317] n.v.v.t.t.d.s.a.VlaServiceImpl - Foo id 9125 to bar 11317
+2017-03-22 00:00:00.012 [WebContainer : 10393] DEBUG  [reqId=asffg] [sessionId=234X2] n.v.v.t.g.b.r.f.VlaReloadingStrategy - Current time: 19:41:26.270+01:00
+2017-03-22 00:00:02.849 [WebContainer : 10509] WARN  [reqId=8djSbY] [sessionId=2359] n.v.http.HttpClientFactory - Connection timeout of 1000 occurred. Retrying...
+2017-03-22 00:00:06.042 [quartzScheduler_Worker-7] ERROR [reqId=job:7w931] [sessionId=] n.r.v.t.s.j.DeleteVlaJob - Task caused javax.persistence.EntityNotFoundException: Unable to find Vla with id 1333
+2017-03-22 00:00:06.043 [quartzScheduler_Worker-7] ERROR [reqId=] [sessionId=] org.quartz.core.JobRunShell - Job DEFAULT.deleteOutdatedSessionJob threw an unhandled Exception:
+javax.persistence.EntityNotFoundException: Unable to find nl.vlaai.Vla with id 1333
+        at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl$JpaEntityNotFoundDelegate.handleEntityNotFound(EntityManagerFactoryBuilderImpl.java:181)
+        at org.hibernate.event.internal.DefaultLoadEventListener.load(DefaultLoadEventListener.java:219)
+        at org.hibernate.event.internal.DefaultLoadEventListener.proxyOrLoad(DefaultLoadEventListener.java:275)
+        at org.hibernate.event.internal.DefaultLoadEventListener.onLoad(DefaultLoadEventListener.java:151)
+        at org.hibernate.internal.SessionImpl.fireLoad(SessionImpl.java:1070)
+2017-03-22 00:00:06.044 [quartzScheduler_Worker-7] ERROR [reqId=] [sessionId=] org.quartz.core.ErrorLogger - Job (DEFAULT.deleteOutdatedSessionJob threw an exception.
+org.quartz.SchedulerException: Job threw an unhandled exception.
+        at org.quartz.core.JobRunShell.run(JobRunShell.java:213)
+        at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:573)
+
+
+
+
+

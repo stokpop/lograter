@@ -1,0 +1,343 @@
+/*
+ * Copyright (C) 2019 Peter Paul Bakker, Stokpop Software Solutions
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package nl.stokpop.lograter.report.text;
+
+import nl.stokpop.lograter.analysis.FailureAware;
+import nl.stokpop.lograter.analysis.HistogramData;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.ConcurrentCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailures;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailuresExcludedInMetrics;
+import nl.stokpop.lograter.command.BaseUnit;
+import nl.stokpop.lograter.counter.RequestCounter;
+import nl.stokpop.lograter.counter.RequestCounterPair;
+import nl.stokpop.lograter.processor.BasicCounterLogConfig;
+import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterConfig;
+import nl.stokpop.lograter.store.RequestCounterStore;
+import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.StringUtils;
+import nl.stokpop.lograter.util.linemapper.LineMap;
+import nl.stokpop.lograter.util.time.DateUtils;
+import nl.stokpop.lograter.util.time.TimePeriod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Map;
+
+abstract class LogCounterTextReport extends LogTextReport {
+
+	private static final Logger log = LoggerFactory.getLogger(LogCounterTextReport.class);
+
+	private String histogramToString(HistogramData histogramData) {
+		StringBuilder out = new StringBuilder();
+		out.append("\n");
+		double[] xValues = histogramData.getXvalues();
+		double[] yValues = histogramData.getYvalues();
+		for (int i = 0; i < xValues.length; i++) {
+			out.append("period: ").append(xValues[i]).append(" number: ").append(yValues[i]).append("\n");
+		}
+		return out.toString();
+	}
+
+	public String reportCounters(String itemName, RequestCounterStorePair requestCounterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
+		return reportCounters(itemName, requestCounterStorePair, totalAnalyser, config, Collections.emptyMap());
+	}
+	public String reportFailureCounters(String itemName, RequestCounterStore counterStorePair, ResponseTimeAnalyser totalFailureAnalyser, PerformanceCenterConfig config) {
+		return reportFailureCounters(itemName, counterStorePair, totalFailureAnalyser, config, Collections.emptyMap());
+	}
+	public String reportCounters(String itemName, RequestCounterStorePair counterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
+
+		if (counterKeyToLineMapMap == null) {
+            throw new NullPointerException("CounterKeyToLineMapMap may not be null");
+        }
+
+        if ( counterStorePair.isEmpty()) {
+            return String.format("No counters found to report in counter store pair [%s]%n", counterStorePair);
+        }
+
+        StringBuilder report = new StringBuilder();
+
+        report.append(reportHeaderLine(itemName, config));
+
+        TimePeriod analysisPeriod = totalAnalyser.getAnalysisTimePeriod();
+        long maxTpmTimestamp = totalAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+        long overallTotalHits = totalAnalyser.totalHits();
+
+		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
+			String counterKey = successCounter.getCounterKey();
+			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
+
+			ResponseTimeAnalyser myAnalyser = analyserFactory(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
+
+			if (hasNoHitsAtAll(myAnalyser)) {
+				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
+			}
+			else {
+				report.append(reportLine(myAnalyser, maxTpmTimestamp, overallTotalHits, config, counterKeyToLineMapMap));
+			}
+		}
+		return report.toString();
+	}
+
+	public String reportFailureCounters(String itemName, RequestCounterStore counterStoreFailures, ResponseTimeAnalyser totalFailureAnalyser, PerformanceCenterConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
+
+		if (counterKeyToLineMapMap == null) {
+			throw new NullPointerException("CounterKeyToLineMapMap may not be null");
+		}
+
+		if ( counterStoreFailures.isEmpty()) {
+			return String.format("No counters found to report in counter store pair [%s]%n", counterStoreFailures);
+		}
+
+		StringBuilder report = new StringBuilder();
+
+		report.append(reportHeaderLine(itemName, config));
+
+		TimePeriod analysisPeriod = totalFailureAnalyser.getAnalysisTimePeriod();
+		long maxTpmTimestamp = totalFailureAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+		long overallTotalHits = totalFailureAnalyser.totalHits();
+
+		for (RequestCounter failureCounter : counterStoreFailures) {
+			String counterKey = failureCounter.getCounterKey();
+
+			ResponseTimeAnalyser myAnalyser = new ResponseTimeAnalyser(failureCounter, analysisPeriod);
+
+			if (hasNoHitsAtAll(myAnalyser)) {
+				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
+			}
+			else {
+				report.append(reportLine(myAnalyser, maxTpmTimestamp, overallTotalHits, config, counterKeyToLineMapMap));
+			}
+		}
+		return report.toString();
+	}
+
+    /**
+     * @return a response time analyser based on the config
+     */
+	private ResponseTimeAnalyser analyserFactory(BasicCounterLogConfig config, TimePeriod analysisPeriod, RequestCounterPair counterPair) {
+		if (config.isFailureAwareAnalysis()) {
+		    if (config.isFailureAwareAnalysisIncludeFailuresInMetrics()) {
+		        return new ResponseTimeAnalyserWithFailures(counterPair, analysisPeriod);
+            }
+            else {
+                return new ResponseTimeAnalyserWithFailuresExcludedInMetrics(counterPair, analysisPeriod);
+            }
+        }
+        else {
+		    return new ResponseTimeAnalyser(counterPair.getCounterSuccess(), analysisPeriod);
+        }
+	}
+
+	private boolean hasNoHitsAtAll(ResponseTimeAnalyser myAnalyser) {
+		return myAnalyser.totalHits() == 0;
+	}
+
+	String reportCounter(String itemName, ResponseTimeAnalyser analyser, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
+
+		StringBuilder report = new StringBuilder();
+
+		report.append(reportHeaderLine(itemName, config));
+
+		int columns = StringUtils.countOccurrences(itemName, ',');
+		long maxTpmTimestamp = totalAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+		long overallTotalHits = totalAnalyser.totalHits();
+
+		report.append(reportLine(analyser, maxTpmTimestamp, overallTotalHits, config, columns));
+
+		return report.toString();
+	}
+
+	String reportCounter(String title, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long overallTotalHits, BasicCounterLogConfig config) {
+        return reportHeaderLine(title, config) + reportLine(analyser, maxTpmStartTimeStamp, overallTotalHits, config);
+	}
+
+	private String reportHeaderLine(String name, BasicCounterLogConfig config) {
+		
+		StringBuilder report = new StringBuilder();
+				
+		report.append(name);
+
+		reportHeaderCounterDetails(report);
+
+        if (config.isIncludeMapperRegexpColumn()) report.append(SEP_CHAR).append("regexp");
+
+		report.append(SEP_CHAR).append("hits");
+
+		if (config.isFailureAwareAnalysis()) {
+			report.append(SEP_CHAR).append("failures");
+			report.append(SEP_CHAR).append("failure%");
+		}
+
+		BaseUnit baseUnit = config.getBaseUnit();
+
+		report.append(SEP_CHAR).append("avg ").append(baseUnit.shortName()).append(SEP_CHAR);
+
+		report.append("min").append(SEP_CHAR).append("max").append(SEP_CHAR);
+		
+		if (config.isCalculateStdDev()) report.append("std dev").append(SEP_CHAR);
+
+		Double[] percentiles = config.getReportPercentiles();
+		if (percentiles != null) {
+		    for (Double percentile : percentiles) {
+		        report.append(nfDoNotShowDecimalSepAlways.format(percentile)).append("% ").append(baseUnit.shortName()).append(SEP_CHAR);
+            }
+        }
+		
+		if (config.isCalculateHitsPerSecond()) report.append("max TPS").append(SEP_CHAR).append("max TPS ts").append(SEP_CHAR);
+
+        report.append("avg TPS").append(SEP_CHAR);
+		
+		report.append("max TPM").append(SEP_CHAR);
+
+		report.append("avg TPS max TPM").append(SEP_CHAR);
+
+		report.append("max TPM ts").append(SEP_CHAR);
+
+		report.append("TPM in overall max TPM").append(SEP_CHAR);
+
+		report.append("TPS in overall max TPM").append(SEP_CHAR);
+
+        report.append("overall%");
+
+		if (config.isCalculateConcurrentCalls()) report.append(SEP_CHAR).append("max concur").append(SEP_CHAR).append("max concur ts");
+		
+        if (config.isCalculateStubDelays()) report.append(SEP_CHAR).append("stub-min").append(SEP_CHAR).append("stub-max").append(SEP_CHAR).append("stub-variance");
+
+		report.append("\n");
+		
+		return report.toString();
+	}
+
+	abstract void reportHeaderCounterDetails(StringBuilder report);
+
+    private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config) {
+        return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, 0, Collections.emptyMap());
+    }
+
+	private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
+		return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, 0, counterKeyToLineMapMap);
+	}
+
+    private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns) {
+        return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, insertColumns, Collections.emptyMap());
+    }
+
+    private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns, Map<String, LineMap> counterKeyToLineMapMap) {
+		StringBuilder report = new StringBuilder();
+
+		String counterKey = analyser.getCounterKey();
+		String counterKeyExcelProof = StringUtils.excelProofText(counterKey);
+		String nameWithColumnAlignment = RequestCounter.createCounterNameThatAlignsInTextReport(counterKeyExcelProof, insertColumns);
+		report.append(nameWithColumnAlignment);
+
+        if (config.isIncludeMapperRegexpColumn()) {
+            LineMap lineMap = counterKeyToLineMapMap.get(counterKey);
+            report.append(SEP_CHAR).append(lineMap == null ? "" : lineMap.getRegExpPattern());
+        }
+
+		long hitsCount = analyser.totalHits();
+        // hits
+		report.append(SEP_CHAR).append(nfNoDecimals.format(hitsCount));
+	    if (analyser instanceof FailureAware) {
+		    long hitsCountFailure = ((FailureAware) analyser).failureHits();
+			// failures
+		    report.append(SEP_CHAR).append(nfNoDecimals.format(hitsCountFailure));
+			double failurePercentage =  ((FailureAware) analyser).failurePercentage();
+		    // failure%
+			report.append(SEP_CHAR).append(nfTwoDecimals.format(failurePercentage));
+	    }
+        final double avgHitDuration = analyser.avgHitDuration();
+	    // avg
+        report.append(SEP_CHAR).append(nfNoDecimals.format(avgHitDuration));
+        // min
+		report.append(SEP_CHAR).append(nfNoDecimals.format(analyser.min()));
+		// max
+		report.append(SEP_CHAR).append(nfNoDecimals.format(analyser.max()));
+        final double stdDevHitDuration = analyser.stdDevHitDuration();
+        // std dev
+        if (config.isCalculateStdDev()) report.append(SEP_CHAR).append(nfNoDecimals.format(stdDevHitDuration));
+        //percentiles
+        Double[] percentiles = config.getReportPercentiles();
+        if (percentiles != null) {
+            for (Double percentile : percentiles) {
+                report.append(SEP_CHAR).append(nfNoDecimals.format(analyser.percentileHitDuration(percentile)));
+            }
+        }
+
+		if (config.isCalculateHitsPerSecond()) {
+			TransactionCounterResult tps = analyser.maxHitsPerSecond();
+			// max TPS
+			report.append(SEP_CHAR).append(nfNoDecimals.format(tps.getMaxHitsPerDuration()));
+			// max TPS ts
+			report.append(SEP_CHAR).append(tps.getMaxHitsPerDuration() > 1 ? DateUtils.formatToStandardDateTimeString(tps.getMaxHitsPerDurationTimestamp()) : "");
+		}
+        // avg TPS
+		report.append(SEP_CHAR).append(nfTwoDecimals.format(analyser.avgTps()));
+
+		TransactionCounterResult tcr = analyser.maxHitsPerMinute();
+	    long maxHitsPerMinute = tcr.getMaxHitsPerDuration();
+	    // max TPM
+	    report.append(SEP_CHAR).append(nfNoDecimals.format(maxHitsPerMinute));
+		// avg TPS max TPM
+		report.append(SEP_CHAR).append(nfTwoDecimals.format((double) maxHitsPerMinute / 60.0d));
+		// max TPM ts
+		report.append(SEP_CHAR).append(maxHitsPerMinute > 1 ? DateUtils.formatToStandardDateTimeString(tcr.getMaxHitsPerDurationTimestamp()) : "");
+	    final long hitsInMinuteOverallMaxTPM = analyser.hitsInMinuteWithStartTime(maxTpmStartTimeStamp);
+	    // TPM in overall max TPM
+	    report.append(SEP_CHAR).append(nfNoDecimals.format(hitsInMinuteOverallMaxTPM));
+	    // avg TPS in overall max TPM
+	    report.append(SEP_CHAR).append(nfTwoDecimals.format((double) hitsInMinuteOverallMaxTPM / 60.0d));
+        // % overall
+        report.append(SEP_CHAR).append(nfTwoDecimals.format(analyser.percentage(totalHits)));
+
+		if (config.isCalculateConcurrentCalls()) {
+			ConcurrentCounterResult ccr = analyser.maxConcurrentRequests();
+			// max concur
+			report.append(SEP_CHAR).append(nfNoDecimals.format(ccr.maxConcurrentRequests));
+			// max concur ts
+			report.append(SEP_CHAR).append(ccr.maxConcurrentRequests > 1 ? DateUtils.formatToStandardDateTimeString(ccr.maxConcurrentRequestsTimestamp) : "");
+		}
+
+        if (config.isCalculateStubDelays()) {
+            double stubMin = avgHitDuration - stdDevHitDuration;
+            double stubMax = avgHitDuration + stdDevHitDuration;
+            int variance = 1;
+
+            if (stubMin < 0.0d) {
+                stubMax = stubMax - stubMin;
+                stubMin = 0.0d;
+            }
+
+            report.append(SEP_CHAR).append(nfNoDecimals.format(stubMin));
+            report.append(SEP_CHAR).append(nfNoDecimals.format(stubMax));
+            report.append(SEP_CHAR).append(variance);
+
+        }
+
+        report.append("\n");
+		
+		if (log.isTraceEnabled()) {
+			log.trace("histogram for {}: {}", counterKey, histogramToString(analyser.histogramForRelevantValues(ResponseTimeAnalyser.GRAPH_HISTO_NUMBER_OF_RANGES)));
+		}
+		
+		return report.toString();
+		
+	}
+
+}

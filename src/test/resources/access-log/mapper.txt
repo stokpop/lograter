@@ -1,0 +1,19 @@
+section(apps)
+/rig/.*/nod/.*###arf did
+/rig/.*/aft/.*###eve
+/way/kue/ulu/.*###dal tew
+
+section(services)
+/arb/gan/.*###zed net
+/arb/sap/.*###vee fib
+/arb/pya/.*###ion aal
+
+section(totals per app)
+^/arb/.*###arb
+^/rig/.*###rig
+^/way/.*###way
+
+section(totals per type)
+.*/xis/.*###xis
+.*/mid/.*###mid
+.*/lum/.*###tew

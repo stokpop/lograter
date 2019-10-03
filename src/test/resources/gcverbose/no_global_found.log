@@ -1,0 +1,168 @@
+<?xml version="1.0" ?>
+
+<verbosegc xmlns="http://www.ibm.com/j9/verbosegc" version="R26_Java726_SR6_20140106_1601_B181350_CMPRSS">
+
+<exclusive-start id="16629" timestamp="2014-10-29T16:37:11.091" intervalms="438.562">
+  <response-info timems="0.089" idlems="0.044" threads="4" lastid="00000000036FA400" lastname="WebContainer : 88" />
+</exclusive-start>
+<af-start id="16630" totalBytesRequested="524296" timestamp="2014-10-29T16:37:11.092" intervalms="438.604" />
+<cycle-start id="16631" type="scavenge" contextid="0" timestamp="2014-10-29T16:37:11.092" intervalms="438.609" />
+<gc-start id="16632" type="scavenge" contextid="16631" timestamp="2014-10-29T16:37:11.092">
+  <mem-info id="16633" free="80487600" total="962985984" percent="8">
+    <mem type="nursery" free="319528" total="288882688" percent="0" />
+    <mem type="tenure" free="80168072" total="674103296" percent="11">
+      <mem type="soa" free="76268696" total="640398336" percent="11" />
+      <mem type="loa" free="3899376" total="33704960" percent="11" />
+    </mem>
+    <remembered-set count="13035" />
+  </mem-info>
+</gc-start>
+<allocation-stats totalBytes="206717368" >
+  <allocated-bytes non-tlh="42712952" tlh="164004416" />
+  <largest-consumer threadName="WebContainer : 66" threadId="0000000003C86A00" bytes="7439976" />
+</allocation-stats>
+<gc-op id="16634" type="scavenge" timems="19.782" contextid="16631" timestamp="2014-10-29T16:37:11.112">
+  <scavenger-info tenureage="11" tiltratio="71" />
+  <memory-copied type="nursery" objects="220848" bytes="113526400" bytesdiscarded="239192" />
+  <memory-copied type="tenure" objects="51767" bytes="19671648" bytesdiscarded="568368" />
+  <copy-failed type="nursery" objects="51383" bytes="21981680" />
+  <finalization candidates="278" enqueued="197" />
+  <ownableSynchronizers candidates="113313" cleared="110126" />
+  <references type="soft" candidates="1854" cleared="0" enqueued="0" dynamicThreshold="16" maxThreshold="32" />
+  <references type="weak" candidates="553" cleared="194" enqueued="0" />
+  <references type="phantom" candidates="19" cleared="0" enqueued="0" />
+  <heap-resize type="expand" space="tenure" amount="1769472" count="3" timems="0.434" reason="continue current collection" />
+</gc-op>
+<gc-end id="16635" type="scavenge" contextid="16631" durationms="20.004" timestamp="2014-10-29T16:37:11.112">
+  <mem-info id="16636" free="149021400" total="877199360" percent="16">
+    <mem type="nursery" free="87556096" total="201326592" percent="43" />
+    <mem type="tenure" free="61465304" total="675872768" percent="9">
+      <mem type="soa" free="58117768" total="642079744" percent="9" />
+      <mem type="loa" free="3347536" total="33793024" percent="9" />
+    </mem>
+    <pending-finalizers system="2" default="195" reference="0" classloader="0" />
+    <remembered-set count="11913" />
+  </mem-info>
+</gc-end>
+<cycle-end id="16637" type="scavenge" contextid="16631" timestamp="2014-10-29T16:37:11.112" />
+<cycle-start id="16638" type="global" contextid="0" timestamp="2014-10-29T16:37:11.112" intervalms="128314.029" />
+<gc-start id="16639" type="global" contextid="16638" timestamp="2014-10-29T16:37:11.112">
+  <mem-info id="16640" free="149021400" total="877199360" percent="16">
+    <mem type="nursery" free="87556096" total="201326592" percent="43" />
+    <mem type="tenure" free="61465304" total="675872768" percent="9">
+      <mem type="soa" free="58117768" total="642079744" percent="9" />
+      <mem type="loa" free="3347536" total="33793024" percent="9" />
+    </mem>
+    <pending-finalizers system="2" default="195" reference="0" classloader="0" />
+    <remembered-set count="11913" />
+  </mem-info>
+</gc-start>
+<allocation-stats totalBytes="0" >
+  <allocated-bytes non-tlh="0" tlh="0" />
+</allocation-stats>
+<gc-op id="16641" type="mark" timems="45.364" contextid="16638" timestamp="2014-10-29T16:37:11.158">
+  <trace-info objectcount="2364084" scancount="1873195" scanbytes="71557552" />
+  <finalization candidates="1585" enqueued="132" />
+  <ownableSynchronizers candidates="15782" cleared="1641" />
+  <references type="soft" candidates="9889" cleared="0" enqueued="0" dynamicThreshold="16" maxThreshold="32" />
+  <references type="weak" candidates="23411" cleared="0" enqueued="0" />
+  <references type="phantom" candidates="8306" cleared="59" enqueued="59" />
+  <stringconstants candidates="80486" cleared="5"  />
+</gc-op>
+<gc-op id="16642" type="sweep" timems="1.193" contextid="16638" timestamp="2014-10-29T16:37:11.159" />
+<gc-end id="16643" type="global" contextid="16638" durationms="46.931" timestamp="2014-10-29T16:37:11.159">
+  <mem-info id="16644" free="531686768" total="877199360" percent="60">
+    <mem type="nursery" free="87425256" total="201326592" percent="43" />
+    <mem type="tenure" free="444261512" total="675872768" percent="65">
+      <mem type="soa" free="420476176" total="635321344" percent="66" />
+      <mem type="loa" free="23785336" total="40551424" percent="58" />
+    </mem>
+    <pending-finalizers system="75" default="254" reference="59" classloader="0" />
+    <remembered-set count="8356" />
+  </mem-info>
+</gc-end>
+<cycle-end id="16645" type="global" contextid="16638" timestamp="2014-10-29T16:37:11.159" />
+<allocation-satisfied id="16646" threadId="0000000003E77C00" bytesRequested="524296" />
+<af-end id="16647" timestamp="2014-10-29T16:37:11.159" />
+<exclusive-end id="16648" timestamp="2014-10-29T16:37:11.159" durationms="67.882" />
+
+<exclusive-start id="102004" timestamp="2014-10-29T18:26:31.374" intervalms="526.261">
+  <response-info timems="0.143" idlems="0.104" threads="2" lastid="00000000040FFD00" lastname="WebContainer : 123" />
+</exclusive-start>
+<af-start id="102005" totalBytesRequested="2064" timestamp="2014-10-29T18:26:31.374" intervalms="525.960" />
+<cycle-start id="102006" type="scavenge" contextid="0" timestamp="2014-10-29T18:26:31.375" intervalms="525.944" />
+<gc-start id="102007" type="scavenge" contextid="102006" timestamp="2014-10-29T18:26:31.375">
+  <mem-info id="102008" free="35716984" total="1533149184" percent="2">
+    <mem type="nursery" free="0" total="328007680" percent="0" />
+    <mem type="tenure" free="35716984" total="1205141504" percent="2">
+      <mem type="soa" free="16111632" total="1144885248" percent="1" />
+      <mem type="loa" free="19605352" total="60256256" percent="32" />
+    </mem>
+    <remembered-set count="14025" />
+  </mem-info>
+</gc-start>
+<allocation-stats totalBytes="279496720" >
+  <allocated-bytes non-tlh="76621056" tlh="202875664" />
+  <largest-consumer threadName="WebContainer : 72" threadId="0000000003D4DA00" bytes="8404240" />
+</allocation-stats>
+<gc-op id="102009" type="scavenge" timems="227.804" contextid="102006" timestamp="2014-10-29T18:26:31.602">
+  <scavenger-info tenureage="11" tiltratio="81" />
+  <memory-copied type="nursery" objects="141065" bytes="74619584" bytesdiscarded="20872" />
+  <memory-copied type="tenure" objects="41908" bytes="29316688" bytesdiscarded="704256" />
+  <copy-failed type="nursery" objects="41268" bytes="74742352" />
+  <copy-failed type="tenure" objects="80" bytes="41943680" />
+  <heap-resize type="expand" space="tenure" amount="2818048" count="5" timems="0.297" reason="continue current collection" />
+  <warning details="aborted collection due to insufficient free space" />
+</gc-op>
+<gc-end id="102010" type="scavenge" contextid="102006" durationms="228.086" timestamp="2014-10-29T18:26:31.603">
+  <mem-info id="102011" free="8085032" total="1535967232" percent="0">
+    <mem type="nursery" free="0" total="328007680" percent="0" />
+    <mem type="tenure" free="8085032" total="1207959552" percent="0">
+      <mem type="soa" free="6594480" total="1147561984" percent="0" />
+      <mem type="loa" free="1490552" total="60397568" percent="2" />
+    </mem>
+    <remembered-set count="14025" />
+  </mem-info>
+</gc-end>
+<cycle-end id="102012" type="scavenge" contextid="102006" timestamp="2014-10-29T18:26:31.603" />
+<percolate-collect id="102013" from="nursery" to="global" reason="failed tenure threshold reached" timestamp="2014-10-29T18:26:31.603"/>
+<cycle-start id="102014" type="global" contextid="0" timestamp="2014-10-29T18:26:31.603" intervalms="356541.542" />
+<gc-start id="102015" type="global" contextid="102014" timestamp="2014-10-29T18:26:31.603">
+  <mem-info id="102016" free="8085032" total="1535967232" percent="0">
+    <mem type="nursery" free="0" total="328007680" percent="0" />
+    <mem type="tenure" free="8085032" total="1207959552" percent="0">
+      <mem type="soa" free="6594480" total="1147561984" percent="0" />
+      <mem type="loa" free="1490552" total="60397568" percent="2" />
+    </mem>
+    <remembered-set count="14025" />
+  </mem-info>
+</gc-start>
+<allocation-stats totalBytes="0" >
+  <allocated-bytes non-tlh="0" tlh="0" />
+</allocation-stats>
+<gc-op id="102017" type="mark" timems="54.617" contextid="102014" timestamp="2014-10-29T18:26:31.658">
+  <trace-info objectcount="2461559" scancount="1959589" scanbytes="74788736" />
+  <finalization candidates="2094" enqueued="581" />
+  <ownableSynchronizers candidates="155723" cleared="141210" />
+  <references type="soft" candidates="9907" cleared="0" enqueued="0" dynamicThreshold="23" maxThreshold="32" />
+  <references type="weak" candidates="25219" cleared="233" enqueued="0" />
+  <references type="phantom" candidates="12332" cleared="493" enqueued="493" />
+  <stringconstants candidates="80503" cleared="5"  />
+</gc-op>
+<gc-op id="102018" type="sweep" timems="2.980" contextid="102014" timestamp="2014-10-29T18:26:31.661" />
+<heap-resize id="102019" type="contract" space="tenure" amount="2293760" count="1" timems="1.931" reason="excess free space following gc" timestamp="2014-10-29T18:26:31.663" />
+<gc-end id="102020" type="global" contextid="102014" durationms="59.977" timestamp="2014-10-29T18:26:31.663">
+  <mem-info id="102021" free="1189437376" total="1533673472" percent="77">
+    <mem type="nursery" free="184547832" total="328007680" percent="56" />
+    <mem type="tenure" free="1004889544" total="1205665792" percent="83">
+      <mem type="soa" free="947168272" total="1133326336" percent="83" />
+      <mem type="loa" free="57721272" total="72339456" percent="79" />
+    </mem>
+    <pending-finalizers system="205" default="376" reference="493" classloader="0" />
+    <remembered-set count="9297" />
+  </mem-info>
+</gc-end>
+<cycle-end id="102022" type="global" contextid="102014" timestamp="2014-10-29T18:26:31.663" />
+<allocation-satisfied id="102023" threadId="0000000003AD3000" bytesRequested="2064" />
+<af-end id="102024" timestamp="2014-10-29T18:26:31.663" />
+<exclusive-end id="102025" timestamp="2014-10-29T18:26:31.663" durationms="289.196" />
