@@ -249,7 +249,7 @@ public final class Calculator {
 
     /**
      * Numbers below 8 are returned as is.
-     * Examples: 14 -> 10, 154 -> 150, 1544 -> 1500
+     * Examples: 14 -&gt; 10, 154 -&gt; 150, 1544 -&gt; 1500
      *
      * @return number closest to a rounded number, considering number of log10.
      */

@@ -245,7 +245,7 @@ public class InLineReplacer {
     }
 
     /**
-     * @ return replaced black listed words with three letter hash word (replaces complete words only).
+     * @return replaced black listed words with three letter hash word (replaces complete words only).
      */
     public static String replaceBlacklistedWords(String text, List<String> blacklist, Function<String, String> replacer) {
         String newLine = text;

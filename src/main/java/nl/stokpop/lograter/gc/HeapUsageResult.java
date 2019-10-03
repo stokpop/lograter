@@ -175,7 +175,6 @@ public class HeapUsageResult {
 
     /**
      * Concurrent-gc success % = ConcurCount / (TotGlob - SystemGCs) * 100%
-     * < 95% dan < 90% dan 
      */
     public double calculateConcurrentGcSuccessRate(TimePeriod timeWindow) {
 

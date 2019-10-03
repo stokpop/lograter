@@ -5,6 +5,7 @@ plugins {
     id 'java-library'
     id 'de.marcphilipp.nexus-publish' version '0.3.0'
     id 'maven-publish'
+    id 'signing'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
     id 'com.github.ben-manes.versions' version '0.25.0'
     id 'com.github.hierynomus.license' version '0.15.0'
@@ -33,7 +34,7 @@ dependencies {
 }
 
 group = 'nl.stokpop'
-version = '1.30.0-SNAPSHOT'
+version = '1.3.0'
 description = 'LogRater'
 sourceCompatibility = '1.8'
 
@@ -73,6 +74,22 @@ nexusPublishing {
     repositories {
         sonatype()
     }
+}
+
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+    archives javadocJar
 }
 
 if (project.hasProperty('release')) {
