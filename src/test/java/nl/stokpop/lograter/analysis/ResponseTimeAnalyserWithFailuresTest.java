@@ -35,11 +35,28 @@ public class ResponseTimeAnalyserWithFailuresTest {
 		assertEquals(2, analyser.failureHits());
 		assertEquals(2/6d * 100, analyser.failurePercentage(), 0.0000001d);
 		assertEquals(1, analyser.min());
-		assertEquals(20, analyser.max());
+		assertEquals(30, analyser.max());
+        assertEquals(16.0, analyser.avgHitDuration(), 0.0000001d);
 		assertEquals("duration is total duration of failures and successes",2501, analyser.getAnalysisTimePeriod().getDurationInMillis());
 	}
 
-	@Test
+    @Test
+    public void countFailureHitsTotalPeriodWithoutFailuresInAnalysis() {
+        RequestCounter successes = createSuccessCounter();
+        RequestCounter failures = createFailureCounter();
+
+        ResponseTimeAnalyserWithFailures analyser = new ResponseTimeAnalyserWithFailures(new RequestCounterPair(successes, failures, false));
+
+        assertEquals("contain all hits of failures and successes", 4, analyser.totalHits());
+        assertEquals(2, analyser.failureHits());
+        assertEquals(2/6d * 100, analyser.failurePercentage(), 0.0000001d);
+        assertEquals(20, analyser.min());
+        assertEquals(30, analyser.max());
+        assertEquals(22.5, analyser.avgHitDuration(), 0.0000001d);
+        assertEquals("duration is total duration of failures and successes",2501, analyser.getAnalysisTimePeriod().getDurationInMillis());
+    }
+
+    @Test
 	public void countFailureHitsSuccessPeriod() {
 		RequestCounter successes = createSuccessCounter();
 		RequestCounter failures = createFailureCounter();
@@ -55,7 +72,7 @@ public class ResponseTimeAnalyserWithFailuresTest {
 	private RequestCounter createFailureCounter() {
 		RequestCounter failures = new RequestCounter("failures", new TimeMeasurementStoreInMemory());
 		failures.incRequests(2500, 1);
-		failures.incRequests(3500, 1);
+		failures.incRequests(3500, 5);
 		return failures;
 	}
 
@@ -64,7 +81,7 @@ public class ResponseTimeAnalyserWithFailuresTest {
 		successes.incRequests(1000, 20);
 		successes.incRequests(2000, 20);
 		successes.incRequests(3000, 20);
-		successes.incRequests(3100, 20);
+		successes.incRequests(3100, 30);
 		return successes;
 	}
 

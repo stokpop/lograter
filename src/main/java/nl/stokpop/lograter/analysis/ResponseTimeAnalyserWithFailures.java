@@ -20,12 +20,28 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 
 /**
  * Analyser for response times that also knows about failures.
- * The metrics (min, max, percentile, etc...) are calculated for failures and successes combined.
- * The hits is total of successes and failures.
+ *
+ * <p>
+ * If supplied with RequestCounterPair with 'includeFailuresInAnalysis' set to true (default setting) then:
+ * <il>
+ *     <li>The metrics (min, max, percentile, etc...) are calculated for failures and successes combined.</li>
+ *     <li>The hits is total of successes and failures.</li>
+ * </il>
+ * </p>
+ *
+ * <p>
+ * If supplied with RequestCounterPair with 'includeFailuresInAnalysis' set to false then:
+ * <il>
+ *     <li>The metrics (min, max, percentile, etc...) are calculated for successes only.</li>
+ *     <li>The hits is total of successes only.</li>
+ *     <li>For percentage failure calculation the total hits is success hits + failure hits.</li>
+ * </il>
+ * </p>
  */
 public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser implements FailureAware {
 
 	private final long numberOfFailureHits;
+	private final boolean includeFailuresInAnalysis;
 
 	/**
 	 * Analyse the request counter for the total time period of success and failure counters.
@@ -34,6 +50,7 @@ public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser imple
 		super(pair.getCombinedRequestCounter());
 		// safe to take all failure hits now: this is based on total time period of both counters
 		this.numberOfFailureHits = pair.getCounterFailure().getHits();
+		this.includeFailuresInAnalysis = pair.isIncludeFailuresInAnalysis();
 	}
 
 	/**
@@ -43,11 +60,15 @@ public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser imple
 		super(pair.getCombinedRequestCounter(), timePeriod);
 		// make sure to only get the failures for the provided time period
 		this.numberOfFailureHits = pair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();
+        this.includeFailuresInAnalysis = pair.isIncludeFailuresInAnalysis();
 	}
 
 	@Override
     public double failurePercentage() {
-		return (numberOfFailureHits / (totalHits() + Double.MIN_VALUE)) * 100d;
+	    // when not including failures in analysis, the totalHits is only the successes,
+        // so the failures need to be added for a correct percentage calculation.
+	    long totalHits = includeFailuresInAnalysis ? totalHits() : totalHits() + numberOfFailureHits;
+		return (numberOfFailureHits / (totalHits + Double.MIN_VALUE)) * 100d;
 	}
 
 	@Override

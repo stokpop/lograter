@@ -24,17 +24,29 @@ public class RequestCounterPair {
     private final RequestCounter counterFailure;
     private final TimePeriod combinedTimePeriod;
     private final RequestCounter combinedRequestCounter;
+    private final boolean includeFailuresInAnalysis;
 
-    public RequestCounterPair(String name, RequestCounter counterSuccess, RequestCounter counterFailure) {
+    public RequestCounterPair(String name, RequestCounter counterSuccess, RequestCounter counterFailure, boolean includeFailuresInAnalysis) {
         this.name = name;
         this.counterSuccess = counterSuccess;
         this.counterFailure = counterFailure;
         this.combinedTimePeriod = TimePeriod.createMaxTimePeriod(counterSuccess.getTimePeriod(), counterFailure.getTimePeriod());
-        this.combinedRequestCounter = new ReadOnlyRequestCounter(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, combinedTimePeriod);
+        this.includeFailuresInAnalysis = includeFailuresInAnalysis;
+        this.combinedRequestCounter = includeFailuresInAnalysis
+                ? new ReadOnlyRequestCounter(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, combinedTimePeriod)
+                : counterSuccess.getTimeSlicedCounter(combinedTimePeriod);
+    }
+
+    public RequestCounterPair(String name, RequestCounter counterSuccess, RequestCounter counterFailure) {
+        this(name, counterSuccess, counterFailure, true);
+    }
+
+    public RequestCounterPair(RequestCounter counterSuccess, RequestCounter counterFailure, boolean includeFailuresInAnalysis) {
+        this(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, includeFailuresInAnalysis);
     }
 
     public RequestCounterPair(RequestCounter counterSuccess, RequestCounter counterFailure) {
-        this(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure);
+        this(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, true);
     }
 
     public String getName() {
@@ -65,4 +77,15 @@ public class RequestCounterPair {
         return counterFailure.getHits() == 0 && counterSuccess.getHits() == 0;
     }
 
+    public boolean isIncludeFailuresInAnalysis() {
+        return includeFailuresInAnalysis;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestCounterPair{" + "name='" + name + '\'' +
+                ", combinedTimePeriod=" + combinedTimePeriod +
+                ", includeFailuresInAnalysis=" + includeFailuresInAnalysis +
+                '}';
+    }
 }
