@@ -21,22 +21,19 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 /**
  * Analyser for response times that also knows about failures.
  *
- * <p>
  * If supplied with RequestCounterPair with 'includeFailuresInAnalysis' set to true (default setting) then:
- * <il>
+ * <ul>
  *     <li>The metrics (min, max, percentile, etc...) are calculated for failures and successes combined.</li>
  *     <li>The hits is total of successes and failures.</li>
- * </il>
- * </p>
+ * </ul>
  *
  * <p>
  * If supplied with RequestCounterPair with 'includeFailuresInAnalysis' set to false then:
- * <il>
+ * <ul>
  *     <li>The metrics (min, max, percentile, etc...) are calculated for successes only.</li>
  *     <li>The hits is total of successes only.</li>
  *     <li>For percentage failure calculation the total hits is success hits + failure hits.</li>
- * </il>
- * </p>
+ * </ul>
  */
 public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyser implements FailureAware {
 
