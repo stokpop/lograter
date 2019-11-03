@@ -29,10 +29,10 @@ public class ResponseTimeAnalyserWithFailuresTest {
 		RequestCounter successes = createSuccessCounter();
 		RequestCounter failures = createFailureCounter();
 
-		ResponseTimeAnalyserWithFailures analyser = new ResponseTimeAnalyserWithFailures(new RequestCounterPair(successes, failures));
+		ResponseTimeAnalyserWithFailedHits analyser = new ResponseTimeAnalyserWithFailedHits(new RequestCounterPair(successes, failures));
 
 		assertEquals("contain all hits of failures and successes", 6, analyser.totalHits());
-		assertEquals(2, analyser.failureHits());
+		assertEquals(2, analyser.failedHits());
 		assertEquals(2/6d * 100, analyser.failurePercentage(), 0.0000001d);
 		assertEquals(1, analyser.min());
 		assertEquals(30, analyser.max());
@@ -45,10 +45,10 @@ public class ResponseTimeAnalyserWithFailuresTest {
         RequestCounter successes = createSuccessCounter();
         RequestCounter failures = createFailureCounter();
 
-        ResponseTimeAnalyserWithFailures analyser = new ResponseTimeAnalyserWithFailures(new RequestCounterPair(successes, failures, false));
+        ResponseTimeAnalyserWithFailedHits analyser = new ResponseTimeAnalyserWithFailedHits(new RequestCounterPair(successes, failures, false));
 
         assertEquals("contain all hits of failures and successes", 4, analyser.totalHits());
-        assertEquals(2, analyser.failureHits());
+        assertEquals(2, analyser.failedHits());
         assertEquals(2/6d * 100, analyser.failurePercentage(), 0.0000001d);
         assertEquals(20, analyser.min());
         assertEquals(30, analyser.max());
@@ -61,10 +61,10 @@ public class ResponseTimeAnalyserWithFailuresTest {
 		RequestCounter successes = createSuccessCounter();
 		RequestCounter failures = createFailureCounter();
 
-		ResponseTimeAnalyserWithFailures analyser = new ResponseTimeAnalyserWithFailures(new RequestCounterPair(successes, failures), successes.getTimePeriod());
+		ResponseTimeAnalyserWithFailedHits analyser = new ResponseTimeAnalyserWithFailedHits(new RequestCounterPair(successes, failures), successes.getTimePeriod());
 
 		assertEquals("contain all hits of successes period", 5, analyser.totalHits());
-		assertEquals(1, analyser.failureHits());
+		assertEquals(1, analyser.failedHits());
 		assertEquals(1/5d * 100, analyser.failurePercentage(), 0.0000001d);
 		assertEquals("duration is total duration of successes",2101, analyser.getAnalysisTimePeriod().getDurationInMillis());
 	}

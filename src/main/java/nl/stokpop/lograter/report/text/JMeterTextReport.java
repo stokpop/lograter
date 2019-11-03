@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailures;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
 import nl.stokpop.lograter.processor.jmeter.JMeterConfig;
 import nl.stokpop.lograter.processor.jmeter.JMeterDataBundle;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -46,7 +46,7 @@ public class JMeterTextReport extends LogCounterTextReport {
     public void report(PrintStream out, TimePeriod analysisPeriod) {
         RequestCounterStorePair requestCounterStorePair = dataBundle.getTotalRequestCounterStorePair();
 
-	    ResponseTimeAnalyser responseTimeAnalyserWithFailures = new ResponseTimeAnalyserWithFailures(requestCounterStorePair.getTotalRequestCounterPair(), analysisPeriod);
+	    ResponseTimeAnalyser responseTimeAnalyserWithFailures = new ResponseTimeAnalyserWithFailedHits(requestCounterStorePair.getTotalRequestCounterPair(), analysisPeriod);
 
         out.println(reportSummaryHeader(responseTimeAnalyserWithFailures, config));
 

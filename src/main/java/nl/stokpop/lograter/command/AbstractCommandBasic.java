@@ -128,6 +128,12 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
             description = "List of percentiles to report. These are comma separated double values, for example: 99,99.9,99.995")
     public List<Double> reportPercentiles = Lists.newArrayList(99d);
 
+    @Parameter(names = {"-incl-failed-hits, --include-failed-hits-in-analysis" },
+            description = "Include failed hits in analysis. " +
+                    "When false the reported number of failures and failure percentage are the same for each counter, " +
+                    "but the other calculated values such as min, max, tps, averaqe, percentiles will not include failed hits.")
+    public boolean includeFailedHitsInAnalysis = true;
+
     @Override
     public String toString() {
         return "AbstractCommandBasic{" +
@@ -157,6 +163,7 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
                 ", reportStubDelays=" + reportStubDelays +
                 ", graphsHistoSimulator=" + graphsHistoSimulator +
                 ", reportPercentiles=" + reportPercentiles +
+                ", includeFailuresInAnalysis=" + includeFailedHitsInAnalysis +
                 '}';
     }
 }

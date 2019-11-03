@@ -17,5 +17,5 @@ package nl.stokpop.lograter.analysis;
 
 public interface FailureAware {
     double failurePercentage();
-    long failureHits();
+    long failedHits();
 }

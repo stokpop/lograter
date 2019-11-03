@@ -225,6 +225,7 @@ public class LogRater {
         config.setCalculateStubDelays(commandBasic.reportStubDelays);
         config.setReportPercentiles(commandBasic.reportPercentiles == null ? new Double[]{} : commandBasic.reportPercentiles.toArray(new Double[0]));
         config.setMaxNoMapperCount(commandBasic.maxNoMapperCount);
+        config.setIncludeFailedHitsInAnalysis(commandBasic.includeFailedHitsInAnalysis);
 	}
 
 	public static void writeReport(LogReport report, String outputFilename, File reportDirectory, PrintStream out, TimePeriod analysisPeriod) throws IOException {

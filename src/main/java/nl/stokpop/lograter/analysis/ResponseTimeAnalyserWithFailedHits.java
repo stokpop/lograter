@@ -38,7 +38,7 @@ import nl.stokpop.lograter.util.time.TimePeriod;
  * </il>
  * </p>
  */
-public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser implements FailureAware {
+public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyser implements FailureAware {
 
 	private final long numberOfFailureHits;
 	private final boolean includeFailuresInAnalysis;
@@ -46,7 +46,7 @@ public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser imple
 	/**
 	 * Analyse the request counter for the total time period of success and failure counters.
 	 */
-	public ResponseTimeAnalyserWithFailures(RequestCounterPair pair) {
+	public ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair) {
 		super(pair.getCombinedRequestCounter());
 		// safe to take all failure hits now: this is based on total time period of both counters
 		this.numberOfFailureHits = pair.getCounterFailure().getHits();
@@ -56,7 +56,7 @@ public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser imple
 	/**
 	 * Analyse the request counter for the specified time period.
 	 */
-	public ResponseTimeAnalyserWithFailures(RequestCounterPair pair, TimePeriod timePeriod) {
+	public ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair, TimePeriod timePeriod) {
 		super(pair.getCombinedRequestCounter(), timePeriod);
 		// make sure to only get the failures for the provided time period
 		this.numberOfFailureHits = pair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();
@@ -72,7 +72,7 @@ public class ResponseTimeAnalyserWithFailures extends ResponseTimeAnalyser imple
 	}
 
 	@Override
-    public long failureHits() {
+    public long failedHits() {
 		return numberOfFailureHits;
 	}
 

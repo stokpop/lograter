@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailuresExcludedInMetrics;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterConfig;
@@ -30,9 +30,11 @@ import java.util.Locale;
 import static nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity.AggregationGranularityType.LRA_FILE_EXACT;
 
 /**
- * Because of the aggregation granularity of the database values not all response times are present.
+ * Because of the aggregation granularity of the database values, not all single response times are present.
+ *
  * The percentiles, concurrent calls and other calculated values are to be considered rough estimates
  * in the generated PerformanceCenter reports.
+ *
  * Try to use the smallest granularity as possible. The smallest granularity seems to be 1 second.
  */
 public class PerformanceCenterTextReport extends LogCounterTextReport {
@@ -49,7 +51,7 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 		RequestCounter requestCounterFailureTotal = totalRequestCounterFailure.getTimeSlicedCounter(analysisPeriod);
 
 		PerformanceCenterConfig config = data.getConfig();
-		ResponseTimeAnalyser analyserTotal = new ResponseTimeAnalyserWithFailuresExcludedInMetrics(data.getTotalRequestCounterStorePair().getTotalRequestCounterPair(), analysisPeriod);
+		ResponseTimeAnalyser analyserTotal = new ResponseTimeAnalyserWithoutFailedHits(data.getTotalRequestCounterStorePair().getTotalRequestCounterPair(), analysisPeriod);
 
 		out.println(reportSummaryHeader(analyserTotal, config));
 		out.println(reportAggregationDetails(data.getAggregationGranularity()));
@@ -64,7 +66,8 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
         ResponseTimeAnalyser analyserFailuresTotal = new ResponseTimeAnalyser(requestCounterFailureTotal, analysisPeriod);
         PerformanceCenterConfig failureConfig = new PerformanceCenterConfig();
         failureConfig.setFailureAwareAnalysis(false);
-        failureConfig.setFailureAwareAnalysisIncludeFailuresInMetrics(false);
+        // no need to call this after setting the setFailureAwareAnalysis to false
+        // failureConfig.setIncludeFailedHitsInAnalysis(true);
 
         out.println("FAILURES");
         out.println(reportCounter(config.getCounterFields(), analyserFailuresTotal, analyserFailuresTotal, failureConfig));

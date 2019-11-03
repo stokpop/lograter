@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailures;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailuresExcludedInMetrics;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.processor.BasicLogConfig;
@@ -76,10 +76,10 @@ public class RequestCounterJsonReport implements LogReport {
 
             if (dataBundle.doesSupportFailureRequestCounters()) {
                 if (dataBundle instanceof PerformanceCenterDataBundle) {
-                    responseTimeAnalyser = new ResponseTimeAnalyserWithFailuresExcludedInMetrics(totalRequestCounterPair, analysisPeriod);
+                    responseTimeAnalyser = new ResponseTimeAnalyserWithoutFailedHits(totalRequestCounterPair, analysisPeriod);
                 }
                 else {
-                    responseTimeAnalyser = new ResponseTimeAnalyserWithFailures(totalRequestCounterPair, analysisPeriod);
+                    responseTimeAnalyser = new ResponseTimeAnalyserWithFailedHits(totalRequestCounterPair, analysisPeriod);
                 }
             }
             else {

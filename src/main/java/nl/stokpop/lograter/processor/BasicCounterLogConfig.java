@@ -27,11 +27,11 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 	private CounterStorageType counterStorage = CounterStorageType.Memory;
 	private boolean includeMapperRegexpColumn = false;
 	private boolean failureAwareAnalysis = false;
-	private boolean failureAwareAnalysisIncludeFailuresInMetrics = true;
     private Double[] reportPercentiles = { 99d };
 	private int maxNoMapperCount = 512;
 	private BaseUnit baseUnit = BaseUnit.milliseconds;
     private String counterStorageDir = ".";
+    private boolean includeFailedHitInAnalysis = true;
 
     public boolean isCalculateStdDev() {
 		return calculateStdDev;
@@ -105,15 +105,7 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
     public void setReportPercentiles(Double[] reportPercentiles) {
         this.reportPercentiles = reportPercentiles;
     }
-
-    public boolean isFailureAwareAnalysisIncludeFailuresInMetrics() {
-        return failureAwareAnalysisIncludeFailuresInMetrics;
-    }
-
-    public void setFailureAwareAnalysisIncludeFailuresInMetrics(boolean failureAwareAnalysisIncludeFailuresInMetrics) {
-        this.failureAwareAnalysisIncludeFailuresInMetrics = failureAwareAnalysisIncludeFailuresInMetrics;
-    }
-
+    
     public int getMaxNoMapperCount() {
         return maxNoMapperCount;
     }
@@ -136,5 +128,13 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 
     public String getCounterStorageDir() {
         return counterStorageDir;
+    }
+
+    public void setIncludeFailedHitsInAnalysis(boolean includeFailedHitInAnalysis) {
+        this.includeFailedHitInAnalysis = includeFailedHitInAnalysis;
+    }
+
+    public boolean isIncludeFailedHitInAnalysis() {
+        return includeFailedHitInAnalysis;
     }
 }

@@ -73,6 +73,8 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 		PerformanceCenterConfig config = new PerformanceCenterConfig();
 		config.setRunId(cmdMain.runId);
 		config.setFailureAwareAnalysis(true);
+        // do not include failed hits in analysis to make behaviour the same as pc analysis
+        config.setIncludeFailedHitsInAnalysis(false);
 		config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
 		LogRater.populateBasicCounterLogSettings(cmdPCResults, config);
 		config.setCounterStorage(cmdMain.storage);
@@ -82,7 +84,6 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 		//config.setClickPathShortCodeLength(cmdPCResults.clickPathShortCodeLength);
 		config.setFileFeederFilterExcludes(cmdPCResults.fileFeederFilterExcludes);
 		config.setFileFeederFilterIncludes(cmdPCResults.fileFeederFilterIncludes);
-		config.setFailureAwareAnalysisIncludeFailuresInMetrics(false);
 
 		PerformanceCenterDataBundle dataBundle = new PerformanceCenterDataBundle(config, data);
 		PerformanceCenterTextReport report = new PerformanceCenterTextReport(dataBundle);

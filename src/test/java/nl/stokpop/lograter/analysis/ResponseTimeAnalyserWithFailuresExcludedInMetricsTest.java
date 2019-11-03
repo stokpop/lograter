@@ -29,10 +29,10 @@ public class ResponseTimeAnalyserWithFailuresExcludedInMetricsTest {
 		RequestCounter successes = createSuccessCounter();
 		RequestCounter failures = createFailureCounter();
 
-		ResponseTimeAnalyserWithFailuresExcludedInMetrics analyser = new ResponseTimeAnalyserWithFailuresExcludedInMetrics(new RequestCounterPair(successes, failures));
+		ResponseTimeAnalyserWithoutFailedHits analyser = new ResponseTimeAnalyserWithoutFailedHits(new RequestCounterPair(successes, failures));
 
 		assertEquals("contain all hits successes", 4, analyser.totalHits());
-		assertEquals(2, analyser.failureHits());
+		assertEquals(2, analyser.failedHits());
 		assertEquals(2/6d * 100, analyser.failurePercentage(), 0.0000001d);
 		assertEquals(20, analyser.min());
 		assertEquals("duration is total duration of successes and failures",2501, analyser.getAnalysisTimePeriod().getDurationInMillis());
@@ -43,10 +43,10 @@ public class ResponseTimeAnalyserWithFailuresExcludedInMetricsTest {
 		RequestCounter successes = createSuccessCounter();
 		RequestCounter failures = createFailureCounter();
 
-        ResponseTimeAnalyserWithFailuresExcludedInMetrics analyser = new ResponseTimeAnalyserWithFailuresExcludedInMetrics(new RequestCounterPair(successes, failures), successes.getTimePeriod());
+        ResponseTimeAnalyserWithoutFailedHits analyser = new ResponseTimeAnalyserWithoutFailedHits(new RequestCounterPair(successes, failures), successes.getTimePeriod());
 
 		assertEquals("contain all hits of successes period", 4, analyser.totalHits());
-		assertEquals(1, analyser.failureHits());
+		assertEquals(1, analyser.failedHits());
 		assertEquals(1/5d * 100, analyser.failurePercentage(), 0.0000001d);
 		assertEquals("duration is total duration of successes",2101, analyser.getAnalysisTimePeriod().getDurationInMillis());
 	}

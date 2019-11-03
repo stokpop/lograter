@@ -21,7 +21,7 @@ import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailures;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.store.RequestCounterStore;
@@ -108,7 +108,7 @@ class LogCounterJsonReport {
         }
         else {
             RequestCounter requestCounterFailure = storeFailure.get(analysisPeriodCounter.getCounterKey());
-            myAnalyser = new ResponseTimeAnalyserWithFailures(new RequestCounterPair(analysisPeriodCounter, requestCounterFailure), analysisPeriod);
+            myAnalyser = new ResponseTimeAnalyserWithFailedHits(new RequestCounterPair(analysisPeriodCounter, requestCounterFailure), analysisPeriod);
         }
         return myAnalyser;
     }
@@ -132,7 +132,7 @@ class LogCounterJsonReport {
         node.put("hits", nfNoDecimals.format(hits));
         if (analyser instanceof FailureAware) {
 	        FailureAware analyserWithFailures = (FailureAware) analyser;
-	        node.put("failures", nfNoDecimals.format(analyserWithFailures.failureHits()));
+	        node.put("failures", nfNoDecimals.format(analyserWithFailures.failedHits()));
         	node.put("failurePercentage", nfTwoDecimals.format(analyserWithFailures.failurePercentage()));
         }
         final double avgHitDuration = analyser.avgHitDuration();

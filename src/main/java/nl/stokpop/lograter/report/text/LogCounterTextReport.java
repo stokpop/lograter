@@ -20,8 +20,8 @@ import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailures;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailuresExcludedInMetrics;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
@@ -132,11 +132,11 @@ abstract class LogCounterTextReport extends LogTextReport {
      */
 	private ResponseTimeAnalyser analyserFactory(BasicCounterLogConfig config, TimePeriod analysisPeriod, RequestCounterPair counterPair) {
 		if (config.isFailureAwareAnalysis()) {
-		    if (config.isFailureAwareAnalysisIncludeFailuresInMetrics()) {
-		        return new ResponseTimeAnalyserWithFailures(counterPair, analysisPeriod);
+		    if (config.isIncludeFailedHitInAnalysis()) {
+		        return new ResponseTimeAnalyserWithFailedHits(counterPair, analysisPeriod);
             }
             else {
-                return new ResponseTimeAnalyserWithFailuresExcludedInMetrics(counterPair, analysisPeriod);
+                return new ResponseTimeAnalyserWithoutFailedHits(counterPair, analysisPeriod);
             }
         }
         else {
@@ -255,7 +255,7 @@ abstract class LogCounterTextReport extends LogTextReport {
         // hits
 		report.append(SEP_CHAR).append(nfNoDecimals.format(hitsCount));
 	    if (analyser instanceof FailureAware) {
-		    long hitsCountFailure = ((FailureAware) analyser).failureHits();
+		    long hitsCountFailure = ((FailureAware) analyser).failedHits();
 			// failures
 		    report.append(SEP_CHAR).append(nfNoDecimals.format(hitsCountFailure));
 			double failurePercentage =  ((FailureAware) analyser).failurePercentage();

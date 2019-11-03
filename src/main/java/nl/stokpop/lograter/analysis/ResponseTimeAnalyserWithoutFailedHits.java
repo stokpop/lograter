@@ -19,51 +19,51 @@ import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
 /**
- * Analyser for response times that also knows about failures.
+ * Analyser for response times that also knows about failed hits.
  *
- * The metrics and data of successes are reported, without the failures.
+ * The metrics and data of successes are reported, without the failed hits.
  *
- * The number of failures and failure percentage is present (but failures are <b>not</b> used in metrics calculations).
+ * The number of failed hits and the failure percentage is present,
+ * but failed hits are <b>not</b> used in metrics calculations.
  *
- * The number of hits are the actual success hits (or passed requests).
+ * The totalHits are the actual success hits, also know as passed requests.
  */
-public class ResponseTimeAnalyserWithFailuresExcludedInMetrics extends ResponseTimeAnalyser implements FailureAware {
+public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyser implements FailureAware {
 
-	private final long numberOfFailures;
+	private final long numberOfFailedHits;
 
     /**
      * Analyse the request counter for the total time period of success and failure counters.
      */
-    public ResponseTimeAnalyserWithFailuresExcludedInMetrics(RequestCounterPair counterPair) {
+    public ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair) {
         super(counterPair.getCounterSuccess(), TimePeriod.createMaxTimePeriod(counterPair.getCounterSuccess().getTimePeriod(), counterPair.getCounterFailure().getTimePeriod()));
         // safe to take all failure hits now:
         // this is based on total time period of both counters
-        this.numberOfFailures = counterPair.getCounterFailure().getHits();
+        this.numberOfFailedHits = counterPair.getCounterFailure().getHits();
     }
 
     /**
      * Analyse the request counter for the specified time period.
      */
-    public ResponseTimeAnalyserWithFailuresExcludedInMetrics(RequestCounterPair counterPair, TimePeriod timePeriod) {
+    public ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair, TimePeriod timePeriod) {
         super(counterPair.getCounterSuccess(), timePeriod);
         // make sure to only get the failures for the provided time period
-        this.numberOfFailures = counterPair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();
+        this.numberOfFailedHits = counterPair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();
     }
 
     public double failurePercentage() {
         // total hits of parent now excludes failure hits
-        return (numberOfFailures / (totalHits() + numberOfFailures + Double.MIN_VALUE)) * 100d;
+        return (numberOfFailedHits / (totalHits() + numberOfFailedHits + Double.MIN_VALUE)) * 100d;
     }
 
     @Override
-    public long failureHits() {
-        return numberOfFailures;
+    public long failedHits() {
+        return numberOfFailedHits;
     }
 
     @Override
     public long totalHits() {
         return super.totalHits();
     }
-
 
 }
