@@ -94,7 +94,7 @@ To see all options:
 
     java -jar lograter-exec.jar -h
     
-Download the executable jar here: TODO
+Download the executable jar here: https://github.com/stokpop/lograter/releases
     
 ## Dependency
 

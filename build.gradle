@@ -3,11 +3,11 @@ import org.gradle.api.plugins.internal.DefaultJavaPluginExtension
 plugins {
     id 'java'
     id 'java-library'
-    id 'de.marcphilipp.nexus-publish' version '0.3.0'
+    id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'maven-publish'
     id 'signing'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
-    id 'com.github.ben-manes.versions' version '0.25.0'
+    id 'com.github.ben-manes.versions' version '0.27.0'
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'io.codearte.nexus-staging' version '0.21.1'
 }
@@ -23,18 +23,18 @@ dependencies {
     compile 'ch.qos.logback:logback-classic:1.2.3'
     compile 'org.xerial:sqlite-jdbc:3.28.0'
     compile 'com.beust:jcommander:1.78'
-    compile 'joda-time:joda-time:2.10.4'
+    compile 'joda-time:joda-time:2.10.5'
     compile 'net.sf.jchart2d:jchart2d:3.3.2'
     compile 'org.hdrhistogram:HdrHistogram:2.1.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
     compile 'net.jcip:jcip-annotations:1.0'
     compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'com.healthmarketscience.jackcess:jackcess:2.2.3'
+    compile 'com.healthmarketscience.jackcess:jackcess:3.0.1'
     testCompile 'junit:junit:4.12'
 }
 
 group = 'nl.stokpop'
-version = '1.3.0'
+version = '1.3.1'
 description = 'LogRater'
 sourceCompatibility = '1.8'
 
@@ -168,6 +168,13 @@ if (project.hasProperty('release')) {
 nexusStaging {
     username = ossrhUser
     password = ossrhPassword
+}
+
+processResources {
+    def props=["version":version]
+    filesMatching('lograter.properties') {
+        expand(props)
+    }
 }
 
 
