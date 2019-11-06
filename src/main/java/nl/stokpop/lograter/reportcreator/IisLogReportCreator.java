@@ -171,7 +171,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		}
 
 		RequestCounter totalRequestCounterSuccess = totalRequestCounterStorePair.getRequestCounterStoreSuccess().getTotalRequestCounter();
-		RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getRequestCounterStoreFailure().getTotalRequestCounter();
+		RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getStoreFailure().getTotalRequestCounter();
 		if (totalRequestCounterSuccess == null && totalRequestCounterFailure == null) {
 			throw new LogRaterException("No lines (success or failure) processed in file feeder. Please check input parameters.");
 		}

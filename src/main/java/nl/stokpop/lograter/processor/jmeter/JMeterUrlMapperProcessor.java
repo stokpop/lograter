@@ -153,7 +153,7 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 	}
 
 	public RequestCounterStore getMappersRequestCounterStoreFailure() {
-		return counterStorePair.getRequestCounterStoreFailure();
+		return counterStorePair.getStoreFailure();
 	}
 
     public Map<String, LineMap> getCounterKeyToLineMapMap() {

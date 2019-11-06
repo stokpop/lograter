@@ -18,8 +18,9 @@ package nl.stokpop.lograter.report.text;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.ConcurrentCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.command.BaseUnit;
@@ -80,11 +81,11 @@ abstract class LogCounterTextReport extends LogTextReport {
 
 		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
 			String counterKey = successCounter.getCounterKey();
-			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
+			RequestCounter failureCounter = counterStorePair.getStoreFailure().get(counterKey);
 
 			ResponseTimeAnalyser myAnalyser = analyserFactory(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
 
-			if (hasNoHitsAtAll(myAnalyser)) {
+			if (!myAnalyser.hasAnyHits()) {
 				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
 			}
 			else {
@@ -115,9 +116,9 @@ abstract class LogCounterTextReport extends LogTextReport {
 		for (RequestCounter failureCounter : counterStoreFailures) {
 			String counterKey = failureCounter.getCounterKey();
 
-			ResponseTimeAnalyser myAnalyser = new ResponseTimeAnalyser(failureCounter, analysisPeriod);
+			ResponseTimeAnalyser myAnalyser = new ResponseTimeAnalyserFailureUnaware(failureCounter, analysisPeriod);
 
-			if (hasNoHitsAtAll(myAnalyser)) {
+			if (!myAnalyser.hasAnyHits()) {
 				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
 			}
 			else {
@@ -140,14 +141,10 @@ abstract class LogCounterTextReport extends LogTextReport {
             }
         }
         else {
-		    return new ResponseTimeAnalyser(counterPair.getCounterSuccess(), analysisPeriod);
+		    return new ResponseTimeAnalyserFailureUnaware(counterPair.getCounterSuccess(), analysisPeriod);
         }
 	}
-
-	private boolean hasNoHitsAtAll(ResponseTimeAnalyser myAnalyser) {
-		return myAnalyser.totalHits() == 0;
-	}
-
+	
 	String reportCounter(String itemName, ResponseTimeAnalyser analyser, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
 
 		StringBuilder report = new StringBuilder();
@@ -333,7 +330,7 @@ abstract class LogCounterTextReport extends LogTextReport {
         report.append("\n");
 		
 		if (log.isTraceEnabled()) {
-			log.trace("histogram for {}: {}", counterKey, histogramToString(analyser.histogramForRelevantValues(ResponseTimeAnalyser.GRAPH_HISTO_NUMBER_OF_RANGES)));
+			log.trace("histogram for {}: {}", counterKey, histogramToString(analyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES)));
 		}
 		
 		return report.toString();

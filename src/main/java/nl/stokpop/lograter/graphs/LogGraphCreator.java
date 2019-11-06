@@ -27,6 +27,7 @@ import nl.stokpop.lograter.GraphConfig;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -113,7 +114,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
         for (RequestCounterStorePair counterStore : counterStores) {
 
         	RequestCounterStore requestCounterStoreSuccess = counterStore.getRequestCounterStoreSuccess();
-        	RequestCounterStore requestCounterStoreFailure = counterStore.getRequestCounterStoreFailure();
+        	RequestCounterStore requestCounterStoreFailure = counterStore.getStoreFailure();
 
 	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreSuccess, "success");
 	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreFailure, "failure");
@@ -161,7 +162,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
             return;
         }
 
-        final ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(timeSlicedCounter, timePeriodFilter);
+        final ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(timeSlicedCounter, timePeriodFilter);
 
         if (graphConfig.isGraphsResponseTimesEnabled()) {
             RequestCounter reducedCounter = null;
@@ -203,7 +204,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
             String histoGraphName = String.format("%s-%s-histogram.min(%d).max(%d)", requestCounterStoreType, analyser.getCounterKey(), analyser.min(), analyser.max());
             log.debug("Starting graph: {}", histoGraphName);
 
-            HistogramData histogram = analyser.histogramForRelevantValues(ResponseTimeAnalyser.GRAPH_HISTO_NUMBER_OF_RANGES);
+            HistogramData histogram = analyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
 
             int nrOfxValues = histogram.getXvalues().length;
             final int minNrOfxValues = 3;
@@ -224,8 +225,8 @@ public class LogGraphCreator extends AbstractGraphCreator {
                 for (int i = 0; i < numberOfValues; i++) {
                     simulatedCounter.incRequests(System.currentTimeMillis(), (int) simulatedValues[i]);
                 }
-                ResponseTimeAnalyser simulatedValuesAnalyser = new ResponseTimeAnalyser(simulatedCounter, timePeriodFilter);
-                HistogramData simHistogramData = simulatedValuesAnalyser.histogramForRelevantValues(ResponseTimeAnalyser.GRAPH_HISTO_NUMBER_OF_RANGES);
+                ResponseTimeAnalyser simulatedValuesAnalyser = new ResponseTimeAnalyserFailureUnaware(simulatedCounter, timePeriodFilter);
+                HistogramData simHistogramData = simulatedValuesAnalyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
                 String simulatedHistogramName = String.format("%s.sim", histoGraphName);
                 File file = showHistoGraph(subDirGraphs, simulatedHistogramName, simHistogramData);
                 chartFiles.add(new ChartFile(simulatedHistogramName, file));

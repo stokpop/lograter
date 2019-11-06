@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
@@ -83,7 +84,7 @@ public class RequestCounterJsonReport implements LogReport {
                 }
             }
             else {
-                responseTimeAnalyser = new ResponseTimeAnalyser(totalRequestCounterPair.getCounterSuccess(), analysisPeriod);
+                responseTimeAnalyser = new ResponseTimeAnalyserFailureUnaware(totalRequestCounterPair.getCounterSuccess(), analysisPeriod);
             }
 
             if (responseTimeAnalyser.totalHits() == 0) {

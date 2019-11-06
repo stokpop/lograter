@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.analysis;
 
 import nl.stokpop.lograter.LogRaterException;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.time.TPSMeasurement;
@@ -47,7 +47,7 @@ public class ResponseTimeAnalyserTest {
 			counter.incRequests(i, i);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter);
 		long[] percentiles = analyser.percentiles();
 		assertEquals(1, percentiles[0]);
 		assertEquals(50, percentiles[49]);
@@ -62,7 +62,7 @@ public class ResponseTimeAnalyserTest {
 			counter.incRequests(i, 50);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter);
 		long[] percentiles = analyser.percentiles();
 
 		assertEquals(50, percentiles[0]);
@@ -78,7 +78,7 @@ public class ResponseTimeAnalyserTest {
 			counter.incRequests(i, i);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter);
 		long[] percentiles = analyser.percentiles();
 		assertEquals(100, percentiles[0]);
 		assertEquals(5_000, percentiles[49]);
@@ -94,7 +94,7 @@ public class ResponseTimeAnalyserTest {
 			counter.incRequests(timestamp, i);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter);
 		long hitsInMinute = analyser.hitsInMinuteWithStartTime(timestamp);
 		assertEquals(nrOfHits, hitsInMinute);
 		
@@ -112,7 +112,7 @@ public class ResponseTimeAnalyserTest {
 	@Test
     public void avgTPSforOneHit() {
         counter.incRequests(1000, 40);
-        ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+        ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter);
         assertEquals(1, analyser.avgTps(), LITTLE_DELTA);
     }
 
@@ -120,7 +120,7 @@ public class ResponseTimeAnalyserTest {
     public void avgTPSOverLongRun() {
         counter.incRequests(1000, 40);
 		TimePeriod timePeriod = TimePeriod.createExcludingEndTime(0, 10000);
-        ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter, timePeriod);
+        ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(counter, timePeriod);
         assertEquals(0.1, analyser.avgTps(), LITTLE_DELTA);
     }
 
@@ -133,7 +133,7 @@ public class ResponseTimeAnalyserTest {
 		}
 
 		RequestCounter slice = counter.getTimeSlicedCounter(TimePeriod.createExcludingEndTime(timestamp + 10000, timestamp + 20000));
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(slice);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(slice);
 		TransactionCounterResult maxHitsPerSecond = analyser.maxHitsPerSecond();
 		assertEquals(10000, slice.getHits());
 		assertEquals(1000.0, maxHitsPerSecond.getMaxHitsPerDuration(), LITTLE_DELTA);
@@ -149,7 +149,7 @@ public class ResponseTimeAnalyserTest {
 		}
 
 		RequestCounter slice = counter.getTimeSlicedCounter(TimePeriod.createExcludingEndTime(timestamp + 10000, timestamp + 20000));
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(slice);
+		ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(slice);
 		TransactionCounterResult maxHitsPerSecond = analyser.maxHitsPerSecond();
 		assertEquals(5000, slice.getHits());
 		assertEquals(1000.0, maxHitsPerSecond.getMaxHitsPerDuration(), LITTLE_DELTA);
@@ -159,7 +159,7 @@ public class ResponseTimeAnalyserTest {
     public void emptyCounter() {
         RequestCounter emptyCounter = new RequestCounter("empty counter", new TimeMeasurementStoreInMemory());
         try {
-            new ResponseTimeAnalyser(emptyCounter);
+            new ResponseTimeAnalyserFailureUnaware(emptyCounter);
         } catch (LogRaterException e) {
             return;
         }
@@ -250,7 +250,7 @@ public class ResponseTimeAnalyserTest {
 		// >> bucket of minute 5 with 1 hit (start 242000)
 		counter.incRequests(280010, 2);
 
-		return new ResponseTimeAnalyser(counter);
+		return new ResponseTimeAnalyserFailureUnaware(counter);
 	}
 
 	private ResponseTimeAnalyser createSubTestAnalyser() {
@@ -262,7 +262,7 @@ public class ResponseTimeAnalyserTest {
 		subCounter.incRequests(220000, 2);
 		subCounter.incRequests(220010, 2);
 
-		return new ResponseTimeAnalyser(subCounter);
+		return new ResponseTimeAnalyserFailureUnaware(subCounter);
 	}
 
 }

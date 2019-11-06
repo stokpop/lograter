@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity;
@@ -47,7 +48,7 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 
 	@Override
 	public void report(PrintStream out, TimePeriod analysisPeriod) {
-		RequestCounter totalRequestCounterFailure = data.getTotalRequestCounterStorePair().getRequestCounterStoreFailure().getTotalRequestCounter();
+		RequestCounter totalRequestCounterFailure = data.getTotalRequestCounterStorePair().getStoreFailure().getTotalRequestCounter();
 		RequestCounter requestCounterFailureTotal = totalRequestCounterFailure.getTimeSlicedCounter(analysisPeriod);
 
 		PerformanceCenterConfig config = data.getConfig();
@@ -63,7 +64,7 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 		    out.println(reportCounters(config.getCounterFields(), requestCounterStore, analyserTotal, config));
 		}
 
-        ResponseTimeAnalyser analyserFailuresTotal = new ResponseTimeAnalyser(requestCounterFailureTotal, analysisPeriod);
+        ResponseTimeAnalyser analyserFailuresTotal = new ResponseTimeAnalyserFailureUnaware(requestCounterFailureTotal, analysisPeriod);
         PerformanceCenterConfig failureConfig = new PerformanceCenterConfig();
         failureConfig.setFailureAwareAnalysis(false);
         // no need to call this after setting the setFailureAwareAnalysis to false
@@ -74,7 +75,7 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 
         // one store expected for performance center data
         for (RequestCounterStorePair requestCounterStore : data.getRequestCounterStorePairs()) {
-            out.println(reportFailureCounters(config.getCounterFields(), requestCounterStore.getRequestCounterStoreFailure(), analyserFailuresTotal, failureConfig));
+            out.println(reportFailureCounters(config.getCounterFields(), requestCounterStore.getStoreFailure(), analyserFailuresTotal, failureConfig));
         }
 		
 	}

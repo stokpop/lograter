@@ -27,44 +27,45 @@ import java.util.Objects;
  * Makes sure both stores have same number of RequestCounters, possibly with empty request counters.
  * To avoid null pointer exceptions: add successes and failures via the RequestCounterStorePair only!
  *
- * TODO: make sure adding/changing the inner counter stores is impossible to retain consistency.
  * E.g. make methods to make all needed functionality available without exposing mutable internals.
  */
 @NotThreadSafe
 public class RequestCounterStorePair {
-	private final RequestCounterStore requestCounterStoreSuccess;
-	private final RequestCounterStore requestCounterStoreFailure;
+	private final RequestCounterStore storeSuccess;
+	private final RequestCounterStore storeFailure;
 
-	public RequestCounterStorePair(RequestCounterStore requestCounterStoreSuccess, RequestCounterStore requestCounterStoreFailure) {
-		this.requestCounterStoreSuccess = requestCounterStoreSuccess;
-		this.requestCounterStoreFailure = requestCounterStoreFailure;
+	public RequestCounterStorePair(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
+		this.storeSuccess = storeSuccess;
+		this.storeFailure = storeFailure;
 	}
 
 	/**
 	 * Warning: do not add new counters to this success store, use addSuccess instead.
+     * @return read only request counter
 	 */
 	public RequestCounterStore getRequestCounterStoreSuccess() {
-		return requestCounterStoreSuccess;
+		return new RequestCounterStoreReadOnly(storeSuccess);
 	}
 
 	/**
 	 * Warning: do not add new counters to this failure store, use addFailure instead.
-	 */
-	public RequestCounterStore getRequestCounterStoreFailure() {
-		return requestCounterStoreFailure;
+     * @return read only request counter
+     */
+	public RequestCounterStore getStoreFailure() {
+	    return new RequestCounterStoreReadOnly(storeFailure);
 	}
 
 	public void addSuccess(String counterKey, long timestamp, int durationInMillis) {
-		requestCounterStoreSuccess.add(counterKey, timestamp, durationInMillis);
-		if (!requestCounterStoreFailure.contains(counterKey)) {
-			requestCounterStoreFailure.addEmptyRequestCounterIfNotExists(counterKey);
+		storeSuccess.add(counterKey, timestamp, durationInMillis);
+		if (!storeFailure.contains(counterKey)) {
+			storeFailure.addEmptyRequestCounterIfNotExists(counterKey);
 		}
 	}
 
 	public void addFailure(String counterKey, long timestamp, int durationInMillis) {
-		requestCounterStoreFailure.add(counterKey, timestamp, durationInMillis);
-		if (!requestCounterStoreSuccess.contains(counterKey)) {
-			requestCounterStoreSuccess.addEmptyRequestCounterIfNotExists(counterKey);
+		storeFailure.add(counterKey, timestamp, durationInMillis);
+		if (!storeSuccess.contains(counterKey)) {
+			storeSuccess.addEmptyRequestCounterIfNotExists(counterKey);
 		}
 	}
 
@@ -72,13 +73,13 @@ public class RequestCounterStorePair {
      * @return the total period covering the success and the failures.
      */
 	public TimePeriod totalTimePeriod() {
-	    return TimePeriod.createMaxTimePeriod(requestCounterStoreSuccess.getTotalRequestCounter().getTimePeriod(), requestCounterStoreFailure.getTotalRequestCounter().getTimePeriod());
+	    return TimePeriod.createMaxTimePeriod(storeSuccess.getTotalRequestCounter().getTimePeriod(), storeFailure.getTotalRequestCounter().getTimePeriod());
     }
-
+    
 	@Override
 	public String toString() {
-        String sb = "RequestCounterStorePair{requestCounterStoreSuccess=" + requestCounterStoreSuccess +
-                ", requestCounterStoreFailure=" + requestCounterStoreFailure + '}';
+        String sb = "RequestCounterStorePair{requestCounterStoreSuccess=" + storeSuccess +
+                ", requestCounterStoreFailure=" + storeFailure + '}';
         return sb;
 	}
 
@@ -89,24 +90,24 @@ public class RequestCounterStorePair {
 
 		RequestCounterStorePair storePair = (RequestCounterStorePair) o;
 
-		if (!Objects.equals(requestCounterStoreSuccess, storePair.requestCounterStoreSuccess))
+		if (!Objects.equals(storeSuccess, storePair.storeSuccess))
 			return false;
-		return Objects.equals(requestCounterStoreFailure, storePair.requestCounterStoreFailure);
+		return Objects.equals(storeFailure, storePair.storeFailure);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = requestCounterStoreSuccess != null ? requestCounterStoreSuccess.hashCode() : 0;
-		result = 31 * result + (requestCounterStoreFailure != null ? requestCounterStoreFailure.hashCode() : 0);
+		int result = storeSuccess != null ? storeSuccess.hashCode() : 0;
+		result = 31 * result + (storeFailure != null ? storeFailure.hashCode() : 0);
 		return result;
 	}
 
 	public RequestCounterPair getTotalRequestCounterPair() {
-        RequestCounter totalRequestCounterSuccess = requestCounterStoreSuccess.getTotalRequestCounter();
-        return new RequestCounterPair(totalRequestCounterSuccess, requestCounterStoreFailure.getTotalRequestCounter());
+        RequestCounter totalRequestCounterSuccess = storeSuccess.getTotalRequestCounter();
+        return new RequestCounterPair(totalRequestCounterSuccess, storeFailure.getTotalRequestCounter());
 	}
 
 	public boolean isEmpty() {
-		return requestCounterStoreFailure.isEmpty() && requestCounterStoreSuccess.isEmpty();
+		return storeFailure.isEmpty() && storeSuccess.isEmpty();
 	}
 }

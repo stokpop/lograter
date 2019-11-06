@@ -66,7 +66,7 @@ public class JMeterLogReader {
         feeder.feedFilesAsString(files, jMeterParser);
 
         RequestCounter totalSuccess = totalStorePair.getRequestCounterStoreSuccess().getTotalRequestCounter();
-        RequestCounter totalFailure = totalStorePair.getRequestCounterStoreFailure().getTotalRequestCounter();
+        RequestCounter totalFailure = totalStorePair.getStoreFailure().getTotalRequestCounter();
         if (totalSuccess == null && totalFailure == null) {
             throw new LogRaterException("No lines (success or failure) processed in file feeder. Please check input parameters.");
         }

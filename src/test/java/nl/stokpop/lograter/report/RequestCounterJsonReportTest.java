@@ -15,6 +15,8 @@
  */
 package nl.stokpop.lograter.report;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.processor.accesslog.AccessLogConfig;
@@ -40,12 +42,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity.AggregationGranularityType.DATABASE_GUESS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class RequestCounterJsonReportTest {
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -93,7 +98,8 @@ public class RequestCounterJsonReportTest {
 
 		String result = createJsonReport(bundle);
 		System.out.println(result);
-		assertTrue("output should contain both store names", result.contains(storeName1) && result.contains(storeName2));
+		
+        assertTrue("output should contain both store names", result.contains(storeName1) && result.contains(storeName2));
 	}
 
 	private void fillStore(RequestCounterStore store, RequestCounterStore total, int numberOfElements) {
@@ -165,28 +171,53 @@ public class RequestCounterJsonReportTest {
 				new RequestCounterStoreFactory(CounterStorageType.Memory),
 				new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS));
 
-		RequestCounterStore storeSuccess = data.getRequestCounterStorePair().getRequestCounterStoreSuccess();
-		RequestCounterStore storeFailure = data.getRequestCounterStorePair().getRequestCounterStoreFailure();
+        RequestCounterStorePair pair = data.getRequestCounterStorePair();
+        RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
+		RequestCounterStore storeFailure = pair.getStoreFailure();
 
-		storeSuccess.add("counter-key-1", 1000, 1000);
-		storeSuccess.add("counter-key-1", 2000, 2000);
-		storeSuccess.add("counter-key-1", 3000, 3000);
-		storeSuccess.add("counter-key-2", 1001, 100);
-		storeSuccess.add("counter-key-2", 2001, 200);
-		storeSuccess.add("counter-key-2", 2950, 300);
 
-		storeFailure.add("counter-key-1", 1000, 1000);
-		storeFailure.add("counter-key-1", 2000, 2000);
-		storeFailure.add("counter-key-1", 3000, 3000);
-		storeFailure.add("counter-key-2", 1001, 100);
-		storeFailure.add("counter-key-2", 2001, 200);
-		storeFailure.add("counter-key-2", 2950, 300);
+		pair.addSuccess("counter-key-1", 1000, 1000);
+		pair.addSuccess("counter-key-1", 2000, 2000);
+		pair.addSuccess("counter-key-1", 3000, 3000);
+		pair.addSuccess("counter-key-2", 1001, 100);
+		pair.addSuccess("counter-key-2", 2001, 200);
+		pair.addSuccess("counter-key-2", 2950, 300);
+
+		pair.addFailure("counter-key-1", 1001, 1009);
+		pair.addFailure("counter-key-1", 2002, 2009);
+		pair.addFailure("counter-key-1", 3003, 3009);
+		pair.addFailure("counter-key-2", 1004, 19);
+		pair.addFailure("counter-key-2", 2005, 29);
+		pair.addFailure("counter-key-2", 2956, 309);
 
 		PerformanceCenterDataBundle performanceCenterDataBundle = new PerformanceCenterDataBundle(config, data);
 
 		String result = createJsonReport(performanceCenterDataBundle);
-		System.out.println(result);
-		assertTrue(result.contains("failures"));
+		//System.out.println(result);
+
+        assertTrue(result.contains("failures"));
+
+        JsonNode rootNode = mapper.readTree(result);
+
+        JsonNode overallCounterNode = rootNode.get("overall-counter");
+
+        int overallHits = overallCounterNode.get("hits").asInt();
+        int maxHitDurationMillis = overallCounterNode.get("maxHitDurationMillis").asInt();
+
+        // for performance center the failed hits should not be included in the analysis
+        assertEquals("6 success hits expected, not 12 because 6 are failed hits", 6, overallHits);
+        assertEquals("3009 is not expected: that is for a failure", 3000, maxHitDurationMillis);
+
+        JsonNode counterStores = rootNode.get("counterStores");
+
+        List<Integer> maxDurationsInt = counterStores.findValues("maxHitDurationMillis")
+                .stream()
+                .map(JsonNode::asInt)
+                .collect(Collectors.toList());
+
+        assertTrue("should exclude failure max response time for each counter (3009 and 309)",
+                (maxDurationsInt.contains(3000) && maxDurationsInt.contains(300))
+                        && !(maxDurationsInt.contains(3009) || maxDurationsInt.contains(309)));
 	}
 
 	@Test
