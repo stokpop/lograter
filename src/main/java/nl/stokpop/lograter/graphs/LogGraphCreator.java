@@ -27,6 +27,7 @@ import nl.stokpop.lograter.GraphConfig;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.RequestCounterStore;
@@ -114,7 +115,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
         for (RequestCounterStorePair counterStore : counterStores) {
 
         	RequestCounterStore requestCounterStoreSuccess = counterStore.getRequestCounterStoreSuccess();
-        	RequestCounterStore requestCounterStoreFailure = counterStore.getStoreFailure();
+        	RequestCounterStore requestCounterStoreFailure = counterStore.getRequestCounterStoreFailure();
 
 	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreSuccess, "success");
 	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreFailure, "failure");
@@ -139,8 +140,8 @@ public class LogGraphCreator extends AbstractGraphCreator {
 		}
 	}
 
-	private void produceGraphsForCounter(TimePeriod timePeriodFilter, File subDirGraphs, File subDirJsGraphs, List<ChartFile> chartFiles, RequestCounter totalCounter, String requestCounterStoreType) {
-        RequestCounter timeSlicedCounter = totalCounter.getTimeSlicedCounter(timePeriodFilter);
+	private void produceGraphsForCounter(TimePeriod timePeriodFilter, File subDirGraphs, File subDirJsGraphs, List<ChartFile> chartFiles, RequestCounter counter, String requestCounterStoreType) {
+        RequestCounter timeSlicedCounter = counter.getTimeSlicedCounter(timePeriodFilter);
 
         if (timeSlicedCounter.getHits() < GRAPH_DRAW_CUTOFF_NR_HITS) {
             // limit the number of warnings we log since it may result in an OutOfMemoryException in Central
@@ -162,7 +163,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
             return;
         }
 
-        final ResponseTimeAnalyser analyser = new ResponseTimeAnalyserFailureUnaware(timeSlicedCounter, timePeriodFilter);
+        final ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(timeSlicedCounter, timePeriodFilter);
 
         if (graphConfig.isGraphsResponseTimesEnabled()) {
             RequestCounter reducedCounter = null;
@@ -225,7 +226,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
                 for (int i = 0; i < numberOfValues; i++) {
                     simulatedCounter.incRequests(System.currentTimeMillis(), (int) simulatedValues[i]);
                 }
-                ResponseTimeAnalyser simulatedValuesAnalyser = new ResponseTimeAnalyserFailureUnaware(simulatedCounter, timePeriodFilter);
+                ResponseTimeAnalyser simulatedValuesAnalyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(simulatedCounter, timePeriodFilter);
                 HistogramData simHistogramData = simulatedValuesAnalyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
                 String simulatedHistogramName = String.format("%s.sim", histoGraphName);
                 File file = showHistoGraph(subDirGraphs, simulatedHistogramName, simHistogramData);

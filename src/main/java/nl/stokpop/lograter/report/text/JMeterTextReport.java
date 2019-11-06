@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.processor.jmeter.JMeterConfig;
 import nl.stokpop.lograter.processor.jmeter.JMeterDataBundle;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -46,18 +46,18 @@ public class JMeterTextReport extends LogCounterTextReport {
     public void report(PrintStream out, TimePeriod analysisPeriod) {
         RequestCounterStorePair requestCounterStorePair = dataBundle.getTotalRequestCounterStorePair();
 
-	    ResponseTimeAnalyser responseTimeAnalyserWithFailures = new ResponseTimeAnalyserWithFailedHits(requestCounterStorePair.getTotalRequestCounterPair(), analysisPeriod);
+	    ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, requestCounterStorePair.getTotalRequestCounterPair());
 
-        out.println(reportSummaryHeader(responseTimeAnalyserWithFailures, config));
+        out.println(reportSummaryHeader(analyser, config));
 
-        long maxTpmStartTimeStamp = responseTimeAnalyserWithFailures.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
-        long overallTotalHits = responseTimeAnalyserWithFailures.totalHits();
+        long maxTpmStartTimeStamp = analyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+        long overallTotalHits = analyser.totalHits();
 
-        out.println(reportCounter("counter", responseTimeAnalyserWithFailures, maxTpmStartTimeStamp, overallTotalHits, config));
+        out.println(reportCounter("counter", analyser, maxTpmStartTimeStamp, overallTotalHits, config));
 
         for (RequestCounterStorePair storePair : dataBundle.getRequestCounterStorePairs()) {
 	        String storeSuccessName = storePair.getRequestCounterStoreSuccess().getName();
-	        out.println(reportCounters(storeSuccessName, storePair, responseTimeAnalyserWithFailures, config, dataBundle.getCounterKeyToLineMapMap()));
+	        out.println(reportCounters(storeSuccessName, storePair, analyser, config, dataBundle.getCounterKeyToLineMapMap()));
         }
 
     }

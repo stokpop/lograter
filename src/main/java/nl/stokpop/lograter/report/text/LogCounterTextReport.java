@@ -15,20 +15,18 @@
  */
 package nl.stokpop.lograter.report.text;
 
+import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterConfig;
-import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.linemapper.LineMap;
@@ -58,9 +56,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 	public String reportCounters(String itemName, RequestCounterStorePair requestCounterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
 		return reportCounters(itemName, requestCounterStorePair, totalAnalyser, config, Collections.emptyMap());
 	}
-	public String reportFailureCounters(String itemName, RequestCounterStore counterStorePair, ResponseTimeAnalyser totalFailureAnalyser, PerformanceCenterConfig config) {
-		return reportFailureCounters(itemName, counterStorePair, totalFailureAnalyser, config, Collections.emptyMap());
-	}
+
 	public String reportCounters(String itemName, RequestCounterStorePair counterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
 
 		if (counterKeyToLineMapMap == null) {
@@ -73,7 +69,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 
         StringBuilder report = new StringBuilder();
 
-        report.append(reportHeaderLine(itemName, config));
+        report.append(reportHeaderLine(itemName, config, false));
 
         TimePeriod analysisPeriod = totalAnalyser.getAnalysisTimePeriod();
         long maxTpmTimestamp = totalAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
@@ -81,42 +77,9 @@ abstract class LogCounterTextReport extends LogTextReport {
 
 		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
 			String counterKey = successCounter.getCounterKey();
-			RequestCounter failureCounter = counterStorePair.getStoreFailure().get(counterKey);
+			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
 
-			ResponseTimeAnalyser myAnalyser = analyserFactory(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
-
-			if (!myAnalyser.hasAnyHits()) {
-				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
-			}
-			else {
-				report.append(reportLine(myAnalyser, maxTpmTimestamp, overallTotalHits, config, counterKeyToLineMapMap));
-			}
-		}
-		return report.toString();
-	}
-
-	public String reportFailureCounters(String itemName, RequestCounterStore counterStoreFailures, ResponseTimeAnalyser totalFailureAnalyser, PerformanceCenterConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
-
-		if (counterKeyToLineMapMap == null) {
-			throw new NullPointerException("CounterKeyToLineMapMap may not be null");
-		}
-
-		if ( counterStoreFailures.isEmpty()) {
-			return String.format("No counters found to report in counter store pair [%s]%n", counterStoreFailures);
-		}
-
-		StringBuilder report = new StringBuilder();
-
-		report.append(reportHeaderLine(itemName, config));
-
-		TimePeriod analysisPeriod = totalFailureAnalyser.getAnalysisTimePeriod();
-		long maxTpmTimestamp = totalFailureAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
-		long overallTotalHits = totalFailureAnalyser.totalHits();
-
-		for (RequestCounter failureCounter : counterStoreFailures) {
-			String counterKey = failureCounter.getCounterKey();
-
-			ResponseTimeAnalyser myAnalyser = new ResponseTimeAnalyserFailureUnaware(failureCounter, analysisPeriod);
+			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
 
 			if (!myAnalyser.hasAnyHits()) {
 				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
@@ -128,28 +91,12 @@ abstract class LogCounterTextReport extends LogTextReport {
 		return report.toString();
 	}
 
-    /**
-     * @return a response time analyser based on the config
-     */
-	private ResponseTimeAnalyser analyserFactory(BasicCounterLogConfig config, TimePeriod analysisPeriod, RequestCounterPair counterPair) {
-		if (config.isFailureAwareAnalysis()) {
-		    if (config.isIncludeFailedHitInAnalysis()) {
-		        return new ResponseTimeAnalyserWithFailedHits(counterPair, analysisPeriod);
-            }
-            else {
-                return new ResponseTimeAnalyserWithoutFailedHits(counterPair, analysisPeriod);
-            }
-        }
-        else {
-		    return new ResponseTimeAnalyserFailureUnaware(counterPair.getCounterSuccess(), analysisPeriod);
-        }
-	}
-	
-	String reportCounter(String itemName, ResponseTimeAnalyser analyser, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
+
+    String reportCounter(String itemName, ResponseTimeAnalyser analyser, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config) {
 
 		StringBuilder report = new StringBuilder();
 
-		report.append(reportHeaderLine(itemName, config));
+		report.append(reportHeaderLine(itemName, config, false));
 
 		int columns = StringUtils.countOccurrences(itemName, ',');
 		long maxTpmTimestamp = totalAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
@@ -161,26 +108,36 @@ abstract class LogCounterTextReport extends LogTextReport {
 	}
 
 	String reportCounter(String title, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long overallTotalHits, BasicCounterLogConfig config) {
-        return reportHeaderLine(title, config) + reportLine(analyser, maxTpmStartTimeStamp, overallTotalHits, config);
+        return reportHeaderLine(title, config, true) + reportLine(analyser, maxTpmStartTimeStamp, overallTotalHits, config);
 	}
 
-	private String reportHeaderLine(String name, BasicCounterLogConfig config) {
+	private String reportHeaderLine(String name, BasicCounterLogConfig config, boolean overallHeader) {
 		
 		StringBuilder report = new StringBuilder();
 				
 		report.append(name);
 
-		reportHeaderCounterDetails(report);
+		if (!overallHeader) { reportHeaderCounterDetails(report); }
 
         if (config.isIncludeMapperRegexpColumn()) report.append(SEP_CHAR).append("regexp");
 
-		report.append(SEP_CHAR).append("hits");
+        boolean failureAwareAnalysis = config.isFailureAwareAnalysis().orElseThrow(() -> new LogRaterException("failureAwareAnalysis option not set"));
+        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis().orElseThrow(() -> new LogRaterException("includeFailedHitsInAnalysis option not set"));
 
-		if (config.isFailureAwareAnalysis()) {
-			report.append(SEP_CHAR).append("failures");
-			report.append(SEP_CHAR).append("failure%");
-		}
-
+        if (failureAwareAnalysis) {
+            if (includeFailedHitsInAnalysis) {
+                report.append(SEP_CHAR).append("hits incl failures");
+            }
+            else {
+                report.append(SEP_CHAR).append("hits excl failures");
+            }
+            report.append(SEP_CHAR).append("failures");
+            report.append(SEP_CHAR).append("failure%");
+        }
+        else {
+            report.append(SEP_CHAR).append("hits");
+        }
+        
 		BaseUnit baseUnit = config.getBaseUnit();
 
 		report.append(SEP_CHAR).append("avg ").append(baseUnit.shortName()).append(SEP_CHAR);
@@ -249,8 +206,10 @@ abstract class LogCounterTextReport extends LogTextReport {
         }
 
 		long hitsCount = analyser.totalHits();
+
         // hits
 		report.append(SEP_CHAR).append(nfNoDecimals.format(hitsCount));
+
 	    if (analyser instanceof FailureAware) {
 		    long hitsCountFailure = ((FailureAware) analyser).failedHits();
 			// failures
@@ -259,6 +218,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 		    // failure%
 			report.append(SEP_CHAR).append(nfTwoDecimals.format(failurePercentage));
 	    }
+
         final double avgHitDuration = analyser.avgHitDuration();
 	    // avg
         report.append(SEP_CHAR).append(nfNoDecimals.format(avgHitDuration));

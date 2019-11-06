@@ -155,7 +155,7 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 	}
 
 	public RequestCounterStore getMappersRequestCounterStoreFailure() {
-		return counterStorePair.getStoreFailure();
+		return counterStorePair.getRequestCounterStoreFailure();
 	}
 
     public Map<String, LineMap> getCounterKeyToLineMapMap() {

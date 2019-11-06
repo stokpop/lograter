@@ -37,7 +37,7 @@ public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyserF
     /**
      * Analyse the request counter for the total time period of success and failure counters.
      */
-    public ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair) {
+    ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair) {
         super(counterPair.getCounterSuccess(), TimePeriod.createMaxTimePeriod(counterPair.getCounterSuccess().getTimePeriod(), counterPair.getCounterFailure().getTimePeriod()));
         // safe to take all failure hits now:
         // this is based on total time period of both counters
@@ -47,7 +47,7 @@ public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyserF
     /**
      * Analyse the request counter for the specified time period.
      */
-    public ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair, TimePeriod timePeriod) {
+    ResponseTimeAnalyserWithoutFailedHits(RequestCounterPair counterPair, TimePeriod timePeriod) {
         super(counterPair.getCounterSuccess(), timePeriod);
         // make sure to only get the failures for the provided time period
         this.numberOfFailedHits = counterPair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();

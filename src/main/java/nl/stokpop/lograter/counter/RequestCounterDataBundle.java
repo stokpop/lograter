@@ -15,7 +15,7 @@
  */
 package nl.stokpop.lograter.counter;
 
-import nl.stokpop.lograter.processor.BasicLogConfig;
+import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 
 import java.util.List;
@@ -31,5 +31,5 @@ public interface RequestCounterDataBundle {
 
 	boolean doesSupportFailureRequestCounters();
 
-	BasicLogConfig getConfig();
+	BasicCounterLogConfig getConfig();
 }

@@ -51,7 +51,7 @@ public class RequestCounterStorePair {
 	 * Warning: do not add new counters to this failure store, use addFailure instead.
      * @return read only request counter
      */
-	public RequestCounterStore getStoreFailure() {
+	public RequestCounterStore getRequestCounterStoreFailure() {
 	    return new RequestCounterStoreReadOnly(storeFailure);
 	}
 

@@ -158,7 +158,7 @@ public class AccessLogReader {
 	    }
 
         RequestCounter totalRequestCounterSuccess = totalRequestCounterStorePair.getRequestCounterStoreSuccess().getTotalRequestCounter();
-        RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getStoreFailure().getTotalRequestCounter();
+        RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getRequestCounterStoreFailure().getTotalRequestCounter();
 
         log.info("Read [{}] successful and [{}] failed access log entries for the following time period: [{}]",
 		        totalRequestCounterSuccess.getHits(), totalRequestCounterFailure.getHits(), totalRequestCounterSuccess.getTimePeriod());
@@ -169,7 +169,7 @@ public class AccessLogReader {
             allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
         }
 	    
-	    return new AccessLogDataBundle(config, requestCounterStoresPairs,totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
+	    return new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
     }
 
     public static List<RequestCounterStorePair> createAccessLogCounterProcessors(

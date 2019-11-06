@@ -22,6 +22,20 @@ public class PerformanceCenterConfig extends BasicCounterLogConfig {
 	private String counterFields;
 	private String mapperFile;
 
+    /**
+     * Sets defaults for PerformanceCenter analysis to:
+     *
+     * <ul>
+     *      <li>failureAwareAnalysis to true</li>
+     *      <li>includeFailedHitsInAnalysis to false</li>
+     * </ul>
+     *
+     * Note these values can be reset after initialization.
+     */
+	public PerformanceCenterConfig() {
+	    setFailureAwareAnalysis(true);
+	    setIncludeFailedHitsInAnalysis(false);
+    }
 	public String getCounterFields() {
 		return counterFields;
 	}

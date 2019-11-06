@@ -30,6 +30,21 @@ public class JMeterConfig extends BasicCounterLogConfig {
     private List<String> groupByFields = Collections.emptyList();
     private String logPattern = null;
 
+    /**
+     * Sets defaults for PerformanceCenter analysis to:
+     *
+     * <ul>
+     *      <li>failureAwareAnalysis to true</li>
+     *      <li>includeFailedHitsInAnalysis to true</li>
+     * </ul>
+     *
+     * Note these values can be reset after initialization.
+     */
+    public JMeterConfig() {
+        setFailureAwareAnalysis(true);
+        setIncludeFailedHitsInAnalysis(true);
+    }
+
 	public boolean ignoreMultiAndNoMatches() {
 		return ignoreMultiAndNoMatches;
 	}

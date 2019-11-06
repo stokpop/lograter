@@ -21,13 +21,13 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 /**
  * A request counter that cannot be changed.
  */
-public class ReadOnlyRequestCounter extends RequestCounter {
+public class RequestCounterReadOnly extends RequestCounter {
 
 	/**
 	 * Create new (in memory!) counter based on two request counters for the given time period.
 	 * The returned RequestCounter is read only.
 	 */
-	public ReadOnlyRequestCounter(
+	public RequestCounterReadOnly(
 			final RequestCounter requestCounterOne,
 			final RequestCounter requestCounterTwo,
 			final TimePeriod timePeriod) {
@@ -38,7 +38,7 @@ public class ReadOnlyRequestCounter extends RequestCounter {
 	 * Create new (in memory!) counter based on two request counters for the given time period.
 	 * The returned RequestCounter is read only.
 	 */
-	public ReadOnlyRequestCounter(
+	public RequestCounterReadOnly(
 			final String counterKey,
 			final RequestCounter requestCounterOne,
 			final RequestCounter requestCounterTwo,
@@ -46,15 +46,15 @@ public class ReadOnlyRequestCounter extends RequestCounter {
 		super(counterKey, requestCounterOne, requestCounterTwo, timePeriod);
 	}
 
-	public ReadOnlyRequestCounter(final String counterKey, final TimeMeasurementStore timeMeasurementStore) {
+	public RequestCounterReadOnly(final String counterKey, final TimeMeasurementStore timeMeasurementStore) {
 		super(counterKey, timeMeasurementStore);
 	}
 
-	protected ReadOnlyRequestCounter(final String counterKey, final TimeMeasurementStore timeSlicedTimeMeasurements, final TimePeriod timePeriod) {
+	protected RequestCounterReadOnly(final String counterKey, final TimeMeasurementStore timeSlicedTimeMeasurements, final TimePeriod timePeriod) {
 		super(counterKey, timeSlicedTimeMeasurements, timePeriod);
 	}
 
-	public ReadOnlyRequestCounter(final String uniqueCounterKey, final RequestCounter successCounter, final RequestCounter failureCounter) {
+	public RequestCounterReadOnly(final String uniqueCounterKey, final RequestCounter successCounter, final RequestCounter failureCounter) {
 		super(uniqueCounterKey, successCounter, failureCounter);
 	}
 

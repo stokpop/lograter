@@ -128,11 +128,17 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
             description = "List of percentiles to report. These are comma separated double values, for example: 99,99.9,99.995")
     public List<Double> reportPercentiles = Lists.newArrayList(99d);
 
-    @Parameter(names = {"-incl-failed-hits, --include-failed-hits-in-analysis" },
+    @Parameter(names = {"-failure-aware"}, arity = 1,
+            description = "Be failure aware if possible. " +
+                    "Report on failed hits in each analysis line. If not set the module defaults are used.")
+    public Boolean failureAwareAnalysis = null;
+
+    @Parameter(names = {"-include-failed-hits-in-analysis"}, arity = 1,
             description = "Include failed hits in analysis. " +
                     "When false the reported number of failures and failure percentage are the same for each counter, " +
-                    "but the other calculated values such as min, max, tps, averaqe, percentiles will not include failed hits.")
-    public boolean includeFailedHitsInAnalysis = true;
+                    "but the other calculated values such as min, max, tps, averaqe, percentiles will not include failed hits. " +
+                    "\"Default behaviour can differ for different modules. Most have true, performance center analysis has false.")
+    public Boolean includeFailedHitsInAnalysis = null;
 
     @Override
     public String toString() {
@@ -163,6 +169,7 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
                 ", reportStubDelays=" + reportStubDelays +
                 ", graphsHistoSimulator=" + graphsHistoSimulator +
                 ", reportPercentiles=" + reportPercentiles +
+                ", failureAwareAnalysis=" + failureAwareAnalysis +
                 ", includeFailuresInAnalysis=" + includeFailedHitsInAnalysis +
                 '}';
     }

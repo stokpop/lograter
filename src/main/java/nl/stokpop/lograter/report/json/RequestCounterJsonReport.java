@@ -22,13 +22,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.counter.RequestCounterPair;
-import nl.stokpop.lograter.processor.BasicLogConfig;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterDataBundle;
+import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.report.LogReport;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -43,7 +40,7 @@ public class RequestCounterJsonReport implements LogReport {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestCounterJsonReport.class);
 
-	final private BasicLogConfig config;
+	final private BasicCounterLogConfig config;
 
     final private RequestCounterDataBundle dataBundle;
 
@@ -67,36 +64,24 @@ public class RequestCounterJsonReport implements LogReport {
         ObjectNode rootNode = factory.objectNode();
         rootNode.put("externalRunId", config.getRunId());
 
-	    RequestCounterPair totalRequestCounterPair = dataBundle.getTotalRequestCounterStorePair().getTotalRequestCounterPair();
+	    RequestCounterPair pair = dataBundle.getTotalRequestCounterStorePair().getTotalRequestCounterPair();
 
-	    if (totalRequestCounterPair.isEmpty()) {
+	    if (pair.isEmpty()) {
             log.warn("No hits available to generate report for [{}].", config.getRunId());
         }
         else {
-            ResponseTimeAnalyser responseTimeAnalyser;
-
-            if (dataBundle.doesSupportFailureRequestCounters()) {
-                if (dataBundle instanceof PerformanceCenterDataBundle) {
-                    responseTimeAnalyser = new ResponseTimeAnalyserWithoutFailedHits(totalRequestCounterPair, analysisPeriod);
-                }
-                else {
-                    responseTimeAnalyser = new ResponseTimeAnalyserWithFailedHits(totalRequestCounterPair, analysisPeriod);
-                }
-            }
-            else {
-                responseTimeAnalyser = new ResponseTimeAnalyserFailureUnaware(totalRequestCounterPair.getCounterSuccess(), analysisPeriod);
-            }
-
-            if (responseTimeAnalyser.totalHits() == 0) {
+            ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, pair);
+            
+            if (!analyser.hasAnyHits()) {
                 log.warn("No hits available in the analysis period [{}] to generate report for [{}].", analysisPeriod, config.getRunId());
             }
             else {
-                jsonReport.addParseAndAnalysisPeriods(rootNode, config.getFilterPeriod(), responseTimeAnalyser.getAnalysisTimePeriod());
+                jsonReport.addParseAndAnalysisPeriods(rootNode, config.getFilterPeriod(), analyser.getAnalysisTimePeriod());
 
-                long maxTpmStartTimeStamp = responseTimeAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
-                long overallTotalHits = responseTimeAnalyser.totalHits();
+                long maxTpmStartTimeStamp = analyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+                long overallTotalHits = analyser.totalHits();
 
-                jsonReport.reportOverallCounter(rootNode, responseTimeAnalyser, maxTpmStartTimeStamp, overallTotalHits);
+                jsonReport.reportOverallCounter(rootNode, analyser, maxTpmStartTimeStamp, overallTotalHits);
 
                 ArrayNode counterStoresNodes = rootNode.putArray("counterStores");
                 for (RequestCounterStorePair storePair : dataBundle.getRequestCounterStorePairs()) {
@@ -104,9 +89,9 @@ public class RequestCounterJsonReport implements LogReport {
                     RequestCounterStore successStore = storePair.getRequestCounterStoreSuccess();
                     counterStoreNode.put("name", successStore.getName());
                     if (dataBundle.doesSupportFailureRequestCounters()) {
-                        jsonReport.reportCounters(counterStoreNode, storePair, responseTimeAnalyser);
+                        jsonReport.reportCounters(counterStoreNode, storePair, analyser);
                     } else {
-                        jsonReport.reportCounters(counterStoreNode, successStore, responseTimeAnalyser);
+                        jsonReport.reportCounters(counterStoreNode, successStore, analyser);
                     }
                 }
             }

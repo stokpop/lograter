@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class AccessLogConfig extends BasicCounterLogConfig {
+
 	private boolean showBasicUrls = false;
 	private boolean showUserAgents = false;
 	private boolean showReferers = false;
@@ -43,6 +44,21 @@ public class AccessLogConfig extends BasicCounterLogConfig {
 	private CommandAccessLog.LogType logType = CommandAccessLog.LogType.apache;
     private List<String> groupByFields = Collections.emptyList();
     private String clickpathEndOfSessionSnippet;
+
+    /**
+     * Sets defaults for PerformanceCenter analysis to:
+     *
+     * <ul>
+     *      <li>failureAwareAnalysis to true</li>
+     *      <li>includeFailedHitsInAnalysis to true</li>
+     * </ul>
+     *
+     * Note these values can be reset after initialization.
+     */
+    public AccessLogConfig() {
+        setFailureAwareAnalysis(true);
+        setIncludeFailedHitsInAnalysis(true);
+    }
 
     public boolean isShowBasicUrls() {
 		return showBasicUrls;

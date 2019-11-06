@@ -34,7 +34,7 @@ dependencies {
 }
 
 group = 'nl.stokpop'
-version = '1.3.1'
+version = '1.3.2-SNAPSHOT'
 description = 'LogRater'
 sourceCompatibility = '1.8'
 
@@ -130,7 +130,14 @@ if (project.hasProperty('release')) {
                     // POM signature
                     beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
                     // Target repository
-                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    String repositoryUrl
+                    if (version.endsWith("SNAPSHOT")) {
+                        repositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                    }
+                    else {
+                        repositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                    }
+                    repository(url: repositoryUrl) {
                         authentication(userName: ossrhUser, password: ossrhPassword)
                     }
                     pom.project {

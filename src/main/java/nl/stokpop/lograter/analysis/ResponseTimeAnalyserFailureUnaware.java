@@ -61,7 +61,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	/**
 	 * Analyse the request counter for the whole available time period.
 	 */
-	public ResponseTimeAnalyserFailureUnaware(RequestCounter counter) {
+	ResponseTimeAnalyserFailureUnaware(RequestCounter counter) {
 		this(counter, counter.getTimePeriod());
 	}
 
@@ -70,7 +70,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	 * data outside of the given time period, then a sliced counter is created internally for
 	 * the given time period.
 	 */
-    public ResponseTimeAnalyserFailureUnaware(RequestCounter counter, TimePeriod timePeriod) {
+    ResponseTimeAnalyserFailureUnaware(RequestCounter counter, TimePeriod timePeriod) {
     	this.tcrCache = new ConcurrentSoftCache<>();
     	RequestCounter slicedCounter = RequestCounter.safeSlicedCounter(counter, timePeriod);
 	    this.requestCounter = slicedCounter;

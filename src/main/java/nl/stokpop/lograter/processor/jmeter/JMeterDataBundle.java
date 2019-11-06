@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.processor.jmeter;
 
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
-import nl.stokpop.lograter.processor.BasicLogConfig;
+import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 import org.slf4j.Logger;
@@ -82,7 +82,7 @@ public class JMeterDataBundle implements RequestCounterDataBundle {
 	}
 
     @Override
-    public BasicLogConfig getConfig() {
+    public BasicCounterLogConfig getConfig() {
         return config;
     }
 

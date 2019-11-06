@@ -19,13 +19,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
 import nl.stokpop.lograter.counter.RequestCounter;
-import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.time.DateUtils;
@@ -81,7 +79,7 @@ class LogCounterJsonReport {
 	void reportCounters(ObjectNode node, RequestCounterStorePair pair, ResponseTimeAnalyser analyser) {
 
         final RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
-        final RequestCounterStore storeFailure = pair.getStoreFailure();
+        final RequestCounterStore storeFailure = pair.getRequestCounterStoreFailure();
 
         ArrayNode arrayNode = node.putArray("counters");
 
@@ -92,7 +90,7 @@ class LogCounterJsonReport {
         for (RequestCounter successCounter : storeSuccess) {
 			RequestCounter analysisPeriodSuccessCounter = successCounter.getTimeSlicedCounter(analysisPeriod);
 			boolean includeFailuresInAnalysis = analyser instanceof ResponseTimeAnalyserWithFailedHits;
-			ResponseTimeAnalyser myAnalyser = findMatchingFailureAnalyserForSuccessCounter(storeFailure, analysisPeriod, analysisPeriodSuccessCounter, includeFailuresInAnalysis);
+			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.findMatchingFailureAnalyserForSuccessCounter(storeFailure, analysisPeriod, analysisPeriodSuccessCounter, includeFailuresInAnalysis);
             if (myAnalyser.hasAnyHits()) {
                 ObjectNode counterNode = arrayNode.addObject();
                 createCounterNode(counterNode, myAnalyser, maxTpmTimestamp, overallTotalHits);
@@ -103,28 +101,7 @@ class LogCounterJsonReport {
 		}
 	}
 
-    private ResponseTimeAnalyser findMatchingFailureAnalyserForSuccessCounter(RequestCounterStore storeFailure,
-                                                                              TimePeriod analysisPeriod,
-                                                                              RequestCounter successCounter,
-                                                                              boolean includeFailuresInAnalysis) {
-        ResponseTimeAnalyser myAnalyser;
-        if (storeFailure == null || storeFailure.get(successCounter.getCounterKey()) == null) {
-            myAnalyser = new ResponseTimeAnalyserFailureUnaware(successCounter, analysisPeriod);
-        }
-        else {
-            RequestCounter failureCounter = storeFailure.get(successCounter.getCounterKey());
-            RequestCounterPair pair = new RequestCounterPair(successCounter, failureCounter);
-            if (includeFailuresInAnalysis) {
-                myAnalyser = new ResponseTimeAnalyserWithFailedHits(pair, analysisPeriod);
-            }
-            else {
-                myAnalyser = new ResponseTimeAnalyserWithoutFailedHits(pair, analysisPeriod);
-            }
-        }
-        return myAnalyser;
-    }
-
-	void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser) {
+    void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser) {
 	 	reportCounters(node, new RequestCounterStorePair(store, null), totalAnalyser);
 	}
 

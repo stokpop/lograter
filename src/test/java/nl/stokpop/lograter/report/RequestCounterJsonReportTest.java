@@ -173,7 +173,7 @@ public class RequestCounterJsonReportTest {
 
         RequestCounterStorePair pair = data.getRequestCounterStorePair();
         RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
-		RequestCounterStore storeFailure = pair.getStoreFailure();
+		RequestCounterStore storeFailure = pair.getRequestCounterStoreFailure();
 
 
 		pair.addSuccess("counter-key-1", 1000, 1000);

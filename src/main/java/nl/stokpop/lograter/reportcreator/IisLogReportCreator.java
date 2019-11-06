@@ -91,7 +91,6 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		config.setDetermineSessionDuration(cmdIisLog.determineSessionDuration);
 		config.setSessionField(cmdIisLog.sessionField);
 		config.setSessionFieldRegexp(cmdIisLog.sessionFieldRegexp);
-		config.setFailureAwareAnalysis(true);
 		config.setCounterStorage(cmdMain.storage);
 		config.setCounterStorageDir(cmdMain.storageDir);
 
@@ -171,7 +170,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		}
 
 		RequestCounter totalRequestCounterSuccess = totalRequestCounterStorePair.getRequestCounterStoreSuccess().getTotalRequestCounter();
-		RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getStoreFailure().getTotalRequestCounter();
+		RequestCounter totalRequestCounterFailure = totalRequestCounterStorePair.getRequestCounterStoreFailure().getTotalRequestCounter();
 		if (totalRequestCounterSuccess == null && totalRequestCounterFailure == null) {
 			throw new LogRaterException("No lines (success or failure) processed in file feeder. Please check input parameters.");
 		}
