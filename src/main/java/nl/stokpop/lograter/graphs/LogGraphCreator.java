@@ -32,6 +32,7 @@ import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.store.RequestCounterStoreType;
 import nl.stokpop.lograter.store.TimeMeasurement;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.FileUtils;
@@ -46,8 +47,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,18 +56,15 @@ public class LogGraphCreator extends AbstractGraphCreator {
     private static final Logger log = LoggerFactory.getLogger(LogGraphCreator.class);
 
     public static final int GRAPH_AGGREGATION_CUTOFF_NR_HITS = 10_000;
+    
     private static final long GRAPH_DRAW_CUTOFF_NR_HITS = 3;
     private static final long GRAPH_DRAW_CUTOFF_MAX_NR_WARNINGS = 512;
-
-    private final DecimalFormat nfTwoDecimals;
 
     private final GraphConfig graphConfig;
 
     private int graphDrawCutoffWarningCount = 0;
 
     public LogGraphCreator(GraphConfig graphConfig) {
-        this.nfTwoDecimals = (DecimalFormat) NumberFormat.getInstance(DEFAULT_LOCALE);
-        this.nfTwoDecimals.applyPattern("#0.00");
         this.graphConfig = graphConfig;
     }
 
@@ -93,7 +89,10 @@ public class LogGraphCreator extends AbstractGraphCreator {
         return trace;
     }
 
-    public File createHtmlChartFile(File dir, String chartFileName, Collection<RequestCounterStorePair> counterStores, TimePeriod filterPeriod) {
+    public File createHtmlChartFile(File dir,
+                                    String chartFileName,
+                                    Collection<RequestCounterStorePair> counterStores,
+                                    TimePeriod filterPeriod) {
 
         String dateStr = formatTimeToStandardDateString(System.currentTimeMillis());
 
@@ -117,32 +116,152 @@ public class LogGraphCreator extends AbstractGraphCreator {
         	RequestCounterStore requestCounterStoreSuccess = counterStore.getRequestCounterStoreSuccess();
         	RequestCounterStore requestCounterStoreFailure = counterStore.getRequestCounterStoreFailure();
 
-	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreSuccess, "success");
-	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreFailure, "failure");
+	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreSuccess, RequestCounterStoreType.success);
+	        createRequestCounterStoreGraphs(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, requestCounterStoreFailure, RequestCounterStoreType.failure);
         }
 
 	    return createOverallChartFile(dir, chartFileName, chartFiles);
 
     }
 
-	private void createRequestCounterStoreGraphs(final TimePeriod filterPeriod, final File subDirGraphs, final File subDirJsGraphs, final List<ChartFile> chartFiles, final RequestCounterStore requestCounterStore, final String requestCounterStoreType) {
-		if (requestCounterStore.isEmpty()) {
-			log.warn("Skipping empty [{}] requestCounterStore [{}]", requestCounterStoreType, requestCounterStore);
+	private void createRequestCounterStoreGraphs(TimePeriod filterPeriod,
+                                                 File subDirGraphs,
+                                                 File subDirJsGraphs,
+                                                 List<ChartFile> chartFiles,
+                                                 RequestCounterStore counterStore,
+                                                 RequestCounterStoreType counterStoreType) {
+		if (counterStore.isEmpty()) {
+			log.warn("Skipping empty [{}] requestCounterStore [{}]", counterStoreType, counterStore);
 		}
 		else {
-			log.info("Generate graphs for [{}] requestCounterStore [{}] for period [{}]", requestCounterStoreType, requestCounterStore, filterPeriod);
-			RequestCounter totalRequestCounter = requestCounterStore.getTotalRequestCounter();
-			produceGraphsForCounter(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, totalRequestCounter, requestCounterStoreType);
+			log.info("Generate graphs for [{}] requestCounterStore [{}] for period [{}]", counterStoreType, counterStore, filterPeriod);
+			RequestCounter totalCounter = counterStore.getTotalRequestCounter();
+			produceGraphsForCounter(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, totalCounter, counterStoreType);
 
-			for (RequestCounter counter : requestCounterStore) {
-				produceGraphsForCounter(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, counter, requestCounterStoreType);
+			for (RequestCounter counter : counterStore) {
+				produceGraphsForCounter(filterPeriod, subDirGraphs, subDirJsGraphs, chartFiles, counter, counterStoreType);
 			}
 		}
 	}
 
-	private void produceGraphsForCounter(TimePeriod timePeriodFilter, File subDirGraphs, File subDirJsGraphs, List<ChartFile> chartFiles, RequestCounter counter, String requestCounterStoreType) {
+	private void produceGraphsForCounter(TimePeriod timePeriodFilter,
+                                         File subDirGraphs,
+                                         File subDirJsGraphs,
+                                         List<ChartFile> chartFiles,
+                                         RequestCounter counter,
+                                         RequestCounterStoreType counterType) {
+
         RequestCounter timeSlicedCounter = counter.getTimeSlicedCounter(timePeriodFilter);
 
+        if (!hasCounterSufficientHitsForGraphing(timeSlicedCounter)) return;
+
+        // TODO: check the kind of analyser that is needed
+        // now the graphs of success and failure are split, so probably good enough
+        final ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(timeSlicedCounter, timePeriodFilter);
+
+        if (graphConfig.isGraphsResponseTimesEnabled()) {
+            chartFiles.add(createResponseTimesGraph(timePeriodFilter, subDirGraphs, counterType, timeSlicedCounter, analyser));
+        }
+
+        if (graphConfig.isGraphsTpsEnabled()) {
+            chartFiles.add(createTpsGraph(timePeriodFilter, subDirGraphs, counterType, timeSlicedCounter, analyser));
+        }
+
+        if (graphConfig.isGraphsHistoEnabled()) {
+            chartFiles.addAll(createHistoGraphs(timePeriodFilter, subDirGraphs, counterType, timeSlicedCounter, analyser));
+        }
+
+        if (graphConfig.isGraphsPercentileEnabled()) {
+            chartFiles.add(createPercentileGraph(subDirGraphs, counterType, analyser));
+        }
+
+        if (graphConfig.isGraphRequested()) {
+            String htmlGraphName = String.format("%s-html-graphs", analyser.getCounterKey());
+            log.debug("Starting html graphs: {}", htmlGraphName);
+            chartFiles.add(HtmlGraphCreator.writeHtmlGoogleGraphFile(subDirJsGraphs, analyser, graphConfig.getBaseUnit()));
+        }
+    }
+
+    private ChartFile createPercentileGraph(File subDirGraphs, RequestCounterStoreType counterType, ResponseTimeAnalyser analyser) {
+        String percentileGraphName = String.format("%s-%s-percentiles.min(%d).max(%d)", counterType, analyser.getCounterKey(), analyser.min(), analyser.max());
+        log.debug("Starting graph: {}", percentileGraphName);
+        // get 99th percentile as maximum to avoid extreme max values to hide all other percentiles
+        File file = showPercentileGraph(subDirGraphs, percentileGraphName, analyser.percentiles(99));
+        return new ChartFile(percentileGraphName, file);
+    }
+
+    private List<ChartFile> createHistoGraphs(TimePeriod timePeriodFilter, File subDirGraphs, RequestCounterStoreType counterType, RequestCounter timeSlicedCounter, ResponseTimeAnalyser analyser) {
+        List<ChartFile> files = new ArrayList<>();
+        String histoGraphName = String.format("%s-%s-histogram.min(%d).max(%d)", counterType, analyser.getCounterKey(), analyser.min(), analyser.max());
+        log.debug("Starting graph: {}", histoGraphName);
+
+        HistogramData histogram = analyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
+
+        int nrOfxValues = histogram.getXvalues().length;
+        final int minNrOfxValues = 3;
+
+        if (nrOfxValues < minNrOfxValues) {
+            log.warn("Too little x values ({}/{}) to create histogram graph for {} ", nrOfxValues, minNrOfxValues, analyser.getCounter().getCounterKey());
+        } else {
+            File histoGraphFile = showHistoGraph(subDirGraphs, histoGraphName, histogram);
+            files.add(new ChartFile(histoGraphName, histoGraphName, histoGraphFile, ChartFile.ChartType.PNG));
+        }
+
+        if (graphConfig.isGraphsHistoSimulatorEnabled()) {
+            RequestCounter simulatedCounter = new RequestCounter("simulatedResponseTimeCounter", new TimeMeasurementStoreInMemory());
+
+            int numberOfValues = (int) timeSlicedCounter.getHits();
+            double[] simulatedValues = new RandomGenerator().generateNormalDistributionSet(numberOfValues, analyser.stdDevHitDuration(), analyser.avgHitDuration(), analyser.min(), analyser.max());
+
+            for (int i = 0; i < numberOfValues; i++) {
+                simulatedCounter.incRequests(System.currentTimeMillis(), (int) simulatedValues[i]);
+            }
+            ResponseTimeAnalyser simulatedValuesAnalyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(simulatedCounter, timePeriodFilter);
+            HistogramData simHistogramData = simulatedValuesAnalyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
+            String simulatedHistogramName = String.format("%s.sim", histoGraphName);
+            File file = showHistoGraph(subDirGraphs, simulatedHistogramName, simHistogramData);
+            files.add(new ChartFile(simulatedHistogramName, file));
+        }
+        return files;
+    }
+
+    private ChartFile createTpsGraph(TimePeriod timePeriodFilter, File subDirGraphs, RequestCounterStoreType counterType, RequestCounter timeSlicedCounter, ResponseTimeAnalyser analyser) {
+        String tpsGraphName = graphConfig.isGraphWithTrueTPSEnabled() ? "perSec(1)" : "movingAvgPerMin(1)";
+
+        List<MetricPoint> metricPoints = analyser.metricPoints();
+
+        String counterNameTps = String.format("%s-%s-tps.%s", counterType, timeSlicedCounter.getCounterKey(), tpsGraphName);
+
+        log.debug("Create graph: {} with {} points", counterNameTps, metricPoints.size());
+        long maxTPS = analyser.maxHitsPerDuration(1000).getMaxHitsPerDuration();
+        File file = showTpsGraph(subDirGraphs, counterNameTps, metricPoints, timePeriodFilter, maxTPS);
+        return new ChartFile(counterNameTps, file);
+    }
+
+    private ChartFile createResponseTimesGraph(TimePeriod timePeriodFilter, File subDirGraphs, RequestCounterStoreType counterType, RequestCounter timeSlicedCounter, ResponseTimeAnalyser analyser) {
+        RequestCounter reducedCounter = null;
+        if (timeSlicedCounter.getHits() > GRAPH_AGGREGATION_CUTOFF_NR_HITS) {
+            final String reducedCounterName = String.format("%s-%s-duration.avgPerSec(%d)", counterType, timeSlicedCounter.getCounterKey(), graphConfig.getAggregateDurationInSeconds());
+            reducedCounter = new RequestCounter(reducedCounterName, new TimeMeasurementStoreInMemory());
+            RequestCounter.fillReducedCounter(timeSlicedCounter, reducedCounter, graphConfig.getAggregateDurationInSeconds());
+        }
+
+        long maxDurationGraphView = analyser.percentilePlus(99.0) * 5;
+
+        if (reducedCounter == null) {
+            String counterNameDuration = String.format("%s-%s-duration",  counterType, timeSlicedCounter.getCounterKey());
+            log.debug("Starting graph: {}", counterNameDuration);
+            File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, timeSlicedCounter, timePeriodFilter, maxDurationGraphView);
+            return new ChartFile(counterNameDuration, file);
+        } else {
+            String counterNameDuration = reducedCounter.getCounterKey();
+            log.debug("Starting graph: {}", counterNameDuration);
+            File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, reducedCounter, timePeriodFilter, maxDurationGraphView);
+            return new ChartFile(counterNameDuration, file);
+        }
+    }
+
+    private boolean hasCounterSufficientHitsForGraphing(RequestCounter timeSlicedCounter) {
         if (timeSlicedCounter.getHits() < GRAPH_DRAW_CUTOFF_NR_HITS) {
             // limit the number of warnings we log since it may result in an OutOfMemoryException in Central
             // when output is processed (logged to Central log)
@@ -160,93 +279,9 @@ public class LogGraphCreator extends AbstractGraphCreator {
                         graphDrawCutoffWarningCount
                 );
             }
-            return;
+            return false;
         }
-
-        final ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(timeSlicedCounter, timePeriodFilter);
-
-        if (graphConfig.isGraphsResponseTimesEnabled()) {
-            RequestCounter reducedCounter = null;
-            if (timeSlicedCounter.getHits() > GRAPH_AGGREGATION_CUTOFF_NR_HITS) {
-                final String reducedCounterName = String.format("%s-%s-duration.avgPerSec(%d)", requestCounterStoreType, timeSlicedCounter.getCounterKey(), graphConfig.getAggregateDurationInSeconds());
-                reducedCounter = new RequestCounter(reducedCounterName, new TimeMeasurementStoreInMemory());
-                RequestCounter.fillReducedCounter(timeSlicedCounter, reducedCounter, graphConfig.getAggregateDurationInSeconds());
-            }
-
-            long maxDurationGraphView = analyser.percentilePlus(99.0) * 5;
-
-            if (reducedCounter == null) {
-                String counterNameDuration = String.format("%s-%s-duration",  requestCounterStoreType, timeSlicedCounter.getCounterKey());
-                log.debug("Starting graph: {}", counterNameDuration);
-                File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, timeSlicedCounter, timePeriodFilter, maxDurationGraphView);
-                chartFiles.add(new ChartFile(counterNameDuration, file));
-            } else {
-                String counterNameDuration = reducedCounter.getCounterKey();
-                log.debug("Starting graph: {}", counterNameDuration);
-                File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, reducedCounter, timePeriodFilter, maxDurationGraphView);
-                chartFiles.add(new ChartFile(counterNameDuration, file));
-            }
-        }
-
-        if (graphConfig.isGraphsTpsEnabled()) {
-            String tpsGraphName = graphConfig.isGraphWithTrueTPSEnabled() ? "perSec(1)" : "movingAvgPerMin(1)";
-
-	        List<MetricPoint> metricPoints = analyser.metricPoints();
-
-            String counterNameTps = String.format("%s-%s-tps.%s", requestCounterStoreType, timeSlicedCounter.getCounterKey(), tpsGraphName);
-
-            log.debug("Create graph: {} with {} points", counterNameTps, metricPoints.size());
-            long maxTPS = analyser.maxHitsPerDuration(1000).getMaxHitsPerDuration();
-            File file = showTpsGraph(subDirGraphs, counterNameTps, metricPoints, timePeriodFilter, maxTPS);
-            chartFiles.add(new ChartFile(counterNameTps, file));
-        }
-
-        if (graphConfig.isGraphsHistoEnabled()) {
-            String histoGraphName = String.format("%s-%s-histogram.min(%d).max(%d)", requestCounterStoreType, analyser.getCounterKey(), analyser.min(), analyser.max());
-            log.debug("Starting graph: {}", histoGraphName);
-
-            HistogramData histogram = analyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
-
-            int nrOfxValues = histogram.getXvalues().length;
-            final int minNrOfxValues = 3;
-
-            if (nrOfxValues < minNrOfxValues) {
-                log.warn("Too little x values ({}/{}) to create histogram graph for {} ", nrOfxValues, minNrOfxValues, analyser.getCounter().getCounterKey());
-            } else {
-                File histoGraphFile = showHistoGraph(subDirGraphs, histoGraphName, histogram);
-                chartFiles.add(new ChartFile(histoGraphName, histoGraphName, histoGraphFile, ChartFile.ChartType.PNG));
-            }
-
-            if (graphConfig.isGraphsHistoSimulatorEnabled()) {
-                RequestCounter simulatedCounter = new RequestCounter("simulatedResponseTimeCounter", new TimeMeasurementStoreInMemory());
-
-                int numberOfValues = (int) timeSlicedCounter.getHits();
-                double[] simulatedValues = new RandomGenerator().generateNormalDistributionSet(numberOfValues, analyser.stdDevHitDuration(), analyser.avgHitDuration(), analyser.min(), analyser.max());
-
-                for (int i = 0; i < numberOfValues; i++) {
-                    simulatedCounter.incRequests(System.currentTimeMillis(), (int) simulatedValues[i]);
-                }
-                ResponseTimeAnalyser simulatedValuesAnalyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(simulatedCounter, timePeriodFilter);
-                HistogramData simHistogramData = simulatedValuesAnalyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
-                String simulatedHistogramName = String.format("%s.sim", histoGraphName);
-                File file = showHistoGraph(subDirGraphs, simulatedHistogramName, simHistogramData);
-                chartFiles.add(new ChartFile(simulatedHistogramName, file));
-            }
-        }
-
-        if (graphConfig.isGraphsPercentileEnabled()) {
-            String percentileGraphName = String.format("%s-%s-percentiles.min(%d).max(%d)", requestCounterStoreType, analyser.getCounterKey(), analyser.min(), analyser.max());
-            log.debug("Starting graph: {}", percentileGraphName);
-            // get 99th percentile as maximum to avoid extreme max values to hide all other percentiles
-            File file = showPercentileGraph(subDirGraphs, percentileGraphName, analyser.percentiles(99));
-            chartFiles.add(new ChartFile(percentileGraphName, file));
-        }
-
-        if (graphConfig.isGraphRequested()) {
-            String htmlGraphName = String.format("%s-html-graphs", analyser.getCounterKey());
-            log.debug("Starting html graphs: {}", htmlGraphName);
-            chartFiles.add(HtmlGraphCreator.writeHtmlGoogleGraphFile(subDirJsGraphs, analyser, graphConfig.getBaseUnit()));
-        }
+        return true;
     }
 
     private File createOverallChartFile(File dir, String chartFileName, List<ChartFile> chartFiles) {

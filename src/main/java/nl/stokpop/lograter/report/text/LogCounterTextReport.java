@@ -16,13 +16,13 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.TransactionCounterResult;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -61,7 +60,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	/**
 	 * Analyse the request counter for the whole available time period.
 	 */
-	ResponseTimeAnalyserFailureUnaware(RequestCounter counter) {
+	public ResponseTimeAnalyserFailureUnaware(RequestCounter counter) {
 		this(counter, counter.getTimePeriod());
 	}
 
@@ -70,7 +69,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	 * data outside of the given time period, then a sliced counter is created internally for
 	 * the given time period.
 	 */
-    ResponseTimeAnalyserFailureUnaware(RequestCounter counter, TimePeriod timePeriod) {
+    public ResponseTimeAnalyserFailureUnaware(RequestCounter counter, TimePeriod timePeriod) {
     	this.tcrCache = new ConcurrentSoftCache<>();
     	RequestCounter slicedCounter = RequestCounter.safeSlicedCounter(counter, timePeriod);
 	    this.requestCounter = slicedCounter;
@@ -167,20 +166,19 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
             }
 
 		}
-		
-		final TransactionCounterResult result = new TransactionCounterResult();
-		result.durationInMillis = timeBucketPeriod;
-		result.maxHitsPerDuration = maxPerDurationUntilNow;
+
+        List<TPSMeasurement> tpsPerTimestamp = includeTpsMeasurements
+                ? avgTpsPerTimeBucket(timeBucketPeriod, maxPerDurationUntilNowTimestamp)
+                : new ArrayList<>();
+
 		// If total period duration is smaller than the duration to calculate max value for,
 		// the timestamp could be less than 0, set to 0 in that case.
-		result.maxHitsPerDurationTimestamp = maxPerDurationUntilNowTimestamp < 0 ? 0 : maxPerDurationUntilNowTimestamp;
+		long maxHitsPerDurationTimestamp = maxPerDurationUntilNowTimestamp < 0
+                ? 0
+                : maxPerDurationUntilNowTimestamp;
 
-		if (includeTpsMeasurements) {
-			result.tpsPerTimestamp = avgTpsPerTimeBucket(timeBucketPeriod, maxPerDurationUntilNowTimestamp);
-		}
-		else {
-			result.tpsPerTimestamp = new ArrayList<>();
-		}
+        final TransactionCounterResult result =
+                new TransactionCounterResult(tpsPerTimestamp, maxPerDurationUntilNow, timeBucketPeriod, maxHitsPerDurationTimestamp);
 
 		tcrCache.put(cacheKey, result);
 
@@ -257,11 +255,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 			}
 		}
 		
-		ConcurrentCounterResult ccr = new ConcurrentCounterResult();
-		ccr.maxConcurrentRequests = maxConcurrentRequests;
-		ccr.maxConcurrentRequestsTimestamp = maxConcurrentRequestsTimestamp;
-		
-		return ccr;
+		return new ConcurrentCounterResult(maxConcurrentRequests, maxConcurrentRequestsTimestamp);
 	}
 
     @Override
@@ -298,59 +292,10 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
         return metricPoints;
     }
     
-	public static class TransactionCounterResult {
-		private List<TPSMeasurement> tpsPerTimestamp = Collections.emptyList();
-		private long maxHitsPerDuration;
-		private long durationInMillis;
-		private long maxHitsPerDurationTimestamp;
-
-	    @Override
-	    public String toString() {
-		    final StringBuilder sb = new StringBuilder("TransactionCounterResult{");
-		    sb.append("tpsPerTimestamp.size=").append(tpsPerTimestamp.size());
-		    sb.append(", maxHitsPerDuration=").append(maxHitsPerDuration);
-		    sb.append(", durationInMillis=").append(durationInMillis);
-		    sb.append(", maxHitsPerDurationTimestamp=").append(maxHitsPerDurationTimestamp);
-		    sb.append('}');
-		    return sb.toString();
-	    }
-
-        @Override
-        public int hashCode() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            throw new UnsupportedOperationException();
-        }
-
-        public List<TPSMeasurement> getTpsPerTimestamp() {
-            return tpsPerTimestamp;
-        }
-
-        public long getMaxHitsPerDuration() {
-            return maxHitsPerDuration;
-        }
-
-        public long getDurationInMillis() {
-            return durationInMillis;
-        }
-
-        public long getMaxHitsPerDurationTimestamp() {
-            return maxHitsPerDurationTimestamp;
-        }
-    }
-
     @Override
     public double percentage(long overallTotalHits) {
         return (totalHits() / (overallTotalHits + Double.MIN_VALUE)) * 100d;
     }
-
-	public static class ConcurrentCounterResult {
-		public long maxConcurrentRequests;
-		public long maxConcurrentRequestsTimestamp;
-	}
 
 	@Override
     public double stdDevHitDuration() {
@@ -361,7 +306,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
     public long hitsInMinuteWithStartTime(long startTimeStamp) {
 
 	    TimePeriod oneMinute = TimePeriod.createExcludingEndTime(startTimeStamp, startTimeStamp + (1000 * 60));
-    	
+
 		RequestCounter oneMinuteRequestCounter = requestCounter.getTimeSlicedCounter(oneMinute);
 
 	    return oneMinuteRequestCounter.getHits();
@@ -375,14 +320,14 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	@Override
     public double avgHitDuration() {
 		return timeWindowCalculator.getAverageDuration();
-		
+
 	}
-	
+
 	@Override
     public long min() {
     	return timeWindowCalculator.getMinDuration();
 	}
-	
+
 	@Override
     public long max() {
         return timeWindowCalculator.getMaxDuration();
@@ -411,7 +356,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 
 		return percentiles;
 	}
-	
+
     @Override
     public TimePeriod getAnalysisTimePeriod() {
         return timeWindowCalculator.getTimeWindowPeriod();
@@ -436,4 +381,6 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 	public boolean equals(Object obj) {
 		throw new UnsupportedOperationException();
 	}
+
+
 }

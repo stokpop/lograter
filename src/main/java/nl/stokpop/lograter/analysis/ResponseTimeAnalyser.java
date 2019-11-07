@@ -28,25 +28,25 @@ public interface ResponseTimeAnalyser {
 
     long percentileHitDuration(double percentile);
 
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerSecond();
+    TransactionCounterResult maxHitsPerSecond();
 
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerMinute();
+    TransactionCounterResult maxHitsPerMinute();
 
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerMinuteWithTpsMeasurements();
+    TransactionCounterResult maxHitsPerMinuteWithTpsMeasurements();
 
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerSecondWithTpsMeasurements();
+    TransactionCounterResult maxHitsPerSecondWithTpsMeasurements();
 
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerHour();
-
-    @SuppressWarnings("boxing")
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerDuration(long durationInMillis);
+    TransactionCounterResult maxHitsPerHour();
 
     @SuppressWarnings("boxing")
-    ResponseTimeAnalyserFailureUnaware.TransactionCounterResult maxHitsPerDuration(
+    TransactionCounterResult maxHitsPerDuration(long durationInMillis);
+
+    @SuppressWarnings("boxing")
+    TransactionCounterResult maxHitsPerDuration(
             long timeBucketPeriod,
             boolean includeTpsMeasurements);
 
-    ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult maxConcurrentRequests();
+    ConcurrentCounterResult maxConcurrentRequests();
 
     double avgTps();
 

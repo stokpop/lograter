@@ -16,7 +16,6 @@
 package nl.stokpop.lograter.analysis;
 
 import nl.stokpop.lograter.LogRaterException;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.time.TPSMeasurement;

@@ -45,7 +45,7 @@ public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyserFail
 	/**
 	 * Analyse the request counter for the total time period of success and failure counters.
 	 */
-	ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair) {
+	public ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair) {
 		super(pair.getCombinedRequestCounter());
 		// safe to take all failure hits now: this is based on total time period of both counters
 		this.numberOfFailureHits = pair.getCounterFailure().getHits();
@@ -55,7 +55,7 @@ public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyserFail
 	/**
 	 * Analyse the request counter for the specified time period.
 	 */
-	ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair, TimePeriod timePeriod) {
+	public ResponseTimeAnalyserWithFailedHits(RequestCounterPair pair, TimePeriod timePeriod) {
 		super(pair.getCombinedRequestCounter(), timePeriod);
 		// make sure to only get the failures for the provided time period
 		this.numberOfFailureHits = pair.getCounterFailure().getTimeSlicedCounter(timePeriod).getHits();

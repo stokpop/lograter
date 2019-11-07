@@ -17,12 +17,12 @@ package nl.stokpop.lograter.report.json;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.ConcurrentCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware.TransactionCounterResult;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
+import nl.stokpop.lograter.analysis.TransactionCounterResult;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
