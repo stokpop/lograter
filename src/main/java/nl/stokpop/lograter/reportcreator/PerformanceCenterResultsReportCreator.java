@@ -72,9 +72,9 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 
 		PerformanceCenterConfig config = new PerformanceCenterConfig();
 		config.setRunId(cmdMain.runId);
-		config.setFailureAwareAnalysis(true);
+		if (cmdPCResults.failureAwareAnalysis != null) { config.setFailureAwareAnalysis(cmdPCResults.failureAwareAnalysis); }
         // do not include failed hits in analysis to make behaviour the same as pc analysis
-        config.setIncludeFailedHitsInAnalysis(false);
+        if (cmdPCResults.failureAwareAnalysis != null) { config.setIncludeFailedHitsInAnalysis(cmdPCResults.includeFailedHitsInAnalysis); }
 		config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
 		LogRater.populateBasicCounterLogSettings(cmdPCResults, config);
 		config.setCounterStorage(cmdMain.storage);

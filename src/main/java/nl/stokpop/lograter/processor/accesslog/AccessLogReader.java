@@ -169,7 +169,7 @@ public class AccessLogReader {
             allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
         }
 	    
-	    return new AccessLogDataBundle(config, requestCounterStoresPairs,totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
+	    return new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
     }
 
     public static List<RequestCounterStorePair> createAccessLogCounterProcessors(

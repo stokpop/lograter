@@ -13,23 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.counter;
+package nl.stokpop.lograter.store;
 
-import nl.stokpop.lograter.processor.BasicCounterLogConfig;
-import nl.stokpop.lograter.store.RequestCounterStorePair;
-
-import java.util.List;
-
-/**
- * DataBundles for RequestCounterStores.
- */
-public interface RequestCounterDataBundle {
-
-	RequestCounterStorePair getTotalRequestCounterStorePair();
-
-	List<RequestCounterStorePair> getRequestCounterStorePairs();
-
-	boolean doesSupportFailureRequestCounters();
-
-	BasicCounterLogConfig getConfig();
+public enum RequestCounterStoreType {
+    success, failure
 }

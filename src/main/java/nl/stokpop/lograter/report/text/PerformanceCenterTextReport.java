@@ -16,8 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithoutFailedHits;
-import nl.stokpop.lograter.counter.RequestCounter;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterConfig;
 import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterDataBundle;
@@ -35,7 +34,8 @@ import static nl.stokpop.lograter.processor.performancecenter.PerformanceCenterA
  * The percentiles, concurrent calls and other calculated values are to be considered rough estimates
  * in the generated PerformanceCenter reports.
  *
- * Try to use the smallest granularity as possible. The smallest granularity seems to be 1 second.
+ * Try to use the smallest granularity as possible.
+ * The smallest granularity seems to be 1 second.
  */
 public class PerformanceCenterTextReport extends LogCounterTextReport {
 
@@ -47,36 +47,21 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 
 	@Override
 	public void report(PrintStream out, TimePeriod analysisPeriod) {
-		RequestCounter totalRequestCounterFailure = data.getTotalRequestCounterStorePair().getRequestCounterStoreFailure().getTotalRequestCounter();
-		RequestCounter requestCounterFailureTotal = totalRequestCounterFailure.getTimeSlicedCounter(analysisPeriod);
+        RequestCounterStorePair pair = data.getTotalRequestCounterStorePair();
 
 		PerformanceCenterConfig config = data.getConfig();
-		ResponseTimeAnalyser analyserTotal = new ResponseTimeAnalyserWithoutFailedHits(data.getTotalRequestCounterStorePair().getTotalRequestCounterPair(), analysisPeriod);
+		ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, pair.getTotalRequestCounterPair());
 
-		out.println(reportSummaryHeader(analyserTotal, config));
+		out.println(reportSummaryHeader(analyser, config));
 		out.println(reportAggregationDetails(data.getAggregationGranularity()));
 		out.println();
-		out.println(reportCounter(config.getCounterFields(), analyserTotal, analyserTotal, config));
+		out.println(reportCounter(config.getCounterFields(), analyser, analyser, config));
 
-		// one store expected for performance center data
+		// one store pair expected for performance center data
 		for (RequestCounterStorePair requestCounterStore : data.getRequestCounterStorePairs()) {
-		    out.println(reportCounters(config.getCounterFields(), requestCounterStore, analyserTotal, config));
+		    out.println(reportCounters(config.getCounterFields(), requestCounterStore, analyser, config));
 		}
 
-        ResponseTimeAnalyser analyserFailuresTotal = new ResponseTimeAnalyser(requestCounterFailureTotal, analysisPeriod);
-        PerformanceCenterConfig failureConfig = new PerformanceCenterConfig();
-        failureConfig.setFailureAwareAnalysis(false);
-        // no need to call this after setting the setFailureAwareAnalysis to false
-        // failureConfig.setIncludeFailedHitsInAnalysis(true);
-
-        out.println("FAILURES");
-        out.println(reportCounter(config.getCounterFields(), analyserFailuresTotal, analyserFailuresTotal, failureConfig));
-
-        // one store expected for performance center data
-        for (RequestCounterStorePair requestCounterStore : data.getRequestCounterStorePairs()) {
-            out.println(reportFailureCounters(config.getCounterFields(), requestCounterStore.getRequestCounterStoreFailure(), analyserFailuresTotal, failureConfig));
-        }
-		
 	}
 
     private String reportAggregationDetails(PerformanceCenterAggregationGranularity granularity) {

@@ -217,7 +217,7 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 
 		TimeMeasurementStore timeSlicedTimeMeasurements = timeMeasurements.getTimeSlice(timePeriod);
 
-		return new ReadOnlyRequestCounter(getCounterKey(), timeSlicedTimeMeasurements, timePeriod);
+		return new RequestCounterReadOnly(getCounterKey(), timeSlicedTimeMeasurements, timePeriod);
 	}
 
 	public String getUniqueCounterKey() {

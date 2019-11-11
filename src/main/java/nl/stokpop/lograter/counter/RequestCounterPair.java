@@ -33,7 +33,7 @@ public class RequestCounterPair {
         this.combinedTimePeriod = TimePeriod.createMaxTimePeriod(counterSuccess.getTimePeriod(), counterFailure.getTimePeriod());
         this.includeFailuresInAnalysis = includeFailuresInAnalysis;
         this.combinedRequestCounter = includeFailuresInAnalysis
-                ? new ReadOnlyRequestCounter(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, combinedTimePeriod)
+                ? new RequestCounterReadOnly(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, combinedTimePeriod)
                 : counterSuccess.getTimeSlicedCounter(combinedTimePeriod);
     }
 

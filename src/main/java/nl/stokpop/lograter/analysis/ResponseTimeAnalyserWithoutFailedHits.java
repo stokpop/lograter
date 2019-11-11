@@ -19,16 +19,18 @@ import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
 /**
- * Analyser for response times that also knows about failed hits.
+ * Analyser for response times that knows about failed hits,
+ * but does not use the failed hits in calculations.
  *
- * The metrics and data of successes are reported, without the failed hits.
+ * The number of totalHits is the actual number of successful hits, excluding the failed hits.
+ *
+ * The metrics and data of successes are reported without the failed hits.
  *
  * The number of failed hits and the failure percentage is present,
  * but failed hits are <b>not</b> used in metrics calculations.
  *
- * The totalHits are the actual success hits, also know as passed requests.
  */
-public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyser implements FailureAware {
+public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyserFailureUnaware implements FailureAware {
 
 	private final long numberOfFailedHits;
 
@@ -62,8 +64,7 @@ public class ResponseTimeAnalyserWithoutFailedHits extends ResponseTimeAnalyser 
     }
 
     @Override
-    public long totalHits() {
-        return super.totalHits();
+    public boolean hasAnyHits() {
+        return totalHits() + numberOfFailedHits > 0;
     }
-
 }

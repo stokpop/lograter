@@ -18,6 +18,8 @@ package nl.stokpop.lograter.processor;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.CounterStorageType;
 
+import java.util.Optional;
+
 public abstract class BasicCounterLogConfig extends BasicLogConfig {
 
 	private boolean calculateStdDev = false;
@@ -26,12 +28,12 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 	private boolean calculateStubDelays = false;
 	private CounterStorageType counterStorage = CounterStorageType.Memory;
 	private boolean includeMapperRegexpColumn = false;
-	private boolean failureAwareAnalysis = false;
+	private Boolean failureAwareAnalysis = null;
     private Double[] reportPercentiles = { 99d };
 	private int maxNoMapperCount = 512;
 	private BaseUnit baseUnit = BaseUnit.milliseconds;
     private String counterStorageDir = ".";
-    private boolean includeFailedHitInAnalysis = true;
+    private Boolean includeFailedHitInAnalysis = null;
 
     public boolean isCalculateStdDev() {
 		return calculateStdDev;
@@ -76,15 +78,16 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
         return includeMapperRegexpColumn;
     }
 
-	public boolean isFailureAwareAnalysis() {
-		return failureAwareAnalysis;
+	public Optional<Boolean> isFailureAwareAnalysis() {
+		return Optional.of(failureAwareAnalysis);
 	}
 
 	/**
 	 * When failure counters are available, report on failure metrics in the reports.
-	 * @param failureAwareAnalysis true when failures are part of the analysis
+	 * @param failureAwareAnalysis true when failures are part of the analysis,
+     *                                null to use default per module 
 	 */
-	public void setFailureAwareAnalysis(boolean failureAwareAnalysis) {
+	public void setFailureAwareAnalysis(Boolean failureAwareAnalysis) {
 		this.failureAwareAnalysis = failureAwareAnalysis;
 	}
 
@@ -130,11 +133,17 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
         return counterStorageDir;
     }
 
-    public void setIncludeFailedHitsInAnalysis(boolean includeFailedHitInAnalysis) {
-        this.includeFailedHitInAnalysis = includeFailedHitInAnalysis;
+    /**
+     * When FailureAwareAnalysis is true, this setting determines if failed hits should
+     * be included in the analysis. If false, failure hits and failure percentage are reported,
+     * but are not included in the analysis, such as determining avg and max values.
+     * @param includeFailedHitsInAnalysis true or false, or null when defaults of reports should be used
+     */
+    public void setIncludeFailedHitsInAnalysis(Boolean includeFailedHitsInAnalysis) {
+        this.includeFailedHitInAnalysis = includeFailedHitsInAnalysis;
     }
 
-    public boolean isIncludeFailedHitInAnalysis() {
-        return includeFailedHitInAnalysis;
+    public Optional<Boolean> isIncludeFailedHitsInAnalysis() {
+        return Optional.ofNullable(includeFailedHitInAnalysis);
     }
 }

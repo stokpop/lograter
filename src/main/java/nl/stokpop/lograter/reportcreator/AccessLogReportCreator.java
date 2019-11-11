@@ -63,7 +63,9 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 		config.setShowBasicUrls(cmdAccessLog.showBasicUrls);
 		config.setShowReferers(cmdAccessLog.showReferers);
 		config.setShowUserAgents(cmdAccessLog.showUserAgents);
+
 		LogRater.populateBasicCounterLogSettings(cmdAccessLog, config);
+
 		config.setClickpathReportStepDurations(cmdAccessLog.clickpathReportStepDurations);
 		config.setRemoveParametersFromUrl(cmdAccessLog.removeParametersFromUrl);
 		config.setFileFeederFilterIncludes(cmdAccessLog.fileFeederFilterIncludes);
@@ -76,7 +78,6 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 		config.setSessionFieldRegexp(cmdAccessLog.sessionFieldRegexp);
 		config.setLogPattern(cmdAccessLog.logPattern);
 		config.setIncludeMapperRegexpColumn(cmdAccessLog.includeMapperRegexpColumn);
-		config.setFailureAwareAnalysis(true);
 		if (cmdAccessLog instanceof CommandAccessLog) {
             config.setLogType(((CommandAccessLog) cmdAccessLog).logType);
         }

@@ -91,7 +91,6 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		config.setDetermineSessionDuration(cmdIisLog.determineSessionDuration);
 		config.setSessionField(cmdIisLog.sessionField);
 		config.setSessionFieldRegexp(cmdIisLog.sessionFieldRegexp);
-		config.setFailureAwareAnalysis(true);
 		config.setCounterStorage(cmdMain.storage);
 		config.setCounterStorageDir(cmdMain.storageDir);
 

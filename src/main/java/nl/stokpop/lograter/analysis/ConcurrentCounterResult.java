@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.counter;
+package nl.stokpop.lograter.analysis;
 
-import nl.stokpop.lograter.processor.BasicCounterLogConfig;
-import nl.stokpop.lograter.store.RequestCounterStorePair;
+public class ConcurrentCounterResult {
 
-import java.util.List;
+    public final long maxConcurrentRequests;
+    public final long maxConcurrentRequestsTimestamp;
 
-/**
- * DataBundles for RequestCounterStores.
- */
-public interface RequestCounterDataBundle {
+    ConcurrentCounterResult(long maxConcurrentRequests, long maxConcurrentRequestsTimestamp) {
+        this.maxConcurrentRequests = maxConcurrentRequests;
+        this.maxConcurrentRequestsTimestamp = maxConcurrentRequestsTimestamp;
+    }
 
-	RequestCounterStorePair getTotalRequestCounterStorePair();
-
-	List<RequestCounterStorePair> getRequestCounterStorePairs();
-
-	boolean doesSupportFailureRequestCounters();
-
-	BasicCounterLogConfig getConfig();
 }

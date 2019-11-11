@@ -17,6 +17,7 @@ package nl.stokpop.lograter.counter;
 
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.store.TimeMeasurement;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -36,7 +37,7 @@ public class RequestCounterTest {
 			counter.incRequests(100_000_000 + i, i + 1);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(counter);
 
 		assertEquals(100, counter.getHits());
 		assertEquals(50, analyser.maxConcurrentRequests().maxConcurrentRequests);
@@ -54,7 +55,7 @@ public class RequestCounterTest {
 			counter.incRequests(100_000_000 + i, i + 1);
 		}
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(counter);
 		
 		assertEquals(loops, counter.getHits());
 		assertEquals(5000, analyser.maxConcurrentRequests().maxConcurrentRequests);
@@ -74,7 +75,7 @@ public class RequestCounterTest {
 		counter.incRequests(4, 430);
 		counter.incRequests(5, 300);
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(counter);
 
 		// note that this is the Sample sd and not the Population sd!
 		assertEquals(164.0, analyser.stdDevHitDuration(), 1.0);
@@ -87,7 +88,7 @@ public class RequestCounterTest {
 
 		counter.incRequests(1, 600);
 
-		ResponseTimeAnalyser analyser = new ResponseTimeAnalyser(counter);
+		ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createSimpleFailureUnaware(counter);
 		
 		assertEquals(600, analyser.percentileHitDuration(99));
 	}

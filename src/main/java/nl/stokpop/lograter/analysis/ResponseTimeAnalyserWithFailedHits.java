@@ -19,7 +19,9 @@ import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
 /**
- * Analyser for response times that also knows about failures.
+ * Analyser for response times that deals with success hits and failed hits.
+ *
+ * The number of total hits is the total of the success and failed hits combined.
  *
  * If supplied with RequestCounterPair with 'includeFailuresInAnalysis' set to true (default setting) then:
  * <ul>
@@ -35,7 +37,7 @@ import nl.stokpop.lograter.util.time.TimePeriod;
  *     <li>For percentage failure calculation the total hits is success hits + failure hits.</li>
  * </ul>
  */
-public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyser implements FailureAware {
+public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyserFailureUnaware implements FailureAware {
 
 	private final long numberOfFailureHits;
 	private final boolean includeFailuresInAnalysis;
@@ -73,4 +75,8 @@ public class ResponseTimeAnalyserWithFailedHits extends ResponseTimeAnalyser imp
 		return numberOfFailureHits;
 	}
 
+    @Override
+    public boolean hasAnyHits() {
+        return totalHits() + numberOfFailureHits > 0;
+    }
 }

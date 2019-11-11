@@ -17,13 +17,13 @@ package nl.stokpop.lograter.report.json;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.ConcurrentCounterResult;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
+import nl.stokpop.lograter.analysis.TransactionCounterResult;
 import nl.stokpop.lograter.counter.RequestCounter;
-import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.time.DateUtils;
@@ -76,48 +76,32 @@ class LogCounterJsonReport {
 
     }
 
-	void reportCounters(ObjectNode node, RequestCounterStorePair counterStorePair, ResponseTimeAnalyser totalAnalyser) {
+	void reportCounters(ObjectNode node, RequestCounterStorePair pair, ResponseTimeAnalyser analyser) {
 
-        final RequestCounterStore storeSuccess = counterStorePair.getRequestCounterStoreSuccess();
-        final RequestCounterStore storeFailure = counterStorePair.getRequestCounterStoreFailure();
+        final RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
+        final RequestCounterStore storeFailure = pair.getRequestCounterStoreFailure();
 
         ArrayNode arrayNode = node.putArray("counters");
 
-        TimePeriod analysisPeriod = totalAnalyser.getAnalysisTimePeriod();
-        long maxTpmTimestamp = totalAnalyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
-        long overallTotalHits = totalAnalyser.totalHits();
+        TimePeriod analysisPeriod = analyser.getAnalysisTimePeriod();
+        long maxTpmTimestamp = analyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
+        long overallTotalHits = analyser.totalHits();
 
-        for (RequestCounter counter : storeSuccess) {
-			RequestCounter analysisPeriodCounter = counter.getTimeSlicedCounter(analysisPeriod);
-			ResponseTimeAnalyser myAnalyser = getResponseTimeAnalyser(storeFailure, analysisPeriod, analysisPeriodCounter);
-            if (hasHits(myAnalyser)) {
+        for (RequestCounter successCounter : storeSuccess) {
+			RequestCounter analysisPeriodSuccessCounter = successCounter.getTimeSlicedCounter(analysisPeriod);
+			boolean includeFailuresInAnalysis = analyser instanceof ResponseTimeAnalyserWithFailedHits;
+			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.findMatchingFailureAnalyserForSuccessCounter(storeFailure, analysisPeriod, analysisPeriodSuccessCounter, includeFailuresInAnalysis);
+            if (myAnalyser.hasAnyHits()) {
                 ObjectNode counterNode = arrayNode.addObject();
                 createCounterNode(counterNode, myAnalyser, maxTpmTimestamp, overallTotalHits);
             } else {
-                log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counter.getCounterKey());
+                log.warn("Skipping line because there are no hits at all " +
+                        "for the counter in the analysis period [{}].", successCounter.getCounterKey());
             }
 		}
 	}
 
-    private ResponseTimeAnalyser getResponseTimeAnalyser(RequestCounterStore storeFailure,
-                                                         TimePeriod analysisPeriod,
-                                                         RequestCounter analysisPeriodCounter) {
-        ResponseTimeAnalyser myAnalyser;
-        if (storeFailure == null || storeFailure.get(analysisPeriodCounter.getCounterKey()) == null) {
-            myAnalyser = new ResponseTimeAnalyser(analysisPeriodCounter, analysisPeriod);
-        }
-        else {
-            RequestCounter requestCounterFailure = storeFailure.get(analysisPeriodCounter.getCounterKey());
-            myAnalyser = new ResponseTimeAnalyserWithFailedHits(new RequestCounterPair(analysisPeriodCounter, requestCounterFailure), analysisPeriod);
-        }
-        return myAnalyser;
-    }
-
-    private boolean hasHits(ResponseTimeAnalyser myAnalyser) {
-        return myAnalyser.totalHits() != 0;
-    }
-
-	void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser) {
+    void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser) {
 	 	reportCounters(node, new RequestCounterStorePair(store, null), totalAnalyser);
 	}
 

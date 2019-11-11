@@ -99,6 +99,7 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
 
     private JMeterConfig createJMeterConfig(CommandMain cmdMain, CommandJMeter cmdJMeter) throws IOException {
         JMeterConfig config = new JMeterConfig();
+        LogRater.populateBasicCounterLogSettings(cmdJMeter, config);
         config.setRunId(cmdMain.runId);
         config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
         config.setDoCountMultipleMapperHits(cmdJMeter.doCountMultipleMapperHits);
@@ -106,7 +107,6 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
         config.setIgnoreMultiAndNoMatches(cmdJMeter.ignoreMultiAndNoMatches);
         config.setLineMappers(LineMapperUtils.createLineMapper(cmdJMeter.mapperFile));
         config.setIncludeMapperRegexpColumn(cmdJMeter.includeMapperRegexpColumn);
-        config.setFailureAwareAnalysis(true);
         config.setLogPattern(cmdJMeter.logPattern);
         config.setCounterStorage(cmdMain.storage);
         config.setCounterStorageDir(cmdMain.storageDir);
