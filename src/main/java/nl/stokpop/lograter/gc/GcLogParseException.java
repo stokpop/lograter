@@ -23,4 +23,7 @@ public class GcLogParseException extends LogRaterException {
         super(message);
     }
 
+    public GcLogParseException(String message, Exception e) {
+        super(message, e);
+    }
 }
