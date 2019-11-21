@@ -15,7 +15,6 @@
  */
 package nl.stokpop.lograter.report.text;
 
-import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.HistogramData;
@@ -121,8 +120,8 @@ abstract class LogCounterTextReport extends LogTextReport {
 
         if (config.isIncludeMapperRegexpColumn()) report.append(SEP_CHAR).append("regexp");
 
-        boolean failureAwareAnalysis = config.isFailureAwareAnalysis().orElseThrow(() -> new LogRaterException("failureAwareAnalysis option not set"));
-        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis().orElseThrow(() -> new LogRaterException("includeFailedHitsInAnalysis option not set"));
+        boolean failureAwareAnalysis = config.isFailureAwareAnalysis();
+        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis();
 
         if (failureAwareAnalysis) {
             if (includeFailedHitsInAnalysis) {

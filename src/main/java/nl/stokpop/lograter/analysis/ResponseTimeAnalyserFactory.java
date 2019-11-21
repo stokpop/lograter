@@ -15,7 +15,6 @@
  */
 package nl.stokpop.lograter.analysis;
 
-import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
@@ -27,8 +26,8 @@ public class ResponseTimeAnalyserFactory {
      * @return a response time analyser based on the config
      */
 	public static ResponseTimeAnalyser createAnalyser(BasicCounterLogConfig config, TimePeriod analysisPeriod, RequestCounterPair counterPair) {
-        boolean failureAwareAnalysis = config.isFailureAwareAnalysis().orElseThrow(() -> new LogRaterException("failureAwareAnalysis option not set"));
-        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis().orElseThrow(() -> new LogRaterException("includeFailedHitsInAnalysis option not set"));
+        boolean failureAwareAnalysis = config.isFailureAwareAnalysis();
+        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis();
 
         if (failureAwareAnalysis) {
 		    if (includeFailedHitsInAnalysis) {

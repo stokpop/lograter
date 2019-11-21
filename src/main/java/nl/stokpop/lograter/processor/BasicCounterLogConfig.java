@@ -18,8 +18,16 @@ package nl.stokpop.lograter.processor;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.CounterStorageType;
 
-import java.util.Optional;
-
+/**
+ * Sets defaults for Basic analysis to:
+ *
+ * <ul>
+ *      <li>failureAwareAnalysis to true</li>
+ *      <li>includeFailedHitsInAnalysis to true</li>
+ * </ul>
+ *
+ * Note these values can be reset after initialization.
+ */
 public abstract class BasicCounterLogConfig extends BasicLogConfig {
 
 	private boolean calculateStdDev = false;
@@ -28,12 +36,12 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 	private boolean calculateStubDelays = false;
 	private CounterStorageType counterStorage = CounterStorageType.Memory;
 	private boolean includeMapperRegexpColumn = false;
-	private Boolean failureAwareAnalysis = null;
     private Double[] reportPercentiles = { 99d };
-	private int maxNoMapperCount = 512;
-	private BaseUnit baseUnit = BaseUnit.milliseconds;
+    private int maxNoMapperCount = 512;
+    private BaseUnit baseUnit = BaseUnit.milliseconds;
     private String counterStorageDir = ".";
-    private Boolean includeFailedHitInAnalysis = null;
+    private boolean failureAwareAnalysis = true;
+    private boolean includeFailedHitsInAnalysis = true;
 
     public boolean isCalculateStdDev() {
 		return calculateStdDev;
@@ -78,8 +86,8 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
         return includeMapperRegexpColumn;
     }
 
-	public Optional<Boolean> isFailureAwareAnalysis() {
-		return Optional.of(failureAwareAnalysis);
+	public boolean isFailureAwareAnalysis() {
+		return failureAwareAnalysis;
 	}
 
 	/**
@@ -87,7 +95,7 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 	 * @param failureAwareAnalysis true when failures are part of the analysis,
      *                                null to use default per module 
 	 */
-	public void setFailureAwareAnalysis(Boolean failureAwareAnalysis) {
+	public void setFailureAwareAnalysis(boolean failureAwareAnalysis) {
 		this.failureAwareAnalysis = failureAwareAnalysis;
 	}
 
@@ -139,11 +147,11 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
      * but are not included in the analysis, such as determining avg and max values.
      * @param includeFailedHitsInAnalysis true or false, or null when defaults of reports should be used
      */
-    public void setIncludeFailedHitsInAnalysis(Boolean includeFailedHitsInAnalysis) {
-        this.includeFailedHitInAnalysis = includeFailedHitsInAnalysis;
+    public void setIncludeFailedHitsInAnalysis(boolean includeFailedHitsInAnalysis) {
+        this.includeFailedHitsInAnalysis = includeFailedHitsInAnalysis;
     }
 
-    public Optional<Boolean> isIncludeFailedHitsInAnalysis() {
-        return Optional.ofNullable(includeFailedHitInAnalysis);
+    public boolean isIncludeFailedHitsInAnalysis() {
+        return includeFailedHitsInAnalysis;
     }
 }
