@@ -26,27 +26,62 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTERS;
+
 @NotThreadSafe
 public class RequestCounterStoreHashMap implements RequestCounterStore {
 
-	private final Map<String, RequestCounter> counters = new HashMap<>();
+    public static final String OVERFLOW_COUNTER = "OVERFLOW-COUNTER";
+
+    private final Map<String, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
-	private RequestCounter totalRequestCounter;
+    private final int maxUniqueCounters;
+    private RequestCounter totalRequestCounter;
 
-	/* package private */ RequestCounterStoreHashMap(String requestCounterStoreName, String totalRequestCounterName, TimePeriod timePeriod) {
-		this.name = requestCounterStoreName;
-		this.totalRequestCounter = new RequestCounter(totalRequestCounterName, new TimeMeasurementStoreInMemory());
+	RequestCounterStoreHashMap(String storeName, String totalRequestName, TimePeriod timePeriod, int maxUniqueCounters) {
+		this.name = storeName;
+		this.totalRequestCounter = new RequestCounter(totalRequestName, new TimeMeasurementStoreInMemory());
 		this.timePeriod = timePeriod;
+		this.maxUniqueCounters = maxUniqueCounters;
 	}
 
-	public void add(String counterKey, long logTimestamp, int durationInMilliseconds) {
-		RequestCounter requestCounter = addEmptyRequestCounterIfNotExists(counterKey);
-		requestCounter.incRequests(logTimestamp, durationInMilliseconds);
-		totalRequestCounter.incRequests(logTimestamp, durationInMilliseconds);
+	RequestCounterStoreHashMap(String storeName, String totalRequestsName, int maxUniqueCounters) {
+		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD, maxUniqueCounters);
 	}
 
-	@Override
+	RequestCounterStoreHashMap(String storeName, String totalRequestsName) {
+		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD, MAX_UNIQUE_COUNTERS);
+	}
+
+	public void add(String counterKey, long timestamp, int durationInMilliseconds) {
+	    RequestCounter currentCounter;
+	    if (isOverflown()) {
+            currentCounter = determineCounterWhenOverflown(counterKey);
+        }
+	    else {
+            currentCounter = addEmptyCounterIfNotExists(counterKey);
+        }
+	    currentCounter.incRequests(timestamp, durationInMilliseconds);
+		totalRequestCounter.incRequests(timestamp, durationInMilliseconds);
+	}
+
+    private RequestCounter determineCounterWhenOverflown(String counterKey) {
+        RequestCounter currentCounter;
+        if (counters.containsKey(counterKey)) {
+            currentCounter = counters.get(counterKey);
+        }
+        else {
+            currentCounter = addEmptyCounterIfNotExists(OVERFLOW_COUNTER);
+        }
+        return currentCounter;
+    }
+
+    public boolean isOverflown() {
+        return counters.size() >= maxUniqueCounters;
+    }
+
+    @Override
 	public String toString() {
 		return "RequestCounterStoreHashMap{" +
 				"name='" + name + '\'' +
@@ -66,7 +101,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
 	@Override
-	public RequestCounter addEmptyRequestCounterIfNotExists(String counterKey) {
+	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
 		if (!counters.containsKey(counterKey)) {
 			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreInMemory());
 			counters.put(counterKey, counter);

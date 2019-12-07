@@ -33,10 +33,15 @@ import java.util.Objects;
 public class RequestCounterStorePair {
 	private final RequestCounterStore storeSuccess;
 	private final RequestCounterStore storeFailure;
+    private final RequestCounterStoreReadOnly readonlyStoreSuccess;
+    private final RequestCounterStoreReadOnly readOnlyStoreFailure;
 
-	public RequestCounterStorePair(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
+    public RequestCounterStorePair(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
 		this.storeSuccess = storeSuccess;
 		this.storeFailure = storeFailure;
+		this.readonlyStoreSuccess = new RequestCounterStoreReadOnly(storeSuccess);
+		this.readOnlyStoreFailure = new RequestCounterStoreReadOnly(storeFailure);
+
 	}
 
 	/**
@@ -44,7 +49,7 @@ public class RequestCounterStorePair {
      * @return read only request counter
 	 */
 	public RequestCounterStore getRequestCounterStoreSuccess() {
-		return new RequestCounterStoreReadOnly(storeSuccess);
+		return readonlyStoreSuccess;
 	}
 
 	/**
@@ -52,20 +57,20 @@ public class RequestCounterStorePair {
      * @return read only request counter
      */
 	public RequestCounterStore getRequestCounterStoreFailure() {
-	    return new RequestCounterStoreReadOnly(storeFailure);
+	    return readOnlyStoreFailure;
 	}
 
 	public void addSuccess(String counterKey, long timestamp, int durationInMillis) {
 		storeSuccess.add(counterKey, timestamp, durationInMillis);
-		if (!storeFailure.contains(counterKey)) {
-			storeFailure.addEmptyRequestCounterIfNotExists(counterKey);
+		if (!storeFailure.isOverflown() && !storeFailure.contains(counterKey)) {
+			storeFailure.addEmptyCounterIfNotExists(counterKey);
 		}
 	}
 
 	public void addFailure(String counterKey, long timestamp, int durationInMillis) {
 		storeFailure.add(counterKey, timestamp, durationInMillis);
-		if (!storeSuccess.contains(counterKey)) {
-			storeSuccess.addEmptyRequestCounterIfNotExists(counterKey);
+		if (!storeSuccess.isOverflown() && !storeSuccess.contains(counterKey)) {
+			storeSuccess.addEmptyCounterIfNotExists(counterKey);
 		}
 	}
 
@@ -78,9 +83,8 @@ public class RequestCounterStorePair {
     
 	@Override
 	public String toString() {
-        String sb = "RequestCounterStorePair{requestCounterStoreSuccess=" + storeSuccess +
+        return "RequestCounterStorePair{requestCounterStoreSuccess=" + storeSuccess +
                 ", requestCounterStoreFailure=" + storeFailure + '}';
-        return sb;
 	}
 
 	@Override

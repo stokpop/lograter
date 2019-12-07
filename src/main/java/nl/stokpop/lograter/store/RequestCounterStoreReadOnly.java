@@ -58,7 +58,12 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
         return store.isEmpty();
     }
 
-    public RequestCounter addEmptyRequestCounterIfNotExists(String counterKey) {
+    @Override
+    public boolean isOverflown() {
+        return store.isOverflown();
+    }
+
+    public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
         throw new UnsupportedOperationException("This RequestCounterStore is read only.");
     }
 

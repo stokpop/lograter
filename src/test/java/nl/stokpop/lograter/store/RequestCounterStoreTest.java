@@ -25,6 +25,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.util.stream.IntStream;
+
+import static nl.stokpop.lograter.store.RequestCounterStoreHashMap.OVERFLOW_COUNTER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -38,7 +41,7 @@ public class RequestCounterStoreTest {
     public void testGet() {
 
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(0, 2000);
-        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", "MyCounterStoreTotalRequestCounter", timePeriod);
+        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", "MyCounterStoreTotalRequestCounter", timePeriod, 512);
 
         String myTestCounterKey = "MyTestCounter";
         counterStore.add(myTestCounterKey, 1000, 2000);
@@ -85,6 +88,45 @@ public class RequestCounterStoreTest {
         RequestCounter myTotalRequestCounter = counterStore.getTotalRequestCounter();
         assertNotNull(myTotalRequestCounter);
         assertEquals(2, myTotalRequestCounter.getHits());
+    }
+
+    @Test
+    public void testCreateTooManyRequestCounters() {
+
+	    final int cap = 10;
+
+	    // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
+        RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
+                .newInstance("mappers-success", "myTestStore", cap);
+
+        final int max = cap + 13;
+
+        IntStream.range(0, max).forEach(i -> store.add("my-counter-" + i, i, i));
+
+        // 10 unique keys and one overflow key with 13 entries
+        assertEquals(cap + 1, store.getCounterKeys().size());
+        assertEquals(max, store.getTotalRequestCounter().getHits());
+        assertEquals(13, store.get(OVERFLOW_COUNTER).getHits());
+    }
+
+    @Test
+    public void testMax1Unique() {
+
+        final int cap = 1;
+
+        // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
+        RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
+                .newInstance("mappers-success", "myTestStore", cap);
+
+
+        store.add("my-counter-" + 1, 0, 0);
+        store.add("my-counter-" + 2, 2, 2);
+        store.add("my-counter-" + 3, 3, 3);
+
+        // 1 unique keys and one overflow key with 2 entries
+        assertEquals(2, store.getCounterKeys().size());
+        assertEquals(3, store.getTotalRequestCounter().getHits());
+        assertEquals(2, store.get(OVERFLOW_COUNTER).getHits());
     }
 
 }

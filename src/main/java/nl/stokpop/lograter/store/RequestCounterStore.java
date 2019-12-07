@@ -30,13 +30,19 @@ public interface RequestCounterStore extends Iterable<RequestCounter> {
 	RequestCounter getTotalRequestCounter();
 
 	boolean contains(String counterKey);
-	void add(String counterKey, long timestamp, int duration);
-	boolean isEmpty();
+    void add(String counterKey, long timestamp, int duration);
+    boolean isEmpty();
 
+    /**
+     * @return false when no more unique counter keys can be added
+     * and an OVERFLOW_COUNTER is present.
+     */
+    boolean isOverflown();
+    
 	/**
 	 * Add new empty RequestCounter if RequestCounter with counterKey does not exist.
 	 * @param counterKey the name of the RequestCounter
 	 * @return the new or existing request counter.
 	 */
-	RequestCounter addEmptyRequestCounterIfNotExists(String counterKey);
+	RequestCounter addEmptyCounterIfNotExists(String counterKey);
 }

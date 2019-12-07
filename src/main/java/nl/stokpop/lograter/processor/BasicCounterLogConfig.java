@@ -37,7 +37,7 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
 	private CounterStorageType counterStorage = CounterStorageType.Memory;
 	private boolean includeMapperRegexpColumn = false;
     private Double[] reportPercentiles = { 99d };
-    private int maxNoMapperCount = 512;
+    private int maxUniqueRequests = 512;
     private BaseUnit baseUnit = BaseUnit.milliseconds;
     private String counterStorageDir = ".";
     private boolean failureAwareAnalysis = true;
@@ -117,12 +117,12 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
         this.reportPercentiles = reportPercentiles;
     }
     
-    public int getMaxNoMapperCount() {
-        return maxNoMapperCount;
+    public int getMaxUniqueRequests() {
+        return maxUniqueRequests;
     }
 
-    public void setMaxNoMapperCount(int maxNoMapperCount) {
-        this.maxNoMapperCount = maxNoMapperCount;
+    public void setMaxUniqueRequests(int maxUniqueRequests) {
+        this.maxUniqueRequests = maxUniqueRequests;
     }
 
     public BaseUnit getBaseUnit() {

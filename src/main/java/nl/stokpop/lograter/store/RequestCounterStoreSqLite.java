@@ -46,7 +46,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	private RequestCounter totalRequestCounter;
 	private TimePeriod timePeriod;
 
-	public RequestCounterStoreSqLite(String storeName, String totalCounterName, Connection con, TimePeriod timePeriod) {
+	public RequestCounterStoreSqLite(String storeName, String totalCounterName, Connection con, TimePeriod timePeriod, int maxUniqueRequests) {
 		this.name = storeName;
 		this.timePeriod = timePeriod;
 		if (con == null) {
@@ -67,25 +67,22 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
 		long totalCounterId;
 
-		PreparedStatement queryCount = null;
-		ResultSet resultSet = null;
 		try {
-			queryCount = con.prepareStatement("select id from counter where counter_store_id = ? and is_total_counter = ?");
-			queryCount.setLong(1, counterStoreId);
-			queryCount.setBoolean(2, true);
-			ResultSet resultset = queryCount.executeQuery();
-			if (resultset.next()) {
-				long foundId = resultset.getLong(1);
-				log.debug("Found id {} for total counter: {} for counter store: {}", foundId, totalCounterName, name);
-				totalCounterId = foundId;
-			}
-			else {
-				log.debug("Total counter not found: {} for counter store: {}. Creating new name in database.", totalCounterName, name);
-				totalCounterId = insertTotalCounter(con, counterStoreId, totalCounterName);
-			}
+            try (PreparedStatement queryCount = con.prepareStatement("select id from counter where counter_store_id = ? and is_total_counter = ?")) {
+                queryCount.setLong(1, counterStoreId);
+                queryCount.setBoolean(2, true);
+                try (ResultSet resultset = queryCount.executeQuery()) {
+                    if (resultset.next()) {
+                        long foundId = resultset.getLong(1);
+                        log.debug("Found id {} for total counter: {} for counter store: {}", foundId, totalCounterName, name);
+                        totalCounterId = foundId;
+                    } else {
+                        log.debug("Total counter not found: {} for counter store: {}. Creating new name in database.", totalCounterName, name);
+                        totalCounterId = insertTotalCounter(con, counterStoreId, totalCounterName);
+                    }
+                }
+            }
 		} finally {
-			if (resultSet != null) resultSet.close();
-			if (queryCount != null) queryCount.close();
 			con.commit();
 		}
 
@@ -96,25 +93,22 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
 	private static Map<String, RequestCounter> fetchCountersForCounterStoreFromDb(Connection con, long dbCounterStoreId, TimePeriod timePeriod) {
 		Map<String, RequestCounter> counters = new HashMap<>();
-		PreparedStatement query = null;
-		ResultSet resultSet = null;
 		try {
 			try {
-				query = con.prepareStatement("select name, id from counter where counter_store_id = ? and is_total_counter = ?");
-				query.setLong(1, dbCounterStoreId);
-				query.setBoolean(2, false);
-				resultSet = query.executeQuery();
-				while (resultSet.next()) {
-					String counterKey = resultSet.getString(1);
-					long counterId = resultSet.getLong(2);
-					log.debug("Found id {} for counter: {}", counterId, counterKey);
-					TimeMeasurementStore tmStore =  new TimeMeasurementStoreSqLite(counterKey, counterId, con, timePeriod);
-					counters.put(counterKey, new RequestCounter(counterKey, tmStore));
-				}		
-		
+                try (PreparedStatement query = con.prepareStatement("select name, id from counter where counter_store_id = ? and is_total_counter = ?")) {
+                    query.setLong(1, dbCounterStoreId);
+                    query.setBoolean(2, false);
+                    try (ResultSet resultSet = query.executeQuery()) {
+                        while (resultSet.next()) {
+                            String counterKey = resultSet.getString(1);
+                            long counterId = resultSet.getLong(2);
+                            log.debug("Found id {} for counter: {}", counterId, counterKey);
+                            TimeMeasurementStore tmStore = new TimeMeasurementStoreSqLite(counterKey, counterId, con, timePeriod);
+                            counters.put(counterKey, new RequestCounter(counterKey, tmStore));
+                        }
+                    }
+                }
 			} finally {
-				if (resultSet != null) resultSet.close();
-				if (query != null) query.close();
 				con.commit();
 			}
 		} catch (SQLException e) {
@@ -125,22 +119,19 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
 	private static Map<String, Long> fillCounterNameToDbCounterIdMapper(Connection con, long counterStoreId) throws SQLException {
 		Map<String, Long> mapper = new HashMap<>();
-		PreparedStatement query = null;
-		ResultSet resultSet = null;
 		try {
-			query = con.prepareStatement("select name, id from counter where counter_store_id = ?");
-			query.setLong(1, counterStoreId);
-			resultSet = query.executeQuery();
-			while (resultSet.next()) {
-				String name = resultSet.getString(1);
-				long counterId = resultSet.getLong(2);
-				log.debug("Found id {} for counter: {}", counterId, name);
-				mapper.put(name, counterId);
-			}		
-	
+            try (PreparedStatement query = con.prepareStatement("select name, id from counter where counter_store_id = ?")) {
+                query.setLong(1, counterStoreId);
+                try (ResultSet resultSet = query.executeQuery()) {
+                    while (resultSet.next()) {
+                        String name = resultSet.getString(1);
+                        long counterId = resultSet.getLong(2);
+                        log.debug("Found id {} for counter: {}", counterId, name);
+                        mapper.put(name, counterId);
+                    }
+                }
+            }
 		} finally {
-			if (resultSet != null) resultSet.close();
-			if (query != null) query.close();			
 			con.commit();
 		}		
 		return mapper;
@@ -149,24 +140,21 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	private long fetchCounterStoreIdOrCreateNewOne() throws SQLException {
 		int id;
 
-		PreparedStatement queryCount = null;
-		ResultSet resultset = null;
 		try {
-			queryCount = con.prepareStatement("select id from counter_store where name = ?");
-			queryCount.setString(1, name);
-			resultset = queryCount.executeQuery();
-			if (resultset.next()) {
-				int foundId = resultset.getInt(1);
-				log.debug("Found id {} for counter_store: {}", foundId, name);
-				id = foundId;
-			}
-			else {
-				log.debug("Counter store not found: {}. Creating new name in database.", name);
-				id = createNewNameInDb();
-			}
+            try (PreparedStatement queryCount = con.prepareStatement("select id from counter_store where name = ?")) {
+                queryCount.setString(1, name);
+                try (ResultSet resultset = queryCount.executeQuery()) {
+                    if (resultset.next()) {
+                        int foundId = resultset.getInt(1);
+                        log.debug("Found id {} for counter_store: {}", foundId, name);
+                        id = foundId;
+                    } else {
+                        log.debug("Counter store not found: {}. Creating new name in database.", name);
+                        id = createNewNameInDb();
+                    }
+                }
+            }
 		} finally {
-			if (resultset != null) resultset.close();
-			if (queryCount != null) queryCount.close();
 			con.commit();
 		}
 		return id;
@@ -177,32 +165,28 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		
 		int id;
 
-		PreparedStatement statement = null;
-		ResultSet resultSet = null;
 		try {
 			String sql = "insert into counter_store(name) values (?)";
-			statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, name);
-			int result = statement.executeUpdate();
-			
-			if (result != 1) {
-				throw new LogRaterException("Insert failed:" + sql + " for name: " + name);
-			}
-			
-			resultSet = statement.getGeneratedKeys();
-			resultSet.next();
-			id = resultSet.getInt(1);
-		
+            try (PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                statement.setString(1, name);
+                int result = statement.executeUpdate();
+
+                if (result != 1) {
+                    throw new LogRaterException("Insert failed:" + sql + " for name: " + name);
+                }
+                try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                    resultSet.next();
+                    id = resultSet.getInt(1);
+                }
+            }
 		} finally {
-			if (statement != null) statement.close();
-			if (resultSet != null) resultSet.close();
 			con.commit();
 		}
 		return id;
 	}
 
 	public void add(String counterKey, long logTimestamp, int durationInMilliseconds) {
-		RequestCounter counter = addEmptyRequestCounterIfNotExists(counterKey);
+		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
 		counter.incRequests(logTimestamp, durationInMilliseconds);
 		totalRequestCounter.incRequests(logTimestamp, durationInMilliseconds);
 	}
@@ -221,28 +205,26 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		
 		long id;
 
-		PreparedStatement statement = null;
-		ResultSet resultSet = null;
 		try {
 			String sql = "insert into counter(name, counter_store_id, is_total_counter) values (?, ?, ?)";
-			statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, counterKey);
-			statement.setLong(2, dbCounterStoreId);
-			statement.setBoolean(3, isTotalCounter);
+            try (PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                statement.setString(1, counterKey);
+                statement.setLong(2, dbCounterStoreId);
+                statement.setBoolean(3, isTotalCounter);
 
-			int result = statement.executeUpdate();
+                int result = statement.executeUpdate();
 
-			if (result != 1) {
-				throw new LogRaterException("Insert failed:" + sql + " for name: " + counterKey);
-			}
+                if (result != 1) {
+                    throw new LogRaterException("Insert failed:" + sql + " for name: " + counterKey);
+                }
 
-			resultSet = statement.getGeneratedKeys();
-			resultSet.next();
-			id = resultSet.getLong(1);
+                try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                    resultSet.next();
+                    id = resultSet.getLong(1);
+                }
+            }
 
 		} finally {
-			if (resultSet != null) resultSet.close();
-			if (statement != null) statement.close();
 			con.commit();
 		}
 
@@ -263,8 +245,13 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		return counterNameToDbCounterIdMapper.isEmpty();
 	}
 
-	@Override
-	public RequestCounter addEmptyRequestCounterIfNotExists(String counterKey) {
+    @Override
+    public boolean isOverflown() {
+        return false;
+    }
+
+    @Override
+	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
 		try {
 			if (!counterNameToDbCounterIdMapper.containsKey(counterKey)) {
 				long dbCounterId = insertCounter(con, dbCounterStoreId, counterKey);

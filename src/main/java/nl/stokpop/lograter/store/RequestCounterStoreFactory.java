@@ -25,11 +25,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.sql.Connection;
 
+import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTERS;
+
 public class RequestCounterStoreFactory {
 
-	private final static Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
+    private final static Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
 
-	private CounterStorageType type;
+    private CounterStorageType type;
 	private Connection con;
 	private File storageRootDir;
 
@@ -56,32 +58,32 @@ public class RequestCounterStoreFactory {
 	}
 
 	public RequestCounterStoreFactory(CounterStorageType type) {
-		this(type, TimePeriod.createExcludingEndTime(TimePeriod.MIN, TimePeriod.MAX));
+		this(type, TimePeriod.MAX_TIME_PERIOD);
 	}
 
 	public RequestCounterStoreFactory(CounterStorageType type, File storageRootDir) {
-        this(type, TimePeriod.createExcludingEndTime(TimePeriod.MIN, TimePeriod.MAX), storageRootDir);
+        this(type, TimePeriod.MAX_TIME_PERIOD, storageRootDir);
     }
 
-	public RequestCounterStore newInstance(String storeName, String totalRequestCounterName) {
-		switch (type) {
+    public RequestCounterStore newInstance(String storeName, String totalRequestsName, int maxUniqueRequests) {
+	    switch (type) {
 			case Memory:
-				return new RequestCounterStoreHashMap(storeName, totalRequestCounterName, timePeriod);
+				return new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod, maxUniqueRequests);
 			case Database:
-				return new RequestCounterStoreSqLite(storeName, totalRequestCounterName, con, timePeriod);
+				return new RequestCounterStoreSqLite(storeName, totalRequestsName, con, timePeriod, maxUniqueRequests);
 			case ExternalSort:
 			    if (storageRootDir == null) {
 			        throw new LogRaterException("Unable to create an external sort request counter without supplying a storage dir.");
                 }
-				return new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestCounterName, timePeriod);
+				return new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestsName, timePeriod);
 			default:
 				log.warn("No valid measurement store option found: {}, using in memory store.", type);
-				return new RequestCounterStoreHashMap(storeName, totalRequestCounterName, timePeriod);
+				return new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod, maxUniqueRequests);
 		}
 	}
 
 	public RequestCounterStore newInstance(String storeName) {
-		return newInstance(storeName, storeName + "-total");
+		return newInstance(storeName, storeName + "-total", MAX_UNIQUE_COUNTERS);
 	}
 
 }

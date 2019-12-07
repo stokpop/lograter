@@ -224,7 +224,7 @@ public class LogRater {
 		config.setCalculateStdDev(commandBasic.reportSD);
         config.setCalculateStubDelays(commandBasic.reportStubDelays);
         config.setReportPercentiles(commandBasic.reportPercentiles == null ? new Double[]{} : commandBasic.reportPercentiles.toArray(new Double[0]));
-        config.setMaxNoMapperCount(commandBasic.maxNoMapperCount);
+        config.setMaxUniqueRequests(commandBasic.maxUniqueCounters);
         // only override the default values of failure awareness if explicitly set
         if (commandBasic.failureAwareAnalysis != null) { config.setFailureAwareAnalysis(commandBasic.failureAwareAnalysis); }
         if (commandBasic.includeFailedHitsInAnalysis != null) { config.setIncludeFailedHitsInAnalysis(commandBasic.includeFailedHitsInAnalysis); }

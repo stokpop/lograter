@@ -30,24 +30,24 @@ import java.util.Map;
 @NotThreadSafe
 public class RequestCounterStoreExternalSort implements RequestCounterStore {
 
-	private static final int BUFFER_SIZE = 100000;
+	private static final int BUFFER_SIZE = 100_000;
 	private final Map<String, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
 	private RequestCounter totalRequestCounter;
 	private File rootStorageDir;
 
-	/* package private */ RequestCounterStoreExternalSort(File rootStorageDir, String storeName, String totalRequestCounterName, TimePeriod timePeriod) {
+	RequestCounterStoreExternalSort(File rootStorageDir, String storeName, String totalRequestCounterName, TimePeriod timePeriod) {
 		this.name = storeName;
 		this.rootStorageDir = rootStorageDir;
 		this.totalRequestCounter = new RequestCounter(totalRequestCounterName, new TimeMeasurementStoreToFiles(this.rootStorageDir, this.name, totalRequestCounterName, BUFFER_SIZE));
 		this.timePeriod = timePeriod;
 	}
 	
-	public void add(String counterKey, long logTimestamp, int durationInMilliseconds) {
-		RequestCounter counter = addEmptyRequestCounterIfNotExists(counterKey);
-		counter.incRequests(logTimestamp, durationInMilliseconds);
-		totalRequestCounter.incRequests(logTimestamp, durationInMilliseconds);
+	public void add(String counterKey, long timestamp, int durationMillis) {
+		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
+		counter.incRequests(timestamp, durationMillis);
+		totalRequestCounter.incRequests(timestamp, durationMillis);
 	}
 
 	@Override
@@ -69,8 +69,13 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 		return counters.isEmpty();
 	}
 
-	@Override
-	public RequestCounter addEmptyRequestCounterIfNotExists(String counterKey) {
+    @Override
+    public boolean isOverflown() {
+        return false;
+    }
+
+    @Override
+	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
 		if (!counters.containsKey(counterKey)) {
 			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreToFiles(rootStorageDir, name, counterKey, BUFFER_SIZE));
 			counters.put(counterKey, counter);
