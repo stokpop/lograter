@@ -26,7 +26,7 @@ public class CsvFileParserTest {
     }
 
     @Test
-    public void detectG1Test() {
+    public void parseG1Test() {
         List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-G1.log")).collect(Collectors.toList());
 
@@ -40,7 +40,7 @@ public class CsvFileParserTest {
     }
 
     @Test
-    public void detectMarkSweepCompactTest() {
+    public void parseMarkSweepCompactTest() {
         List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log")).collect(Collectors.toList());
 
@@ -48,7 +48,15 @@ public class CsvFileParserTest {
     }
 
     @Test
-    public void detectParallelTest() {
+    public void parseMarkSweepCompactJava10Test() {
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
+                .parse(getFile("jmx/jvm-heap-metrics-mark-sweep-compact-java-10.log")).collect(Collectors.toList());
+
+        assertEquals(10, memoryMetrics.size());
+    }
+
+    @Test
+    public void parseParallelTest() {
         List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-parallel.log")).collect(Collectors.toList());
 

@@ -26,6 +26,11 @@ public class GcAlgorithmDetectorTest {
     }
 
     @Test
+    public void detectMarkSweepCompactJava10Test() {
+        assertEquals(MARK_SWEEP_COMPACT_JAVA_10, GcAlgorithmDetector.INSTANCE.detect(getFile("jmx/jvm-heap-metrics-mark-sweep-compact-java-10.log")));
+    }
+
+    @Test
     public void detectParallelTest() {
         assertEquals(PARALLEL, GcAlgorithmDetector.INSTANCE.detect(getFile("jmx/jvm-heap-metrics-parallel.log")));
     }
