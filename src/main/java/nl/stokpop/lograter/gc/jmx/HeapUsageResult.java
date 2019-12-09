@@ -7,11 +7,11 @@ import java.util.List;
 public enum HeapUsageResult {
     INSTANCE;
 
-    public double calculateGcOverheadPercentage(List<GcMetrics> memoryMetrics, TimePeriod timePeriod) {
+    public double calculateGcOverheadPercentage(List<MemoryMetrics> memoryMetrics, TimePeriod timePeriod) {
         double totalGcDuration = memoryMetrics
                 .stream()
                 .filter(metrics -> timePeriod.isWithinTimePeriod(metrics.getTimestamp()))
-                .map(GcMetrics::getGcDurationMs)
+                .map(MemoryMetrics::getGcDurationMs)
                 .mapToDouble(Double::doubleValue)
                 .sum();
 

@@ -1,6 +1,6 @@
 package nl.stokpop.lograter.gc.jmx.parse;
 
-import nl.stokpop.lograter.gc.jmx.GcMetrics;
+import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class JmxMemoryParserTest {
     @Test
     public void getMemoryMetricsEntriesFromFileTes() {
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(1572875922000L, 1572875950000L);
-        List<GcMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFile(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log"), timePeriod);
+        List<MemoryMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFile(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log"), timePeriod);
 
         assertEquals(9, memoryMetrics.size());
     }
@@ -26,7 +26,7 @@ public class JmxMemoryParserTest {
         TimePeriod timePeriod = TimePeriod.MAX_TIME_PERIOD;
         List<File> files = Arrays.asList(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log"), getFile("jmx/jvm-heap-metrics-G1.log"));
 
-        List<GcMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFiles(files, timePeriod);
+        List<MemoryMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFiles(files, timePeriod);
 
         assertEquals(14, memoryMetrics.size());
     }

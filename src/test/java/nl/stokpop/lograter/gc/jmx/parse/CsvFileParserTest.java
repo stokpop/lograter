@@ -1,6 +1,6 @@
 package nl.stokpop.lograter.gc.jmx.parse;
 
-import nl.stokpop.lograter.gc.jmx.GcMetrics;
+import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
 import org.junit.Test;
 
 import java.io.File;
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class CsvFileParserTest {
     @Test
     public void parseConcurrentMarkSweepTest() {
-        List<GcMetrics> memoryMetrics = CsvFileParser.INSTANCE
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-concurrent-mark-sweep.log")).collect(Collectors.toList());
 
         assertEquals(5, memoryMetrics.size());
@@ -27,7 +27,7 @@ public class CsvFileParserTest {
 
     @Test
     public void detectG1Test() {
-        List<GcMetrics> memoryMetrics = CsvFileParser.INSTANCE
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-G1.log")).collect(Collectors.toList());
 
         assertEquals(4, memoryMetrics.size());
@@ -41,7 +41,7 @@ public class CsvFileParserTest {
 
     @Test
     public void detectMarkSweepCompactTest() {
-        List<GcMetrics> memoryMetrics = CsvFileParser.INSTANCE
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log")).collect(Collectors.toList());
 
         assertEquals(10, memoryMetrics.size());
@@ -49,7 +49,7 @@ public class CsvFileParserTest {
 
     @Test
     public void detectParallelTest() {
-        List<GcMetrics> memoryMetrics = CsvFileParser.INSTANCE
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
                 .parse(getFile("jmx/jvm-heap-metrics-parallel.log")).collect(Collectors.toList());
 
         assertEquals(11, memoryMetrics.size());

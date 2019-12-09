@@ -3,7 +3,7 @@ package nl.stokpop.lograter.gc.jmx.parse;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.extern.slf4j.Slf4j;
 import nl.stokpop.lograter.gc.GcLogParseException;
-import nl.stokpop.lograter.gc.jmx.GcMetrics;
+import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
 import nl.stokpop.lograter.gc.jmx.algorithm.GcAlgorithm;
 
 import java.io.File;
@@ -18,12 +18,12 @@ public enum CsvFileParser {
 
     private static final char SEPARATOR = ',';
 
-    public Stream<GcMetrics> parse(File file) {
+    public Stream<MemoryMetrics> parse(File file) {
         Reader fileReader = getFileReader(file);
 
         GcAlgorithm gcAlgorithm = GcAlgorithmDetector.INSTANCE.detect(file);
 
-        Stream<GcMetrics> jMXMemoryMetrics =
+        Stream<MemoryMetrics> jMXMemoryMetrics =
                 new CsvToBeanBuilder(fileReader)
                         .withType(gcAlgorithm.getBean())
                         .withIgnoreLeadingWhiteSpace(true)

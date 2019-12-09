@@ -2,7 +2,7 @@ package nl.stokpop.lograter.gc.jmx.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.*;
-import nl.stokpop.lograter.gc.jmx.GcMetrics;
+import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
@@ -10,7 +10,7 @@ import nl.stokpop.lograter.util.time.DateUtils;
 @AllArgsConstructor
 @Getter
 @Setter
-public class MemoryG1 implements GcMetrics {
+public class MemoryG1 implements MemoryMetrics {
     //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,G1YoungGeneration,G1OldGeneration,Metaspace,G1SurvivorSpace,CompressedClassSpace,G1EdenSpace,G1OldGen,CodeCache
     @CsvBindByName
     private String timestamp; //yyyy-MM-dd HH:mm:ss.SSS e.g. 2019-10-22T11:43:40.590
@@ -46,8 +46,38 @@ public class MemoryG1 implements GcMetrics {
     }
 
     @Override
+    public long getEdenUsedBytes() {
+        return g1EdenSpace;
+    }
+
+    @Override
+    public long getSurvivorUsedBytes() {
+        return g1SurvivorSpace;
+    }
+
+    @Override
+    public long getTenuredUsedBytes() {
+        return g1OldGen;
+    }
+
+    @Override
     public long getOldGenerationUsedBytes() {
         return g1OldGen;
+    }
+
+    @Override
+    public long getMetaSpaceUsedBytes() {
+        return metaspace;
+    }
+
+    @Override
+    public long getCompressedClassSpaceUsedBytes() {
+        return compressedClassSpace;
+    }
+
+    @Override
+    public long getCodeCacheUsedBytes() {
+        return codeCache;
     }
 
     @Override

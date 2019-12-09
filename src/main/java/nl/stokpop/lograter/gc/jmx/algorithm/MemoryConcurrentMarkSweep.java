@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nl.stokpop.lograter.gc.jmx.GcMetrics;
+import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MemoryConcurrentMarkSweep implements GcMetrics {
+public class MemoryConcurrentMarkSweep implements MemoryMetrics {
     //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,ParNew,ConcurrentMarkSweep,Metaspace,CompressedClassSpace,CodeCache,ParEdenSpace,ParSurvivorSpace,CMSOldGen
     @CsvBindByName
     private String timestamp;
@@ -48,8 +48,38 @@ public class MemoryConcurrentMarkSweep implements GcMetrics {
     }
 
     @Override
+    public long getEdenUsedBytes() {
+        return parEdenSpace;
+    }
+
+    @Override
+    public long getSurvivorUsedBytes() {
+        return parSurvivorSpace;
+    }
+
+    @Override
+    public long getTenuredUsedBytes() {
+        return cMSOldGen;
+    }
+
+    @Override
     public long getOldGenerationUsedBytes() {
         return cMSOldGen;
+    }
+
+    @Override
+    public long getMetaSpaceUsedBytes() {
+        return metaspace;
+    }
+
+    @Override
+    public long getCompressedClassSpaceUsedBytes() {
+        return compressedClassSpace;
+    }
+
+    @Override
+    public long getCodeCacheUsedBytes() {
+        return codeCache;
     }
 
     @Override
