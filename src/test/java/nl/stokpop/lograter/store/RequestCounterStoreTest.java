@@ -21,9 +21,7 @@ import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.DatabaseBootstrap;
 import nl.stokpop.lograter.util.DatabaseBootstrapTest;
 import nl.stokpop.lograter.util.time.TimePeriod;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.util.stream.IntStream;
 
@@ -33,9 +31,6 @@ import static org.junit.Assert.assertNotNull;
 
 @NotThreadSafe
 public class RequestCounterStoreTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
     public void testGet() {
@@ -128,5 +123,4 @@ public class RequestCounterStoreTest {
         assertEquals(3, store.getTotalRequestCounter().getHits());
         assertEquals(2, store.get(OVERFLOW_COUNTER).getHits());
     }
-
 }
