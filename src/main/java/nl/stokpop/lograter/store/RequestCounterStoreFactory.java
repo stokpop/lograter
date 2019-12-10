@@ -65,21 +65,27 @@ public class RequestCounterStoreFactory {
         this(type, TimePeriod.MAX_TIME_PERIOD, storageRootDir);
     }
 
-    public RequestCounterStore newInstance(String storeName, String totalRequestsName, int maxUniqueRequests) {
+    public RequestCounterStore newInstance(String storeName, String totalRequestsName, int maxUniqueCounters) {
+	    RequestCounterStore store;
 	    switch (type) {
 			case Memory:
-				return new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod, maxUniqueRequests);
+				store = new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod);
+				break;
 			case Database:
-				return new RequestCounterStoreSqLite(storeName, totalRequestsName, con, timePeriod, maxUniqueRequests);
+				store = new RequestCounterStoreSqLite(storeName, totalRequestsName, con, timePeriod);
+				break;
 			case ExternalSort:
 			    if (storageRootDir == null) {
 			        throw new LogRaterException("Unable to create an external sort request counter without supplying a storage dir.");
                 }
-				return new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestsName, timePeriod);
+				store = new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestsName, timePeriod);
+			    break;
 			default:
 				log.warn("No valid measurement store option found: {}, using in memory store.", type);
-				return new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod, maxUniqueRequests);
+				store = new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod);
 		}
+		// always limit the max number of requests to avoid memory issues and slow behaviour
+		return new RequestCounterStoreMaxCounters(store, maxUniqueCounters);
 	}
 
 	public RequestCounterStore newInstance(String storeName) {

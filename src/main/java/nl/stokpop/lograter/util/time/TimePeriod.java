@@ -202,13 +202,14 @@ public final class TimePeriod {
 
     public String getHumanReadableDuration() {
         if (this.startTime == NOT_SET) {
-            return "No start time set, unknown duration: " + toSimpleString();
+            return "unknown";
         }
         if (this.endTime == NOT_SET) {
-            return "No end time set, unknown duration: " + toSimpleString();
+            return "unknown";
         }
         if (durationInMillis > Integer.MAX_VALUE) {
-            return "Longer than " + daysHoursMinutes.print(MAX_PERIOD_FOR_INT) + " (max printable period in Joda time): " + toSimpleString();
+            // this is longer than Joda time can print
+            return "very long";
         }
         else {
             Period period = new Period(durationInMillis);

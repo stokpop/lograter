@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.report.text;
 
+import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
 import nl.stokpop.lograter.analysis.FailureAware;
 import nl.stokpop.lograter.analysis.HistogramData;
@@ -77,7 +78,9 @@ abstract class LogCounterTextReport extends LogTextReport {
 		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
 			String counterKey = successCounter.getCounterKey();
 			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
-
+            if (failureCounter == null) {
+                throw new LogRaterException("No failure counter found for " + counterKey + " in " + counterStorePair);
+            }
 			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
 
 			if (!myAnalyser.hasAnyHits()) {

@@ -68,12 +68,7 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	public boolean isEmpty() {
 		return counters.isEmpty();
 	}
-
-    @Override
-    public boolean isOverflown() {
-        return false;
-    }
-
+	
     @Override
 	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
 		if (!counters.containsKey(counterKey)) {

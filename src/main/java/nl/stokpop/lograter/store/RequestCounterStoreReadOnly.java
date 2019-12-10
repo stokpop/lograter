@@ -57,12 +57,7 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
     public boolean isEmpty() {
         return store.isEmpty();
     }
-
-    @Override
-    public boolean isOverflown() {
-        return store.isOverflown();
-    }
-
+    
     public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
         throw new UnsupportedOperationException("This RequestCounterStore is read only.");
     }
@@ -77,5 +72,15 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
 
     public Spliterator<RequestCounter> spliterator() {
         return store.spliterator();
+    }
+
+    @Override
+    public boolean isOverflowing() {
+        return store.isOverflowing();
+    }
+
+    @Override
+    public String toString() {
+        return "RequestCounterStoreReadOnly{" + "store=" + store + '}';
     }
 }

@@ -27,7 +27,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.util.stream.IntStream;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreHashMap.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -41,7 +41,7 @@ public class RequestCounterStoreTest {
     public void testGet() {
 
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(0, 2000);
-        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", "MyCounterStoreTotalRequestCounter", timePeriod, 512);
+        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", "MyCounterStoreTotalRequestCounter", timePeriod);
 
         String myTestCounterKey = "MyTestCounter";
         counterStore.add(myTestCounterKey, 1000, 2000);

@@ -51,7 +51,7 @@ public class LineMapperUtils {
             AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields());
             AccessLogUrlMapperProcessor processor =
                     new AccessLogUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
-                            config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits(), config.getMaxUniqueRequests());
+                            config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());
             processors.add(processor);
         }
         return processors;

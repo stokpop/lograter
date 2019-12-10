@@ -26,59 +26,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTERS;
-
 @NotThreadSafe
 public class RequestCounterStoreHashMap implements RequestCounterStore {
-
-    public static final String OVERFLOW_COUNTER = "OVERFLOW-COUNTER";
 
     private final Map<String, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
-    private final int maxUniqueCounters;
     private RequestCounter totalRequestCounter;
 
-	RequestCounterStoreHashMap(String storeName, String totalRequestName, TimePeriod timePeriod, int maxUniqueCounters) {
+	RequestCounterStoreHashMap(String storeName, String totalRequestName, TimePeriod timePeriod) {
 		this.name = storeName;
 		this.totalRequestCounter = new RequestCounter(totalRequestName, new TimeMeasurementStoreInMemory());
 		this.timePeriod = timePeriod;
-		this.maxUniqueCounters = maxUniqueCounters;
-	}
-
-	RequestCounterStoreHashMap(String storeName, String totalRequestsName, int maxUniqueCounters) {
-		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD, maxUniqueCounters);
 	}
 
 	RequestCounterStoreHashMap(String storeName, String totalRequestsName) {
-		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD, MAX_UNIQUE_COUNTERS);
+		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD);
 	}
 
-	public void add(String counterKey, long timestamp, int durationInMilliseconds) {
-	    RequestCounter currentCounter;
-	    if (isOverflown()) {
-            currentCounter = determineCounterWhenOverflown(counterKey);
-        }
-	    else {
-            currentCounter = addEmptyCounterIfNotExists(counterKey);
-        }
-	    currentCounter.incRequests(timestamp, durationInMilliseconds);
-		totalRequestCounter.incRequests(timestamp, durationInMilliseconds);
-	}
-
-    private RequestCounter determineCounterWhenOverflown(String counterKey) {
-        RequestCounter currentCounter;
-        if (counters.containsKey(counterKey)) {
-            currentCounter = counters.get(counterKey);
-        }
-        else {
-            currentCounter = addEmptyCounterIfNotExists(OVERFLOW_COUNTER);
-        }
-        return currentCounter;
-    }
-
-    public boolean isOverflown() {
-        return counters.size() >= maxUniqueCounters;
+    public void add(String counterKey, long logTimestamp, int durationMillis) {
+        RequestCounter requestCounter = addEmptyCounterIfNotExists(counterKey);
+        requestCounter.incRequests(logTimestamp, durationMillis);
+        totalRequestCounter.incRequests(logTimestamp, durationMillis);
     }
 
     @Override

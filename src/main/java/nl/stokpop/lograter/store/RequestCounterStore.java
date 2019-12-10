@@ -37,7 +37,7 @@ public interface RequestCounterStore extends Iterable<RequestCounter> {
      * @return false when no more unique counter keys can be added
      * and an OVERFLOW_COUNTER is present.
      */
-    boolean isOverflown();
+    default boolean isOverflowing() { return false; }
     
 	/**
 	 * Add new empty RequestCounter if RequestCounter with counterKey does not exist.

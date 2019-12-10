@@ -78,4 +78,9 @@ public class LineMapperSection {
     public int size() {
         return lineMaps.size();
     }
+
+    @Override
+    public String toString() {
+        return "LineMapperSection{" + "name='" + name + '\'' + '}';
+    }
 }

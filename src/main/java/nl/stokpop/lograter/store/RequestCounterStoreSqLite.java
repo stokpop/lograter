@@ -38,15 +38,15 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestCounterStoreSqLite.class);
 	
-	private String name;
-	private Connection con;
-	private long dbCounterStoreId;
-	private Map<String, Long> counterNameToDbCounterIdMapper;
-	private Map<String, RequestCounter> cachedCounters;
-	private RequestCounter totalRequestCounter;
-	private TimePeriod timePeriod;
+    private final String name;
+	private final Connection con;
+	private final long dbCounterStoreId;
+	private final Map<String, Long> counterNameToDbCounterIdMapper;
+	private final Map<String, RequestCounter> cachedCounters;
+	private final RequestCounter totalRequestCounter;
+	private final TimePeriod timePeriod;
 
-	public RequestCounterStoreSqLite(String storeName, String totalCounterName, Connection con, TimePeriod timePeriod, int maxUniqueRequests) {
+	public RequestCounterStoreSqLite(String storeName, String totalCounterName, Connection con, TimePeriod timePeriod) {
 		this.name = storeName;
 		this.timePeriod = timePeriod;
 		if (con == null) {
@@ -185,10 +185,10 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		return id;
 	}
 
-	public void add(String counterKey, long logTimestamp, int durationInMilliseconds) {
+	public void add(String counterKey, long logTimestamp, int durationMillis) {
 		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
-		counter.incRequests(logTimestamp, durationInMilliseconds);
-		totalRequestCounter.incRequests(logTimestamp, durationInMilliseconds);
+		counter.incRequests(logTimestamp, durationMillis);
+		totalRequestCounter.incRequests(logTimestamp, durationMillis);
 	}
 
 	private long insertCounter(Connection con, long dbCounterStoreId, String counterKey) throws SQLException {
@@ -242,13 +242,8 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
 	@Override
 	public boolean isEmpty() {
-		return counterNameToDbCounterIdMapper.isEmpty();
+		return cachedCounters.isEmpty();
 	}
-
-    @Override
-    public boolean isOverflown() {
-        return false;
-    }
 
     @Override
 	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
@@ -285,7 +280,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 
     @Override
     public List<String> getCounterKeys() {
-        return new ArrayList<>(counterNameToDbCounterIdMapper.keySet());
+        return new ArrayList<>(cachedCounters.keySet());
     }
 
 	@Override

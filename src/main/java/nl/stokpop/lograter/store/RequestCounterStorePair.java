@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -28,6 +29,11 @@ import java.util.Objects;
  * To avoid null pointer exceptions: add successes and failures via the RequestCounterStorePair only!
  *
  * E.g. make methods to make all needed functionality available without exposing mutable internals.
+ *
+ * If RequestCounterStoreMaxCounters types are given, both success and failure store should be of
+ * same type and have the same max counters value for this store pair to work correctly.
+ * A LogRaterException is thrown when this rule is violated.
+ *
  */
 @NotThreadSafe
 public class RequestCounterStorePair {
@@ -37,14 +43,31 @@ public class RequestCounterStorePair {
     private final RequestCounterStoreReadOnly readOnlyStoreFailure;
 
     public RequestCounterStorePair(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
-		this.storeSuccess = storeSuccess;
+        this.storeSuccess = storeSuccess;
 		this.storeFailure = storeFailure;
 		this.readonlyStoreSuccess = new RequestCounterStoreReadOnly(storeSuccess);
 		this.readOnlyStoreFailure = new RequestCounterStoreReadOnly(storeFailure);
 
-	}
+        sanityCheckMaxCountersThrowsException(storeSuccess, storeFailure);
 
-	/**
+    }
+
+    private void sanityCheckMaxCountersThrowsException(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
+        if (storeSuccess instanceof RequestCounterStoreMaxCounters) {
+            if (!(storeFailure instanceof RequestCounterStoreMaxCounters)) {
+                String msg = String.format("Both counter store should be of same type RequestCounterStoreMaxCounters: success: %s failure: %s", storeSuccess, storeFailure);
+                throw new LogRaterException(msg);
+            }
+            int maxSuccess =  ((RequestCounterStoreMaxCounters)storeSuccess).getMaxUniqueCounters();
+            int maxFailure =  ((RequestCounterStoreMaxCounters)storeFailure).getMaxUniqueCounters();
+            if (maxSuccess != maxFailure) {
+                String msg = String.format("Both RequestCounterStoreMaxCounters must have same max unique counters value. success: %d, failure: %d", maxSuccess, maxFailure);
+                throw new LogRaterException(msg);
+            }
+        }
+    }
+
+    /**
 	 * Warning: do not add new counters to this success store, use addSuccess instead.
      * @return read only request counter
 	 */
@@ -62,15 +85,17 @@ public class RequestCounterStorePair {
 
 	public void addSuccess(String counterKey, long timestamp, int durationInMillis) {
 		storeSuccess.add(counterKey, timestamp, durationInMillis);
-		if (!storeFailure.isOverflown() && !storeFailure.contains(counterKey)) {
+		if (!storeFailure.contains(counterKey)) {
 			storeFailure.addEmptyCounterIfNotExists(counterKey);
+			//assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}
 
 	public void addFailure(String counterKey, long timestamp, int durationInMillis) {
 		storeFailure.add(counterKey, timestamp, durationInMillis);
-		if (!storeSuccess.isOverflown() && !storeSuccess.contains(counterKey)) {
+		if (!storeSuccess.contains(counterKey)) {
 			storeSuccess.addEmptyCounterIfNotExists(counterKey);
+            //assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}
 
@@ -113,5 +138,10 @@ public class RequestCounterStorePair {
 
 	public boolean isEmpty() {
 		return storeFailure.isEmpty() && storeSuccess.isEmpty();
+	}
+
+	public boolean isOverflowing() {
+	    // actually both should be overflowing at same time
+		return storeFailure.isOverflowing() || storeSuccess.isOverflowing();
 	}
 }
