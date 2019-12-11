@@ -107,7 +107,8 @@ public class AccessLogRunTest {
                 tempFolder.getRoot().getPath(),
                 "access",
                 "--max-unique-counters",
-                "6",
+                "2",
+                "--ignore-multi-and-no-matches",
                 "-mf",
                 "src/test/resources/access-log/mapper.txt",
                 "src/test/resources/access-log/access.log",
@@ -119,7 +120,7 @@ public class AccessLogRunTest {
 		assertTrue("Contains text [Duration]", result.contains("Duration"));
 		assertTrue("Contains text [99%]", result.contains("99%"));
 		assertTrue("The files contain 144 lines and of which 8 failure lines.", result.contains("TOTAL-success-total,144,8"));
-		assertTrue("Contains an overflow counter with 70 hits and 8 failures.", result.contains("OVERFLOW-COUNTER,70,8"));
+		assertTrue("Contains an overflow counter with 16 hits and 8 failures.", result.contains("OVERFLOW-COUNTER,16,8"));
 
 	}
 

@@ -17,7 +17,7 @@ package nl.stokpop.lograter.command;
 
 import com.beust.jcommander.Parameters;
 
-@Parameters(separators = "=", commandDescription = "Parse an application log file.")
+@Parameters(separators = "=", commandDescription = "Parse an (Java logback) application log file.")
 public class CommandApplicationLog extends AbstractCommandBasic {
 	
 	private static final String COMMANDNAME = "application";
