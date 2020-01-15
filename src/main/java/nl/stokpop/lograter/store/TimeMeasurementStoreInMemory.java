@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This class is NOT threadsafe due to sorting and sorting check.
+ * This class is NOT thread safe due to sorting and sorting check.
  */
 @NotThreadSafe
 public class TimeMeasurementStoreInMemory extends AbstractTimeMeasurementStore {

@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.accesslog;
 
+import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStore;
@@ -30,20 +31,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
+@NotThreadSafe
 public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 
     private static final Logger log = LoggerFactory.getLogger(AccessLogUrlMapperProcessor.class);
 
 	private static final String NO_MAPPER = "NO_MAPPER";
-	private static final String NO_MAPPER_OVERFLOW = "NO_MAPPER_OVERFLOW";
-    private static final String LOG_MSG_NON_MATCHES_COUNT = "Total mapper non-matches: {}. No match found for: [{}].";
 
     private final RequestCounterStorePair counterStorePair;
 
     private final LineMapperSection lineMapperSection;
 
 	private final Set<String> reportedNonMatchers = new HashSet<>();
+	private final AtomicLong nonMatchersCount = new AtomicLong();
 	private final Set<String> reportedMultiMatchers = new HashSet<>();
 
     // needed to report the used regexp for this mapper key
@@ -54,7 +56,6 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
     private final boolean isIgnoreMultiAndNoMatches;
     private final boolean isDoCountMultipleMapperHits;
     private final boolean isDoCountNoMappersAsOne;
-    private final int maxNoMapperCount;
 
     public AccessLogUrlMapperProcessor(
             final RequestCounterStorePair counterStorePair,
@@ -62,15 +63,13 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
             final AccessLogCounterKeyCreator keyCreator,
             boolean isDoCountNoMappersAsOne,
             boolean isIgnoreMultiAndNoMatches,
-            boolean isDoCountMultipleMapperHits,
-            int maxNoMapperCount) {
+            boolean isDoCountMultipleMapperHits) {
 		this.lineMapperSection = lineMapperSection;
         this.counterStorePair = counterStorePair;
         this.counterKeyCreator = keyCreator;
         this.isDoCountNoMappersAsOne = isDoCountNoMappersAsOne;
         this.isIgnoreMultiAndNoMatches = isIgnoreMultiAndNoMatches;
         this.isDoCountMultipleMapperHits = isDoCountMultipleMapperHits;
-        this.maxNoMapperCount = maxNoMapperCount;
     }
 
 	@Override
@@ -81,28 +80,21 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 	private void updateMappers(final AccessLogEntry logEntry) {
 		
 		LineMapperCallback callback = new LineMapperCallback() {
-			
 			@Override
 			public void noMatchFound(String line) {
 				if (!reportedNonMatchers.contains(line)) {
-					if (!isIgnoreMultiAndNoMatches) {
+					if (!isIgnoreMultiAndNoMatches && !counterStorePair.isOverflowing()) {
                         reportedNonMatchers.add(line);
-                        logNonMatcher(line, reportedNonMatchers.size());
+                        logNonMatcher(line, nonMatchersCount.incrementAndGet());
                     }
 				}
 				if (!isIgnoreMultiAndNoMatches) {
-					String mapperCounterKey;
-					if (reportedNonMatchers.size() > maxNoMapperCount) {
-						mapperCounterKey = NO_MAPPER_OVERFLOW;
-					}
-					else {
-						String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
-						mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
-					}
+                    String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
+                    String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
 					addToCounterStore(mapperCounterKey, logEntry);
 				}
 			}
-			
+
 			@Override
 			public void multiMatchFound(String line, int hits) {
 				if (isDoCountMultipleMapperHits) {
@@ -115,7 +107,7 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 					}
 				}
 			}
-			
+
 			@Override
 			public void matchFound(LineMap mapper) {
                 String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, mapper);
@@ -124,19 +116,22 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
                     counterKeyToLineMapMap.put(mapperCounterKey, mapper);
                 }
 			}
-		};			
-		
+		};
+
 		lineMapperSection.updateMappers(logEntry.getUrl(), isDoCountMultipleMapperHits, callback);
 	}
 
-    private void logNonMatcher(String line, int nonMatchesCount) {
-        if (nonMatchesCount <= maxNoMapperCount) {
-            log.warn(LOG_MSG_NON_MATCHES_COUNT, nonMatchesCount, line);
+    private void logNonMatcher(String line, long nonMatchesCount) {
+
+        String name = lineMapperSection.getName();
+
+        if (!counterStorePair.isOverflowing()) {
+            log.warn("Total mapper non-matches ({}): [{}] no match found for: [{}].", name, nonMatchesCount, line);
         } else {
-            log.debug(LOG_MSG_NON_MATCHES_COUNT, nonMatchesCount, line);
+            log.debug("Total mapper non-matches ({}): [{}] no match found for: [{}].", name, nonMatchesCount, line);
         }
         if (nonMatchesCount % 1000 == 0) {
-            log.warn("Total warnings about 'Total non-matches': [{}]", nonMatchesCount);
+            log.warn("Total non-matches found ({}): [{}]", name, nonMatchesCount);
         }
     }
 
@@ -162,4 +157,14 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
         return Collections.unmodifiableMap(new HashMap<>(counterKeyToLineMapMap));
     }
 
+    @Override
+    public String toString() {
+        return "AccessLogUrlMapperProcessor{" + "counterStorePair=" + counterStorePair +
+                ", lineMapperSection=" + lineMapperSection +
+                ", nonMatchersCount=" + nonMatchersCount +
+                ", isIgnoreMultiAndNoMatches=" + isIgnoreMultiAndNoMatches +
+                ", isDoCountMultipleMapperHits=" + isDoCountMultipleMapperHits +
+                ", isDoCountNoMappersAsOne=" + isDoCountNoMappersAsOne +
+                '}';
+    }
 }

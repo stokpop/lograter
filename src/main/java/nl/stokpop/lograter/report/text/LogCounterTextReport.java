@@ -78,7 +78,9 @@ abstract class LogCounterTextReport extends LogTextReport {
 		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
 			String counterKey = successCounter.getCounterKey();
 			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
-
+            if (failureCounter == null) {
+                throw new LogRaterException("No failure counter found for " + counterKey + " in " + counterStorePair);
+            }
 			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
 
 			if (!myAnalyser.hasAnyHits()) {
@@ -121,8 +123,8 @@ abstract class LogCounterTextReport extends LogTextReport {
 
         if (config.isIncludeMapperRegexpColumn()) report.append(SEP_CHAR).append("regexp");
 
-        boolean failureAwareAnalysis = config.isFailureAwareAnalysis().orElseThrow(() -> new LogRaterException("failureAwareAnalysis option not set"));
-        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis().orElseThrow(() -> new LogRaterException("includeFailedHitsInAnalysis option not set"));
+        boolean failureAwareAnalysis = config.isFailureAwareAnalysis();
+        boolean includeFailedHitsInAnalysis = config.isIncludeFailedHitsInAnalysis();
 
         if (failureAwareAnalysis) {
             if (includeFailedHitsInAnalysis) {

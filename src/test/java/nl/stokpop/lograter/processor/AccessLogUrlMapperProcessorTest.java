@@ -33,9 +33,9 @@ public class AccessLogUrlMapperProcessorTest {
 
     @Test
     public void testProcessEntry() {
-        RequestCounterStoreFactory requestCounterStoreFactory = new RequestCounterStoreFactory(CounterStorageType.Memory);
-        RequestCounterStore mappersSuccess = requestCounterStoreFactory.newInstance("mappers");
-        RequestCounterStore mappersFailure = requestCounterStoreFactory.newInstance("mappers");
+        RequestCounterStoreFactory type = new RequestCounterStoreFactory(CounterStorageType.Memory);
+        RequestCounterStore mappersSuccess = type.newInstance("mappers");
+        RequestCounterStore mappersFailure = type.newInstance("mappers");
         LineMapperSection lineMapperSection = new LineMapperSection("linemappertable");
         lineMapperSection.addMapperRule("(.*)bar(.*)", "$1 $2 test");
         AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(false, false);
@@ -46,8 +46,7 @@ public class AccessLogUrlMapperProcessorTest {
                 keyCreator,
                 true,
                 true,
-                true,
-                512);
+                true);
 
         AccessLogEntry logEntry = new AccessLogEntry();
         logEntry.setUrl("onebartwo");

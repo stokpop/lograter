@@ -124,7 +124,7 @@ public class TimePeriodTest {
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(0, ((long) Integer.MAX_VALUE) + 1);
         String humanReadableDurationTooLong = timePeriod.getHumanReadableDuration();
         System.out.println(humanReadableDurationTooLong);
-        assertTrue(humanReadableDurationTooLong.startsWith("Longer than"));
+        assertTrue(humanReadableDurationTooLong.startsWith("very long"));
     }
 
 	@Test(expected = LogRaterException.class)

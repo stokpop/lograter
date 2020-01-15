@@ -15,6 +15,9 @@
  */
 package nl.stokpop.lograter.command;
 
+import com.beust.jcommander.Parameters;
+
+@Parameters(separators = "=", commandDescription = "Parse sar files with cpu info.")
 public class CommandSarLog extends LogRaterCommand {
     private static final String COMMANDNAME = "sar";
 

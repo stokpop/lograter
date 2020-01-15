@@ -22,8 +22,10 @@ import nl.stokpop.lograter.graphs.LogGraphCreator;
 import java.util.List;
 
 public abstract class AbstractCommandBasic extends LogRaterCommand {
-	
-	@Parameter(description = "<List of files to parse, or a file prefix to automatically load a set of files>")
+
+    public static final int MAX_UNIQUE_COUNTERS = 512;
+
+    @Parameter(description = "<List of files to parse, or a file prefix to automatically load a set of files>")
 	public List<String> files;
 	
 	@Parameter(names = {"-fffi", "--filefeederfilter-includes"},
@@ -103,10 +105,10 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
 			description = "Mapper file to use. Also used in clickpath analysis.")
 	public String mapperFile;
 
-	@Parameter(names = { "--max-no-mapper-count" },
-            description = "Maximum number of unique counters before a mapper overflow is used to combine all non-matched mappers" +
-            " (named NO_MAPPER_OVERFLOW).")
-	public int maxNoMapperCount = 512;
+	@Parameter(names = { "--max-unique-counters" },
+            description = "Maximum number of unique counters before an overflow counter is used that combines all further counters" +
+            " (named OVERFLOW_COUNTER).")
+	public int maxUniqueCounters = MAX_UNIQUE_COUNTERS;
 
 	@Parameter(names = { "-sessionfield-regexp" },
 			description = "Regexp to use to get the sessionId from the sessionField. Use a capture group () to specify the sessionId capture.")
@@ -163,7 +165,7 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
                 ", determineSessionDuration=" + determineSessionDuration +
                 ", sessionField='" + sessionField + '\'' +
                 ", mapperFile='" + mapperFile + '\'' +
-                ", maxNoMapperCount=" + maxNoMapperCount +
+                ", maxUniqueCounters=" + maxUniqueCounters +
                 ", sessionFieldRegexp='" + sessionFieldRegexp + '\'' +
                 ", clickPathShortCodeLength=" + clickPathShortCodeLength +
                 ", reportStubDelays=" + reportStubDelays +

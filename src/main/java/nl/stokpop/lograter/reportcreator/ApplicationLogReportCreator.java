@@ -32,6 +32,8 @@ import nl.stokpop.lograter.report.text.ApplicationLogTextReport;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +43,8 @@ import java.io.PrintStream;
  * Create an application log report.
  */
 public class ApplicationLogReportCreator implements ReportCreatorWithCommand<CommandApplicationLog> {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationLogReportCreator.class);
 
 	@Override
 	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandApplicationLog cmdApplicationLog) throws IOException {
@@ -72,7 +76,7 @@ public class ApplicationLogReportCreator implements ReportCreatorWithCommand<Com
 
 		ChartFile chartFile = HtmlErrorsAndWarnsGraphCreator.createErrorAndWarningGraph(reportDirectory, testPeriod, bucketPeriodMillis, errorsOverTime, warnsOverTime);
 
-		System.out.println("Check out errors chart: " + chartFile.getFile().getAbsolutePath());
+		log.info("Check out errors chart: " + chartFile.getFile().getAbsolutePath());
 
 		ApplicationLogTextReport report = new ApplicationLogTextReport(data, config);
 		String outputFilename = cmdMain.outputFilename;

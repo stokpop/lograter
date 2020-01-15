@@ -35,8 +35,6 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
     private static final Logger log = LoggerFactory.getLogger(JMeterUrlMapperProcessor.class);
 
 	private static final String NO_MAPPER = "NO_MAPPER";
-	private static final String NO_MAPPER_OVERFLOW = "NO_MAPPER_OVERFLOW";
-    private static final String LOG_MSG_NON_MATCHES_COUNT = "Total mapper non-matches: {}. No match found for: [{}].";
 
     private final RequestCounterStorePair counterStorePair;
 
@@ -53,7 +51,6 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
     private final boolean isIgnoreMultiAndNoMatches;
     private final boolean isDoCountMultipleMapperHits;
     private final boolean isDoCountNoMappersAsOne;
-    private final int maxNoMapperCount;
 
     public JMeterUrlMapperProcessor(
             final RequestCounterStorePair counterStorePair,
@@ -69,7 +66,6 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
         this.isDoCountNoMappersAsOne = isDoCountNoMappersAsOne;
         this.isIgnoreMultiAndNoMatches = isIgnoreMultiAndNoMatches;
         this.isDoCountMultipleMapperHits = isDoCountMultipleMapperHits;
-        this.maxNoMapperCount = maxNoMapperCount;
     }
 
 	@Override
@@ -91,13 +87,8 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 				}
 				if (!isIgnoreMultiAndNoMatches) {
 					String mapperCounterKey;
-					if (reportedNonMatchers.size() > maxNoMapperCount) {
-						mapperCounterKey = NO_MAPPER_OVERFLOW;
-					}
-					else {
-						String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
-						mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
-					}
+                    String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
+                    mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
 					addToCounterStore(mapperCounterKey, logEntry);
 				}
 			}
@@ -129,13 +120,13 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 	}
 
     private void logNonMatcher(String line, int nonMatchesCount) {
-        if (nonMatchesCount <= maxNoMapperCount) {
-            log.warn(LOG_MSG_NON_MATCHES_COUNT, nonMatchesCount, line);
+        if (!counterStorePair.isOverflowing()) {
+            log.warn("Total mapper non-matches: {}. No match found for: [{}].", nonMatchesCount, line);
         } else {
-            log.debug(LOG_MSG_NON_MATCHES_COUNT, nonMatchesCount, line);
+            log.debug("Total mapper non-matches: {}. No match found for: [{}].", nonMatchesCount, line);
         }
         if (nonMatchesCount % 1000 == 0) {
-            log.warn("Total warnings about 'Total non-matches': [{}]", nonMatchesCount);
+            log.warn("Total non-matches found: [{}]", nonMatchesCount);
         }
     }
 

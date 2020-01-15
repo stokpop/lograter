@@ -29,24 +29,28 @@ import java.util.Map;
 @NotThreadSafe
 public class RequestCounterStoreHashMap implements RequestCounterStore {
 
-	private final Map<String, RequestCounter> counters = new HashMap<>();
+    private final Map<String, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
-	private RequestCounter totalRequestCounter;
+    private RequestCounter totalRequestCounter;
 
-	/* package private */ RequestCounterStoreHashMap(String requestCounterStoreName, String totalRequestCounterName, TimePeriod timePeriod) {
-		this.name = requestCounterStoreName;
-		this.totalRequestCounter = new RequestCounter(totalRequestCounterName, new TimeMeasurementStoreInMemory());
+	RequestCounterStoreHashMap(String storeName, String totalRequestName, TimePeriod timePeriod) {
+		this.name = storeName;
+		this.totalRequestCounter = new RequestCounter(totalRequestName, new TimeMeasurementStoreInMemory());
 		this.timePeriod = timePeriod;
 	}
 
-	public void add(String counterKey, long logTimestamp, int durationInMilliseconds) {
-		RequestCounter requestCounter = addEmptyRequestCounterIfNotExists(counterKey);
-		requestCounter.incRequests(logTimestamp, durationInMilliseconds);
-		totalRequestCounter.incRequests(logTimestamp, durationInMilliseconds);
+	RequestCounterStoreHashMap(String storeName, String totalRequestsName) {
+		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD);
 	}
 
-	@Override
+    public void add(String counterKey, long logTimestamp, int durationMillis) {
+        RequestCounter requestCounter = addEmptyCounterIfNotExists(counterKey);
+        requestCounter.incRequests(logTimestamp, durationMillis);
+        totalRequestCounter.incRequests(logTimestamp, durationMillis);
+    }
+
+    @Override
 	public String toString() {
 		return "RequestCounterStoreHashMap{" +
 				"name='" + name + '\'' +
@@ -66,7 +70,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
 	@Override
-	public RequestCounter addEmptyRequestCounterIfNotExists(String counterKey) {
+	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
 		if (!counters.containsKey(counterKey)) {
 			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreInMemory());
 			counters.put(counterKey, counter);

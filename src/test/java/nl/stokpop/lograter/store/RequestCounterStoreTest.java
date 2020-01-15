@@ -21,18 +21,16 @@ import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.DatabaseBootstrap;
 import nl.stokpop.lograter.util.DatabaseBootstrapTest;
 import nl.stokpop.lograter.util.time.TimePeriod;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
+import java.util.stream.IntStream;
+
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @NotThreadSafe
 public class RequestCounterStoreTest {
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
     public void testGet() {
@@ -87,4 +85,42 @@ public class RequestCounterStoreTest {
         assertEquals(2, myTotalRequestCounter.getHits());
     }
 
+    @Test
+    public void testCreateTooManyRequestCounters() {
+
+	    final int cap = 10;
+
+	    // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
+        RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
+                .newInstance("mappers-success", "myTestStore", cap);
+
+        final int max = cap + 13;
+
+        IntStream.range(0, max).forEach(i -> store.add("my-counter-" + i, i, i));
+
+        // 10 unique keys and one overflow key with 13 entries
+        assertEquals(cap + 1, store.getCounterKeys().size());
+        assertEquals(max, store.getTotalRequestCounter().getHits());
+        assertEquals(13, store.get(OVERFLOW_COUNTER).getHits());
+    }
+
+    @Test
+    public void testMax1Unique() {
+
+        final int cap = 1;
+
+        // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
+        RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
+                .newInstance("mappers-success", "myTestStore", cap);
+
+
+        store.add("my-counter-" + 1, 0, 0);
+        store.add("my-counter-" + 2, 2, 2);
+        store.add("my-counter-" + 3, 3, 3);
+
+        // 1 unique keys and one overflow key with 2 entries
+        assertEquals(2, store.getCounterKeys().size());
+        assertEquals(3, store.getTotalRequestCounter().getHits());
+        assertEquals(2, store.get(OVERFLOW_COUNTER).getHits());
+    }
 }

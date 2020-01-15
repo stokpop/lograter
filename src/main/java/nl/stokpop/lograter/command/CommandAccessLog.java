@@ -55,7 +55,7 @@ public class CommandAccessLog extends AbstractCommandAccessLog {
                 ", clickpathReportStepDurations=" + clickpathReportStepDurations +
                 ", determineSessionDuration=" + determineSessionDuration +
                 ", mapperFile='" + mapperFile + '\'' +
-                ", maxNoMapperCount=" + maxNoMapperCount +
+                ", maxNoMapperCount=" + maxUniqueCounters +
                 ", clickPathShortCodeLength=" + clickPathShortCodeLength +
                 ", reportStubDelays=" + reportStubDelays +
                 ", graphsHistoSimulator=" + graphsHistoSimulator +

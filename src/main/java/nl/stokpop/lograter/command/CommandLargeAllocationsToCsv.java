@@ -16,9 +16,11 @@
 package nl.stokpop.lograter.command;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 
 import java.util.List;
 
+@Parameters(separators = "=", commandDescription = "Parse WebSphere application server logs with large allocation traces.")
 public class CommandLargeAllocationsToCsv extends LogRaterCommand {
     private static final String COMMANDNAME = "alloc";
 

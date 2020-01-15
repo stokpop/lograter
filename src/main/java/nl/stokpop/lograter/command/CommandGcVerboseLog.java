@@ -16,10 +16,12 @@
 package nl.stokpop.lograter.command;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import nl.stokpop.lograter.graphs.AbstractGraphCreator;
 
 import java.util.List;
 
+@Parameters(separators = "=", commandDescription = "Parse WebSphere verbose garbage collection log files.")
 public class CommandGcVerboseLog extends LogRaterCommand {
 
     private static final String COMMANDNAME = "gc";
