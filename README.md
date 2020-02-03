@@ -8,6 +8,18 @@ LogRater can be run stand-alone from the command line, or be included as jar in 
 
 LogRater is sponsored by Rabobank.
 
+# build
+
+Create an executable jar: 
+
+    ./gradlew customFatJar
+    
+Execute as (use correct version number):
+
+    java -jar build/libs/lograter-exec-X.Y.Z-SNAPSHOT.jar  
+    
+You can also download a pre-build jar here: https://github.com/stokpop/lograter/releases
+
 # Uses
 
 ## Incoming requests
@@ -21,6 +33,51 @@ The following web logs are supported:
 * apache 
 * nginx
 * iis
+
+Use the log pattern to define your log line structure. LogRater needs at least:
+ * a timestamp
+ * the endpoint called (url for example) 
+ * the duration of that call
+ * optionally the http status code 
+
+In apache access log these are defined by these directives: 
+* `%t`
+* `%r`
+* `%d` (milliseconds) or `%D` (microseconds) or `%T` (seconds)
+* `%s` 
+
+You can directly copy the log pattern definition from the http.conf file. If the original log pattern is unknown or non-existend, you can create
+a log pattern yourself and make use of "placeholders" such as "`%{name}X`" for the parts that are not needed.
+ 
+Take this line for example:
+
+    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.stokpop.nl - [2020-01-29T15:45:44.813+0000] \"GET /delay?duration=200 HTTP/1.1\" 200 0 85 \"-\" \"curl/7.64.1\" response_time:0.477786246 x_b3_parentspanid:\"-\" b3:\"woiertu\"";
+
+To parse a line like this, you can use this log pattern:
+
+    %{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]}t "%r" %s %{two}X response_time:%T %{three}X
+
+LogRater will use the literals to parse the line (first is "` - `" so all before that character sequence is "read" into `%{one}X`). 
+
+Notice the second timestamp in the log line is 
+used for parsing actual parsing. 
+
+The `%r` is used to get the url (%r is actually the triplet <http command, url, and http version>).
+
+The `%s` is for the http status code to detect errors.
+
+And `%T` is for the response time in seconds.
+
+Notice that information in `%{one}X`, `%{two}X` and `%{three}X` is not used and is basically discarded.
+
+The default pattern for `%t` is `[dd/MMM/yyyy:HH:mm:ss Z]`. In this example an override is provided
+to match the log file timestamp format.
+     
+Run as follows:
+
+    java -jar lograter-exec-X.Y.Z.jar -o report-{ts}.html access -lp "%{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]}t \"%r\" %c %{two}X response_time:%T %{three}X" -gh -gr -gp -gt -sd -fffi "GET" Afterburner-CPU.log
+
+where only lines that contain "`GET`" are included via "`-fffi`" and a report with graphs is created.
 
 ## Outgoing requests
 
@@ -100,7 +157,7 @@ Download the executable jar here: https://github.com/stokpop/lograter/releases
 
 To use LogRater from maven or gradle, find the lograter jar in maven central.
 
-## Lograter command line options
+## LogRater command line options
 
     LogRater version: 1.3.3
 

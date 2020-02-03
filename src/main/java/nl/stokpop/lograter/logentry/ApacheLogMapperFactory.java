@@ -36,6 +36,7 @@ import static nl.stokpop.lograter.logentry.AccessLogEntry.parseRequest;
 public class ApacheLogMapperFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ApacheLogMapperFactory.class);
+    public static final String DEFAULT_DATE_TIME_LOG_PATTERN = "[dd/MMM/yyyy:HH:mm:ss Z]";
 
     private ApacheLogMapperFactory() {}
 
@@ -46,14 +47,14 @@ public class ApacheLogMapperFactory {
                 LogbackDirective directive = (LogbackDirective) element;
                 if ("t".equals(directive.getDirective())) {
                     String variable = directive.getVariable();
-                    if (variable != null && variable.contains("%")) {
+                    if (variable != null) {
                         dateTimePattern = DateUtils.convertStrfTimePatternToDateTimeFormatterPattern(variable);
                     }
                 }
             }
         }
         if (dateTimePattern == null) {
-            dateTimePattern = "[dd/MMM/yyyy:HH:mm:ss Z]";
+            dateTimePattern = DEFAULT_DATE_TIME_LOG_PATTERN;
         }
         return dateTimePattern;
     }
@@ -113,27 +114,23 @@ public class ApacheLogMapperFactory {
 		mappers.put("D",
                 (StringEntryMapper<AccessLogEntry>) (value, variable, e) -> {
                     long durationInMicros = Long.parseLong(value);
-                    e.setDurationInMicros(durationInMicros);
-                    long durationInMillis = durationInMicros / 1000;
-                    if (durationInMillis > Integer.MAX_VALUE) {
-                        throw new LogRaterException("Duration in millis is too large to fit in integer: " + durationInMillis);
-                    }
-                    // TODO this is now experiment with microseconds
-                    e.setDurationInMillis((int) (baseUnit == milliseconds ? durationInMillis : durationInMicros));
+                    insertDurationIntoLogEntry(e, durationInMicros, baseUnit);
                 });
 
-		mappers.put("x",
+        mappers.put("T",
+                (StringEntryMapper<AccessLogEntry>) (value, variable, e) -> {
+                    double durationInSeconds = Double.parseDouble(value);
+                    // losing nano precision here!
+                    long durationInMicros = (long)(durationInSeconds * 1_000_000);
+                    insertDurationIntoLogEntry(e, durationInMicros, baseUnit);
+                });
+
+        mappers.put("x",
                 (StringEntryMapper<AccessLogEntry>) (value, variable, e) -> {
                     if ("duration-nanoseconds".equals(variable)) {
                         long durationInNanos = Long.parseLong(value);
                         long durationInMicros = Math.round(durationInNanos / 1_000.0);
-                        e.setDurationInMicros(durationInMicros);
-                        long durationInMillis = Math.round(durationInNanos / 1_000_000.0);
-                        if (durationInMillis > Integer.MAX_VALUE) {
-                            throw new LogRaterException("Duration in nanos is too large to fit in integer: " + durationInMillis);
-                        }
-                        // TODO this is now experiment with microseconds
-                        e.setDurationInMillis((int) (baseUnit == milliseconds ? durationInMillis : durationInMicros));
+                        insertDurationIntoLogEntry(e, durationInMicros, baseUnit);
                     }
 		        });
 
@@ -161,8 +158,19 @@ public class ApacheLogMapperFactory {
 
 		return mappers;
 	}
-    
-	@Override
+
+    private static void insertDurationIntoLogEntry(AccessLogEntry e, long durationInMicros, BaseUnit baseUnit) {
+        e.setDurationInMicros(durationInMicros);
+
+        long durationInMillis = durationInMicros / 1000;
+        if (durationInMillis > Integer.MAX_VALUE) {
+            throw new LogRaterException("Duration in millis is too large to fit in integer: " + durationInMillis);
+        }
+        // TODO this is now experiment with microseconds
+        e.setDurationInMillis((int) (baseUnit == milliseconds ? durationInMillis : durationInMicros));
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}

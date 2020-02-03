@@ -20,6 +20,8 @@ import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.logentry.ApacheLogMapperFactory;
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -416,6 +418,30 @@ public class ApacheLogFormatParserTest {
         assertEquals(Math.round(1790913.0/1000), entry.getDurationInMicros());
 
         System.out.println(entry);
+    }
+
+    @Test
+    public void testCloudLog() throws ParseException {
+        String pattern =
+                "%{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]}t \"%r\" %s %{two}X response_time:%T %{three}X";
+
+        List<LogbackElement> elements = ApacheLogFormatParser.parse(pattern);
+        final int expectedElements = 15;
+        System.out.println(elements);
+        assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
+
+        Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+
+        String logline = "    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.xxx.yyy.zzz.nl - [2020-01-29T15:45:44.813+0000] \"GET /delay?duration=200 HTTP/1.1\" 200 0 85 \"-\" \"curl/7.64.1\" \"1.1.1.1:555\" \"2.2.2.2:4444\" x_forwarded_for:\"3.3.3.3\" x_forwarded_proto:\"https\" vcap_request_id:\"xxxx-1d3f-411a-56de-yyyy\" response_time:0.477786246 app_id:\"xxx-6c11-4f8f-a8cc-yyy\" app_index:\"0\" x_client_ip:\"-\" x_session_id:\"-\" x_b3_traceid:\"eorituwerio\" x_b3_spanid:\"weopirtu\" x_b3_parentspanid:\"-\" b3:\"woiertu\"";
+
+        AccessLogEntry entry = parser.parseLogLine(logline);
+
+        assertEquals("/delay", entry.getUrl());
+        assertEquals(logline, entry.getLogline());
+        assertEquals(477, entry.getDurationInMillis());
+        assertEquals(200, entry.getHttpStatus());
+
     }
 
 }
