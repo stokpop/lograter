@@ -1,4 +1,4 @@
-package nl.stokpop.lograter.gc.jmx;
+package nl.stokpop.lograter.jmx.memory;
 
 public interface MemoryMetrics {
     long getTimestamp();

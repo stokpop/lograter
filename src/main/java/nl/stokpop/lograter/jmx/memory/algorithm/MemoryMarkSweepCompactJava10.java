@@ -1,41 +1,46 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MemoryParallelGc implements MemoryMetrics {
-    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,PSOldGen,PSEdenSpace,CompressedClassSpace,CodeCache,PSSurvivorSpace
+public class MemoryMarkSweepCompactJava10 implements MemoryMetrics {
+    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,Copy,MarkSweepCompact,Metaspace,CodeHeap'non-nmethods',TenuredGen,EdenSpace,CodeHeap'profilednmethods',SurvivorSpace,CompressedClassSpace,CodeHeap'non-profilednmethods'
     @CsvBindByName
     private String timestamp;
     @CsvBindByName
     private long heapMemoryUsage;
     @CsvBindByName
     private long nonHeapMemoryUsage;
-    @CsvBindByName(column = "pSMarkSweep")
+    @CsvBindByName(column = "copy")
     private long youngGenerationGcTime;
-    @CsvBindByName(column = "pSScavenge")
+    @CsvBindByName(column = "markSweepCompact")
     private long oldGenerationGcTime;
     @CsvBindByName
     private long metaspace;
     @CsvBindByName
-    private long pSOldGen;
+    private long tenuredGen;
     @CsvBindByName
-    private long pSEdenSpace;
+    private long edenSpace;
+    @CsvBindByName
+    private long survivorSpace;
     @CsvBindByName
     private long compressedClassSpace;
-    @CsvBindByName
-    private long codeCache;
-    @CsvBindByName
-    private long pSSurvivorSpace;
+    @CsvBindByName(column = "CodeHeap'non-nmethods'")
+    private long codeCacheNonMethods;
+    @CsvBindByName(column = "CodeHeap'profilednmethods'")
+    private long codeCacheProfiledMethods;
+    @CsvBindByName(column = "CodeHeap'non-profilednmethods'")
+    private long codeCacheNonProfiledMethods;
+
 
     @Override
     public long getTimestamp() {
@@ -49,22 +54,22 @@ public class MemoryParallelGc implements MemoryMetrics {
 
     @Override
     public long getEdenUsedBytes() {
-        return pSEdenSpace;
+        return edenSpace;
     }
 
     @Override
     public long getSurvivorUsedBytes() {
-        return pSSurvivorSpace;
+        return survivorSpace;
     }
 
     @Override
     public long getTenuredUsedBytes() {
-        return pSOldGen;
+        return tenuredGen;
     }
 
     @Override
     public long getOldGenerationUsedBytes() {
-        return pSOldGen;
+        return tenuredGen;
     }
 
     @Override
@@ -79,7 +84,7 @@ public class MemoryParallelGc implements MemoryMetrics {
 
     @Override
     public long getCodeCacheUsedBytes() {
-        return codeCache;
+        return codeCacheNonMethods + codeCacheNonProfiledMethods + codeCacheProfiledMethods;
     }
 
     @Override

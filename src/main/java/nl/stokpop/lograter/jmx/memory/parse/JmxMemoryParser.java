@@ -1,6 +1,7 @@
-package nl.stokpop.lograter.gc.jmx.parse;
+package nl.stokpop.lograter.jmx.memory.parse;
 
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
+import nl.stokpop.lograter.jmx.memory.parse.CsvFileParser;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
 import java.io.File;

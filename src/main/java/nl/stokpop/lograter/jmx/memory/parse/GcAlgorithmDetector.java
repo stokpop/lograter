@@ -1,8 +1,8 @@
-package nl.stokpop.lograter.gc.jmx.parse;
+package nl.stokpop.lograter.jmx.memory.parse;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.stokpop.lograter.gc.GcLogParseException;
-import nl.stokpop.lograter.gc.jmx.algorithm.GcAlgorithm;
+import nl.stokpop.lograter.jmx.memory.algorithm.GcAlgorithm;
 
 import java.io.File;
 import java.io.IOException;

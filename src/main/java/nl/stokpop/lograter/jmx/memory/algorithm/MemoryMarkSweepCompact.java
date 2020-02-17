@@ -1,11 +1,11 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder

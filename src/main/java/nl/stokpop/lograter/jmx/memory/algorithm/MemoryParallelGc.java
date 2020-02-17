@@ -1,39 +1,41 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
-import lombok.*;
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
-public class MemoryG1 implements MemoryMetrics {
-    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,G1YoungGeneration,G1OldGeneration,Metaspace,G1SurvivorSpace,CompressedClassSpace,G1EdenSpace,G1OldGen,CodeCache
+public class MemoryParallelGc implements MemoryMetrics {
+    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,PSOldGen,PSEdenSpace,CompressedClassSpace,CodeCache,PSSurvivorSpace
     @CsvBindByName
-    private String timestamp; //yyyy-MM-dd HH:mm:ss.SSS e.g. 2019-10-22T11:43:40.590
+    private String timestamp;
     @CsvBindByName
     private long heapMemoryUsage;
     @CsvBindByName
     private long nonHeapMemoryUsage;
-    @CsvBindByName(column = "g1YoungGeneration")
+    @CsvBindByName(column = "pSMarkSweep")
     private long youngGenerationGcTime;
-    @CsvBindByName(column = "g1OldGeneration")
+    @CsvBindByName(column = "pSScavenge")
     private long oldGenerationGcTime;
     @CsvBindByName
     private long metaspace;
     @CsvBindByName
-    private long g1SurvivorSpace;
+    private long pSOldGen;
+    @CsvBindByName
+    private long pSEdenSpace;
     @CsvBindByName
     private long compressedClassSpace;
     @CsvBindByName
-    private long g1EdenSpace;
-    @CsvBindByName
-    private long g1OldGen;
-    @CsvBindByName
     private long codeCache;
+    @CsvBindByName
+    private long pSSurvivorSpace;
 
     @Override
     public long getTimestamp() {
@@ -47,22 +49,22 @@ public class MemoryG1 implements MemoryMetrics {
 
     @Override
     public long getEdenUsedBytes() {
-        return g1EdenSpace;
+        return pSEdenSpace;
     }
 
     @Override
     public long getSurvivorUsedBytes() {
-        return g1SurvivorSpace;
+        return pSSurvivorSpace;
     }
 
     @Override
     public long getTenuredUsedBytes() {
-        return g1OldGen;
+        return pSOldGen;
     }
 
     @Override
     public long getOldGenerationUsedBytes() {
-        return g1OldGen;
+        return pSOldGen;
     }
 
     @Override

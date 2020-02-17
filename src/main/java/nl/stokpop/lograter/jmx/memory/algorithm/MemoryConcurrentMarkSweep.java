@@ -1,46 +1,42 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
+
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MemoryMarkSweepCompactJava10 implements MemoryMetrics {
-    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,Copy,MarkSweepCompact,Metaspace,CodeHeap'non-nmethods',TenuredGen,EdenSpace,CodeHeap'profilednmethods',SurvivorSpace,CompressedClassSpace,CodeHeap'non-profilednmethods'
+public class MemoryConcurrentMarkSweep implements MemoryMetrics {
+    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,ParNew,ConcurrentMarkSweep,Metaspace,CompressedClassSpace,CodeCache,ParEdenSpace,ParSurvivorSpace,CMSOldGen
     @CsvBindByName
     private String timestamp;
     @CsvBindByName
     private long heapMemoryUsage;
     @CsvBindByName
     private long nonHeapMemoryUsage;
-    @CsvBindByName(column = "copy")
+    @CsvBindByName(column = "parNew")
     private long youngGenerationGcTime;
-    @CsvBindByName(column = "markSweepCompact")
+    @CsvBindByName(column = "concurrentMarkSweep")
     private long oldGenerationGcTime;
     @CsvBindByName
     private long metaspace;
     @CsvBindByName
-    private long tenuredGen;
-    @CsvBindByName
-    private long edenSpace;
-    @CsvBindByName
-    private long survivorSpace;
-    @CsvBindByName
     private long compressedClassSpace;
-    @CsvBindByName(column = "CodeHeap'non-nmethods'")
-    private long codeCacheNonMethods;
-    @CsvBindByName(column = "CodeHeap'profilednmethods'")
-    private long codeCacheProfiledMethods;
-    @CsvBindByName(column = "CodeHeap'non-profilednmethods'")
-    private long codeCacheNonProfiledMethods;
-
+    @CsvBindByName
+    private long codeCache;
+    @CsvBindByName
+    private long parEdenSpace;
+    @CsvBindByName
+    private long parSurvivorSpace;
+    @CsvBindByName
+    private long cMSOldGen;
 
     @Override
     public long getTimestamp() {
@@ -54,22 +50,22 @@ public class MemoryMarkSweepCompactJava10 implements MemoryMetrics {
 
     @Override
     public long getEdenUsedBytes() {
-        return edenSpace;
+        return parEdenSpace;
     }
 
     @Override
     public long getSurvivorUsedBytes() {
-        return survivorSpace;
+        return parSurvivorSpace;
     }
 
     @Override
     public long getTenuredUsedBytes() {
-        return tenuredGen;
+        return cMSOldGen;
     }
 
     @Override
     public long getOldGenerationUsedBytes() {
-        return tenuredGen;
+        return cMSOldGen;
     }
 
     @Override
@@ -84,7 +80,7 @@ public class MemoryMarkSweepCompactJava10 implements MemoryMetrics {
 
     @Override
     public long getCodeCacheUsedBytes() {
-        return codeCacheNonMethods + codeCacheNonProfiledMethods + codeCacheProfiledMethods;
+        return codeCache;
     }
 
     @Override

@@ -1,12 +1,13 @@
-package nl.stokpop.lograter.gc.jmx.parse;
+package nl.stokpop.lograter.jmx.parse;
 
 import nl.stokpop.lograter.gc.GcLogParseException;
+import nl.stokpop.lograter.jmx.memory.parse.GcAlgorithmDetector;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
 
-import static nl.stokpop.lograter.gc.jmx.algorithm.GcAlgorithm.*;
+import static nl.stokpop.lograter.jmx.memory.algorithm.GcAlgorithm.*;
 import static org.junit.Assert.assertEquals;
 
 public class GcAlgorithmDetectorTest {

@@ -1,4 +1,4 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

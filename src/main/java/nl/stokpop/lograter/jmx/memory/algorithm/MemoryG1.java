@@ -1,41 +1,39 @@
-package nl.stokpop.lograter.gc.jmx.algorithm;
+package nl.stokpop.lograter.jmx.memory.algorithm;
 
 import com.opencsv.bean.CsvBindByName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import nl.stokpop.lograter.gc.jmx.MemoryMetrics;
+import lombok.*;
+import nl.stokpop.lograter.jmx.memory.MemoryMetrics;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MemoryConcurrentMarkSweep implements MemoryMetrics {
-    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,ParNew,ConcurrentMarkSweep,Metaspace,CompressedClassSpace,CodeCache,ParEdenSpace,ParSurvivorSpace,CMSOldGen
+@Setter
+public class MemoryG1 implements MemoryMetrics {
+    //Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,G1YoungGeneration,G1OldGeneration,Metaspace,G1SurvivorSpace,CompressedClassSpace,G1EdenSpace,G1OldGen,CodeCache
     @CsvBindByName
-    private String timestamp;
+    private String timestamp; //yyyy-MM-dd HH:mm:ss.SSS e.g. 2019-10-22T11:43:40.590
     @CsvBindByName
     private long heapMemoryUsage;
     @CsvBindByName
     private long nonHeapMemoryUsage;
-    @CsvBindByName(column = "parNew")
+    @CsvBindByName(column = "g1YoungGeneration")
     private long youngGenerationGcTime;
-    @CsvBindByName(column = "concurrentMarkSweep")
+    @CsvBindByName(column = "g1OldGeneration")
     private long oldGenerationGcTime;
     @CsvBindByName
     private long metaspace;
     @CsvBindByName
+    private long g1SurvivorSpace;
+    @CsvBindByName
     private long compressedClassSpace;
     @CsvBindByName
+    private long g1EdenSpace;
+    @CsvBindByName
+    private long g1OldGen;
+    @CsvBindByName
     private long codeCache;
-    @CsvBindByName
-    private long parEdenSpace;
-    @CsvBindByName
-    private long parSurvivorSpace;
-    @CsvBindByName
-    private long cMSOldGen;
 
     @Override
     public long getTimestamp() {
@@ -49,22 +47,22 @@ public class MemoryConcurrentMarkSweep implements MemoryMetrics {
 
     @Override
     public long getEdenUsedBytes() {
-        return parEdenSpace;
+        return g1EdenSpace;
     }
 
     @Override
     public long getSurvivorUsedBytes() {
-        return parSurvivorSpace;
+        return g1SurvivorSpace;
     }
 
     @Override
     public long getTenuredUsedBytes() {
-        return cMSOldGen;
+        return g1OldGen;
     }
 
     @Override
     public long getOldGenerationUsedBytes() {
-        return cMSOldGen;
+        return g1OldGen;
     }
 
     @Override
