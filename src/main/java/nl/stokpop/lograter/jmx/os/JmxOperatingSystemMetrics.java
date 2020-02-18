@@ -1,10 +1,7 @@
 package nl.stokpop.lograter.jmx.os;
 
 import com.opencsv.bean.CsvBindByName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import nl.stokpop.lograter.util.time.DateUtils;
 
 /*
@@ -30,6 +27,7 @@ MaxFileDescriptorCount
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class JmxOperatingSystemMetrics {
 
     @CsvBindByName
@@ -109,5 +107,57 @@ public class JmxOperatingSystemMetrics {
 
     public long getMaxFileDescriptorCount() {
         return maxFileDescriptorCount;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setProcessCpuLoad(double processCpuLoad) {
+        this.processCpuLoad = processCpuLoad;
+    }
+
+    public void setSystemCpuLoad(double systemCpuLoad) {
+        this.systemCpuLoad = systemCpuLoad;
+    }
+
+    public void setProcessCpuTime(long processCpuTime) {
+        this.processCpuTime = processCpuTime;
+    }
+
+    public void setCommittedVirtualMemorySize(long committedVirtualMemorySize) {
+        this.committedVirtualMemorySize = committedVirtualMemorySize;
+    }
+
+    public void setTotalSwapSpaceSize(long totalSwapSpaceSize) {
+        this.totalSwapSpaceSize = totalSwapSpaceSize;
+    }
+
+    public void setFreeSwapSpaceSize(long freeSwapSpaceSize) {
+        this.freeSwapSpaceSize = freeSwapSpaceSize;
+    }
+
+    public void setFreePhysicalMemorySize(long freePhysicalMemorySize) {
+        this.freePhysicalMemorySize = freePhysicalMemorySize;
+    }
+
+    public void setTotalPhysicalMemorySize(long totalPhysicalMemorySize) {
+        this.totalPhysicalMemorySize = totalPhysicalMemorySize;
+    }
+
+    public void setSystemLoadAverage(double systemLoadAverage) {
+        this.systemLoadAverage = systemLoadAverage;
+    }
+
+    public void setAvailableProcessors(long availableProcessors) {
+        this.availableProcessors = availableProcessors;
+    }
+
+    public void setOpenFileDescriptorCount(long openFileDescriptorCount) {
+        this.openFileDescriptorCount = openFileDescriptorCount;
+    }
+
+    public void setMaxFileDescriptorCount(long maxFileDescriptorCount) {
+        this.maxFileDescriptorCount = maxFileDescriptorCount;
     }
 }
