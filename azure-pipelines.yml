@@ -14,7 +14,7 @@ steps:
     displayName: Gradle build
     inputs:
       gradleWrapperFile: 'gradlew'
-      gradleOptions: '–b pcc.gradle'
+      options: '–b pcc.gradle'
       publishJUnitResults: false
       jdkVersionOption: 1.8
       tasks: 'publish'
