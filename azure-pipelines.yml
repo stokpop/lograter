@@ -1,0 +1,20 @@
+trigger:
+    - master
+
+pool: Rabo-Build-Azure-Linux
+
+steps:
+  - script: git config user.email "azure-pipeline@rabobank.nl"
+    displayName: Set git user email
+
+  - script: git config user.name "Azure pipeline"
+    displayName: Set git user name
+
+  - task: Gradle@2
+    displayName: Gradle build
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      gradleOptions: '–b pcc.gradle'
+      publishJUnitResults: false
+      jdkVersionOption: 1.8
+      tasks: 'publish'
