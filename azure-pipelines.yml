@@ -13,8 +13,8 @@ steps:
   - task: Gradle@2
     displayName: Gradle build
     inputs:
-      gradleWrapperFile: 'gradle'
-      options: '–b pcc.gradle'
+      gradleWrapperFile: 'gradlew'
+      options: '-build-file pcc.gradle'
       publishJUnitResults: false
       jdkVersionOption: 1.8
       tasks: 'publish'
