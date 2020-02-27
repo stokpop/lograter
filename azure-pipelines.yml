@@ -4,8 +4,8 @@ trigger:
 pool: Rabo-Build-Azure-Linux
 
 variables:
-  nexus.snapshots.repository: 'https://maven.rabobank.nl/nexus/content/repositories/gict-snapshots'
-  nexus.releases.repository: 'https://maven.rabobank.nl/nexus/content/repositories/gict-release'
+  nexus_repository_username: $(Nexus.User)
+  nexus_repository_password: $(Nexus.Password)
 
 steps:
   - script: git config user.email "azure-pipeline@rabobank.nl"
