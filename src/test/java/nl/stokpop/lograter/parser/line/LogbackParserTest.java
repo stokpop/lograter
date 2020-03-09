@@ -84,7 +84,7 @@ public class LogbackParserTest {
     	String logbackpattern = "[%d{ISO8601}] [%thread][%p][%C{0}] transactionId=%X{correlationId} - %m%n%xEx{short}";
 		LogbackParser<LogbackLogEntry> parser = LogbackParser.createLogbackParser(logbackpattern);
 
-		String logline = "[2019-04-06 20:31:00,159] [myThread-3][ERROR][Classname] transactionId=mdcCorrId - app message\n" +
+		String logline = "[2019-04-06T20:31:00.159+02:00] [myThread-3][ERROR][Classname] transactionId=mdcCorrId - app message\n" +
 				"mainPackage.foo.bar.TestException: Houston we have a problem\n" +
 				"  at mainPackage.foo.bar.TestThrower.fire(TestThrower.java:22)) ~[wombat-1.3.jar:1.3]";
 		LogbackLogEntry entry = parser.parseLogLine(logline);
