@@ -7,18 +7,36 @@ variables:
   nexus_repository_username: $(Nexus.User)
   nexus_repository_password: $(Nexus.Password)
 
-steps:
-  - script: git config user.email "azure-pipeline@rabobank.nl"
-    displayName: Set git user email
+jobs:
+  - job: Build
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
+    steps:
+      - checkout: self
+        persistCredentials: true
+      - task: Gradle@2
+        displayName: Gradle build
+        inputs:
+          gradleWrapperFile: 'gradlew'
+          options: '-build-file pcc.gradle'
+          jdkVersionOption: 1.8
+          tasks: 'test'
+          publishJUnitResults: true
+          testResultsFiles: 'build/test-results/test/TEST-*.xml'
 
-  - script: git config user.name "Azure pipeline"
-    displayName: Set git user name
+  - job: Release
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
+    steps:
+      - script: git config user.email "azure-pipeline@rabobank.nl"
+        displayName: Set git user email
 
-  - task: Gradle@2
-    displayName: Gradle build
-    inputs:
-      gradleWrapperFile: 'gradlew'
-      options: '-build-file pcc.gradle'
-      publishJUnitResults: false
-      jdkVersionOption: 1.8
-      tasks: 'publish'
+      - script: git config user.name "Azure pipeline"
+        displayName: Set git user name
+
+      - task: Gradle@2
+        displayName: Gradle build
+        inputs:
+          gradleWrapperFile: 'gradlew'
+          options: '-build-file pcc.gradle'
+          publishJUnitResults: false
+          jdkVersionOption: 1.8
+          tasks: 'publish'
