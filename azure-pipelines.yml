@@ -1,11 +1,10 @@
 trigger:
-    - master
+  batch: true
+  branches:
+    include:
+      - master
 
 pool: Rabo-Build-Azure-Linux
-
-variables:
-  nexus_repository_username: $(Nexus.User)
-  nexus_repository_password: $(Nexus.Password)
 
 jobs:
   - job: Build
@@ -29,6 +28,9 @@ jobs:
 
   - job: Release
     condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
+    variables:
+      nexus_repository_username: $(Nexus.User)
+      nexus_repository_password: $(Nexus.Password)
     steps:
       - script: git config user.email "azure-pipeline@rabobank.nl"
         displayName: Set git user email
