@@ -1,0 +1,57 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+
+pool: Rabo-Build-Azure-Linux
+
+jobs:
+  - job: Build
+    condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.SourceBranch'], 'refs/heads/pcc'))
+    variables:
+      JAVA_TOOL_OPTIONS: -Duser.timezone=Europe/Amsterdam
+
+    steps:
+      - checkout: self
+        persistCredentials: true
+
+      - task: Gradle@2
+        displayName: Gradle build
+        inputs:
+          gradleWrapperFile: 'gradlew'
+          options: '-build-file pcc.gradle'
+          jdkVersionOption: 1.8
+          tasks: 'test'
+          publishJUnitResults: true
+          testResultsFiles: 'build/test-results/test/TEST-*.xml'
+
+  - job: SetLastCommiter
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    steps:
+      - script: |
+          UserName=`git log -1 --pretty=format:'%an'`
+          echo "##vso[task.setvariable variable=UserName;isOutput=true]$UserName"
+        name: setUserNameStep
+        displayName: Set last commiter username
+        
+  - job: Release
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/pcc'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
+    variables:
+      nexus_repository_username: $(Nexus.User)
+      nexus_repository_password: $(Nexus.Password)
+    steps:
+      - script: git config user.email "azure-pipeline@rabobank.nl"
+        displayName: Set git user email
+
+      - script: git config user.name "Azure pipeline"
+        displayName: Set git user name
+
+      - task: Gradle@2
+        displayName: Gradle build
+        inputs:
+          gradleWrapperFile: 'gradlew'
+          options: '-build-file pcc.gradle'
+          publishJUnitResults: false
+          jdkVersionOption: 1.8
+          tasks: 'publish'
