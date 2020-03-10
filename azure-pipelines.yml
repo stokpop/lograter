@@ -10,16 +10,19 @@ variables:
 jobs:
   - job: Build
     condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
+    variables:
+      JAVA_TOOL_OPTIONS: -Duser.timezone=Europe/Amsterdam
+
     steps:
       - checkout: self
         persistCredentials: true
+
       - task: Gradle@2
         displayName: Gradle build
         inputs:
           gradleWrapperFile: 'gradlew'
           options: '-build-file pcc.gradle'
           jdkVersionOption: 1.8
-          gradleOptions: '-Xmx128m'
           tasks: 'test'
           publishJUnitResults: true
           testResultsFiles: 'build/test-results/test/TEST-*.xml'
