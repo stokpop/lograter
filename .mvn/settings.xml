@@ -1,0 +1,10 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+    <servers>
+        <server>
+            <!-- id matches pom.xml:/project/build/plugins/plugin[artifactId=nexus-staging-maven-plugin]/configuration/serverId -->
+            <id>releases</id>
+            <username>${nexusUser}</username>
+            <password>${nexusPassword}</password>
+        </server>
+    </servers>
+</settings>

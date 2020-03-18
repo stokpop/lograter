@@ -2,56 +2,65 @@ trigger:
   batch: true
   branches:
     include:
-      - master
+      - pcc
 
-pool: Rabo-Build-Azure-Linux
+pool: Rabo-Build-Azure-Linux-Preview
 
 jobs:
   - job: Build
-    condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.SourceBranch'], 'refs/heads/test-release'))
-    variables:
-      JAVA_TOOL_OPTIONS: -Duser.timezone=Europe/Amsterdam
-
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/pcc')
     steps:
       - checkout: self
         persistCredentials: true
-
-      - task: Gradle@2
-        displayName: Gradle build
+      - task: Maven@3
         inputs:
-          gradleWrapperFile: 'gradlew'
-          options: '-build-file pcc.gradle'
-          jdkVersionOption: 1.8
-          tasks: 'test'
+          mavenPomFile: pom.xml
+          options: '-s .mvn/settings.xml'
+          goals: 'package'
           publishJUnitResults: true
-          testResultsFiles: 'build/test-results/test/TEST-*.xml'
+          jdkVersionOption: 1.8
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
   - job: SetLastCommiter
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/test-release')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/pcc')
     steps:
       - script: |
           UserName=`git log -1 --pretty=format:'%an'`
           echo "##vso[task.setvariable variable=UserName;isOutput=true]$UserName"
         name: setUserNameStep
         displayName: Set last commiter username
-        
+
   - job: Release
-    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/test-release'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
-    variables:
-      nexus_repository_username: $(Nexus.User)
-      nexus_repository_password: $(Nexus.Password)
+    dependsOn: SetLastCommiter
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/pcc'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
     steps:
-      - script: git config user.email "azure-pipeline@rabobank.nl"
+      - checkout: self
+        persistCredentials: true
+        clean: true
+
+      - script: 'git config user.email "azure-pipeline@rabobank.nl"'
         displayName: Set git user email
 
-      - script: git config user.name "Azure pipeline"
+      - script: 'git config user.name "Azure pipeline"'
         displayName: Set git user name
 
-      - task: Gradle@2
-        displayName: Gradle build
+      - bash: 'git branch -D release || true'
+        displayName: Remove release branch
+
+      - bash: 'git switch -c release'
+        displayName: Switch to release branch
+
+      - task: Maven@3
+        displayName: Maven release clean, prepare, perform
         inputs:
-          gradleWrapperFile: 'gradlew'
-          options: '-build-file pcc.gradle'
+          mavenPomFile: pom.xml
+          options: '--batch-mode -s .mvn/settings.xml -DlocalCheckout=true -DpushChanges=false -DnexusUser=$(Nexus.User) -DnexusPassword=$(Nexus.Password)'
+          goals: 'release:clean release:prepare release:perform'
           publishJUnitResults: false
           jdkVersionOption: 1.8
-          tasks: 'publish'
+
+      - bash: 'git fetch --all && git push origin release:pcc --tags'
+        displayName: Push to pcc
+
+      - bash: 'git checkout pcc && git branch -D release'
+        displayName: Remove release branch

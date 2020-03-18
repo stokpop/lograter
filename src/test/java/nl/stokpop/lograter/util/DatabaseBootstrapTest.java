@@ -19,7 +19,7 @@ import org.junit.Test;
 
 public class DatabaseBootstrapTest {
 
-    private static final String TEST_DATABASE_PATH = "build/test-lograter.db";
+    private static final String TEST_DATABASE_PATH = "target/test-lograter.db";
 
 	@Test
 	public void testBootstrapDatabase() {
