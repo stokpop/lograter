@@ -65,11 +65,11 @@ publishing {
             def snapshotsRepoUrl = project.property("nexus.snapshots.repository")
             def releasesRepoUrl = project.property("nexus.releases.repository")
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            println "maven url:" + url;
             credentials {
                 username = System.getenv('nexus_repository_username')
                 password = System.getenv('nexus_repository_password')
             }
+            println "maven url:" + url + ", user: " + System.getenv('nexus_repository_username');
         }
     }
 }
