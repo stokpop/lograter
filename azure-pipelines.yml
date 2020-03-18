@@ -8,7 +8,7 @@ pool: Rabo-Build-Azure-Linux
 
 jobs:
   - job: Build
-    condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.SourceBranch'], 'refs/heads/pcc'))
+    condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.SourceBranch'], 'refs/heads/test-release'))
     variables:
       JAVA_TOOL_OPTIONS: -Duser.timezone=Europe/Amsterdam
 
@@ -27,7 +27,7 @@ jobs:
           testResultsFiles: 'build/test-results/test/TEST-*.xml'
 
   - job: SetLastCommiter
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/test-release')
     steps:
       - script: |
           UserName=`git log -1 --pretty=format:'%an'`
@@ -36,7 +36,7 @@ jobs:
         displayName: Set last commiter username
         
   - job: Release
-    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/pcc'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/test-release'), ne(dependencies.SetLastCommiter.outputs['setUserNameStep.UserName'], 'Azure pipeline'))
     variables:
       nexus_repository_username: $(Nexus.User)
       nexus_repository_password: $(Nexus.Password)
