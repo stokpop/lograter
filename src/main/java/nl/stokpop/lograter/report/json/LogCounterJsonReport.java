@@ -43,6 +43,7 @@ class LogCounterJsonReport {
 
     private final DecimalFormat nfTwoDecimals;
     private final DecimalFormat nfNoDecimals;
+    protected final DecimalFormat nfDoNotShowDecimalSepAlways;
 
     private final boolean addStubDelays;
 
@@ -56,6 +57,9 @@ class LogCounterJsonReport {
 
         nfNoDecimals = (DecimalFormat) NumberFormat.getInstance(DEFAULT_LOCALE);
         nfNoDecimals.applyPattern("0");
+
+        nfDoNotShowDecimalSepAlways = (DecimalFormat) DecimalFormat.getInstance(DEFAULT_LOCALE);
+        nfDoNotShowDecimalSepAlways.setDecimalSeparatorAlwaysShown(false);
 
         this.addStubDelays = addStubDelays;
 	}
@@ -76,7 +80,7 @@ class LogCounterJsonReport {
 
     }
 
-	void reportCounters(ObjectNode node, RequestCounterStorePair pair, ResponseTimeAnalyser analyser) {
+	void reportCounters(ObjectNode node, RequestCounterStorePair pair, ResponseTimeAnalyser analyser, Double [] reportPercentiles) {
 
         final RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
         final RequestCounterStore storeFailure = pair.getRequestCounterStoreFailure();
@@ -93,7 +97,7 @@ class LogCounterJsonReport {
 			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.findMatchingFailureAnalyserForSuccessCounter(storeFailure, analysisPeriod, analysisPeriodSuccessCounter, includeFailuresInAnalysis);
             if (myAnalyser.hasAnyHits()) {
                 ObjectNode counterNode = arrayNode.addObject();
-                createCounterNode(counterNode, myAnalyser, maxTpmTimestamp, overallTotalHits);
+                createCounterNode(counterNode, myAnalyser, maxTpmTimestamp, overallTotalHits, reportPercentiles);
             } else {
                 log.warn("Skipping line because there are no hits at all " +
                         "for the counter in the analysis period [{}].", successCounter.getCounterKey());
@@ -101,16 +105,16 @@ class LogCounterJsonReport {
 		}
 	}
 
-    void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser) {
-	 	reportCounters(node, new RequestCounterStorePair(store, null), totalAnalyser);
+    void reportCounters(ObjectNode node, RequestCounterStore store, ResponseTimeAnalyser totalAnalyser, Double [] reportPercentiles) {
+	 	reportCounters(node, new RequestCounterStorePair(store, null), totalAnalyser, reportPercentiles);
 	}
 
-	void reportOverallCounter(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long overallTotalHits) {
+	void reportOverallCounter(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long overallTotalHits, Double [] reportPercentiles) {
         ObjectNode counterNode = node.putObject("overall-counter");
-        createCounterNode(counterNode, analyser, maxTpmStartTimeStamp, overallTotalHits);
+        createCounterNode(counterNode, analyser, maxTpmStartTimeStamp, overallTotalHits, reportPercentiles);
 	}
 
-    private void createCounterNode(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits) {
+    void createCounterNode(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, Double [] reportPercentiles) {
 		node.put("name", analyser.getCounterKey());
         long hits = analyser.totalHits();
         node.put("hits", nfNoDecimals.format(hits));
@@ -125,8 +129,17 @@ class LogCounterJsonReport {
 		node.put("maxHitDurationMillis", nfNoDecimals.format(analyser.max()));
         final double stdDevHitDuration = analyser.stdDevHitDuration();
         node.put("stdDevHitDurationMillis", nfNoDecimals.format(stdDevHitDuration));
-		node.put("percentile95HitDurationMillis", nfNoDecimals.format(analyser.percentileHitDuration(95)));
-		node.put("percentile99HitDurationMillis", nfNoDecimals.format(analyser.percentileHitDuration(99)));
+        if ((reportPercentiles == null) || (reportPercentiles.length == 0)) {
+            // add the defaults like before
+            node.put("percentile95HitDurationMillis", nfNoDecimals.format(analyser.percentileHitDuration(95)));
+            node.put("percentile99HitDurationMillis", nfNoDecimals.format(analyser.percentileHitDuration(99)));
+        } else {
+            for (Double each : reportPercentiles) {
+
+                String eachFieldName = String.format("percentile%sHitDurationMillis", nfDoNotShowDecimalSepAlways.format(each));
+                node.put(eachFieldName, nfNoDecimals.format(analyser.percentileHitDuration(each)));
+            }
+        }
         final TransactionCounterResult tps = analyser.maxHitsPerSecond();
 		node.put("maxHitsPerSecond", nfNoDecimals.format(tps.getMaxHitsPerDuration()));
 		node.put("maxHitsPerSecondTimestamp", tps.getMaxHitsPerDuration() > 1 ? DateUtils.formatToStandardDateTimeString(tps.getMaxHitsPerDurationTimestamp()) : "");
