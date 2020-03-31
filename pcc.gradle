@@ -45,6 +45,12 @@ javadoc {
     options.encoding = "UTF-8"
 }
 
+tasks.withType(PublishToMavenRepository) {
+    doFirst {
+        println("Publishing ${publication.groupId}:${publication.artifactId}:${publication.version} to ${repository.url}")
+    }
+}
+
 task customFatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'nl.stokpop.lograter.LogRater'
@@ -69,7 +75,9 @@ publishing {
                 username = System.getenv('nexus_repository_username')
                 password = System.getenv('nexus_repository_password')
             }
-            println "maven url:" + url + ", user: " + System.getenv('nexus_repository_username');
+            println "maven url:                 " + url;
+            println "nexus_repository_username: " + System.getenv('nexus_repository_username') + " *";
+            println "*)  when null or incorrect check/set your environment variables: nexus_repository_xxx";
         }
     }
 }
