@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Peter Paul Bakker, Stokpop Software Solutions
+ * Copyright (C) 2020 Peter Paul Bakker, Stokpop Software Solutions
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public final class PerformanceCenterCalculator {
         final long startTimeMs = testStartTimeSecEpoch * 1000;
         final ZoneId zoneId = ZoneId.systemDefault();
         final boolean isDayLightSavingActive = DateUtils.isDayLightSavingActive(startTimeMs, zoneId);
-        // the offset is bigger because it seems HP is adding DST to epoch time…
+        // the offset is bigger because it seems HP is adding DST to epoch time???
         final long dayLightSavingsOffset = isDayLightSavingActive ? -3600 : 0;
 
         final long localStartTimeSecEpoch = testStartTimeSecEpoch + dayLightSavingsOffset;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Peter Paul Bakker, Stokpop Software Solutions
+ * Copyright (C) 2020 Peter Paul Bakker, Stokpop Software Solutions
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class InLineReplacer {
      */
     public static String replaceUrlInRequestTriplet(String text, Function<String, String> replacer) {
         Matcher matcher = PATTERN_REQUEST_URL.matcher(text);
-        // java 9+: Matcher.replaceAll​(Function<MatchResult,String> replacer)
+        // java 9+: Matcher.replaceAll???(Function<MatchResult,String> replacer)
         return replaceAll(matcher, s -> replaceUrlPathAfterSlashes(s, replacer));
     }
 
@@ -368,7 +368,7 @@ public class InLineReplacer {
     }
 
     public static boolean allPunctuation(String text) {
-        return text.chars().allMatch(c -> ",.;:/ []{}=-+_()!\\<>?*&^%$#@|'\"±§~`".indexOf(c) != -1);
+        return text.chars().allMatch(c -> ",.;:/ []{}=-+_()!\\<>?*&^%$#@|'\"????~`".indexOf(c) != -1);
     }
 
     public static String replaceClassname(String classname, Function<String, String> replacer) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Peter Paul Bakker, Stokpop Software Solutions
+ * Copyright (C) 2020 Peter Paul Bakker, Stokpop Software Solutions
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package nl.stokpop.lograter.command;
 
 public enum BaseUnit {
-    microseconds("microseconds", "μs"), milliseconds("milliseconds", "ms");
+    microseconds("microseconds", "??s"), milliseconds("milliseconds", "ms");
 
     private String fullName;
     private String shortName;
