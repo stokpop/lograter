@@ -42,7 +42,7 @@ public class LogbackDirective implements LogbackElement {
      * @param directive only the directive, e.g. X
      * @return a new LogbackDirective. The variable (e.g. userid) still needs to be set if needed.
      */
-    public static LogbackDirective getInstance(String directive) {
+    public static LogbackDirective from(String directive) {
         return new LogbackDirective(directive, null);
 
     }
@@ -53,7 +53,7 @@ public class LogbackDirective implements LogbackElement {
      * @param variable variable of the directive, such as userid in %X{userid}
      * @return a new LogbackDirective. The variable (e.g. userid) still needs to be set if needed.
      */
-    public static LogbackDirective getInstance(String directive, String variable) {
+    public static LogbackDirective from(String directive, String variable) {
         if (directive == null) {
             throw new LogRaterException("Directive cannot be null.");
         }

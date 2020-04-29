@@ -124,7 +124,7 @@ public class NginxLogFormatParser<T extends LogEntry> implements LogFormatParser
 			}
 			if (isDirective && !(Character.isLetter(c) || c == '-' || c == '_')) {
 				isDirective = false;
-                LogbackDirective var = LogbackDirective.getInstance(currentText.toString());
+                LogbackDirective var = LogbackDirective.from(currentText.toString());
                 elements.add(var);
 				currentText.setLength(0);
 			}

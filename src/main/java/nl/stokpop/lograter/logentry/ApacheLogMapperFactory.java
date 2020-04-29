@@ -73,6 +73,7 @@ public class ApacheLogMapperFactory {
 		
         String dateTimePattern = determineDateTimePattern(elements);
 
+        // either t or msec_frac or usec_frac can be called first, add up both for epoch timestamp
 		mappers.put("t",
 			new DateLogEntryMapper<AccessLogEntry>(dateTimePattern) {
 				public void writeToLogEntry(String value, String variable, AccessLogEntry e) {

@@ -124,19 +124,14 @@ public class ApacheLogFormatParser<T extends LogEntry> implements LogFormatParse
 			if (wasDirective && Character.isLetter(c)) {
 				String directiveLetter = String.valueOf(c);
 				wasDirective = false;
-				if (variable != null) {
-					// special case for %{msec_frac}t and %{usec_frac}t
-					if ("t".equals(directiveLetter) && ("msec_frac".equals(variable) || "usec_frac".equals(variable))) {
-							elements.add(LogbackDirective.getInstance(variable));
-					}
-					else {
-						elements.add(LogbackDirective.getInstance(directiveLetter, variable));
-					}
-					variable = null;
+				// special case for %{msec_frac}t and %{usec_frac}t
+				if ("t".equals(directiveLetter) && ("msec_frac".equals(variable) || "usec_frac".equals(variable))) {
+						elements.add(LogbackDirective.from(variable));
 				}
 				else {
-					throw new LogRaterException("Missing variable value for directive : " + directiveLetter + " in pattern: " + pattern);
+					elements.add(LogbackDirective.from(directiveLetter, variable));
 				}
+				variable = null;
 				continue;
 			}
 			if (!isDirective && c == '%') {
@@ -190,10 +185,10 @@ public class ApacheLogFormatParser<T extends LogEntry> implements LogFormatParse
 	private static void parseDirective(List<LogbackElement> elements, String directive) {
 	    if (directive.length() > 1) {
 			// we currently only have single character directives so rest is literal
-			elements.add(LogbackDirective.getInstance(directive.substring(0, 1)));
+			elements.add(LogbackDirective.from(directive.substring(0, 1)));
 			elements.add(new LogbackLiteral(directive.substring(1)));
 		} else if (directive.length() == 1) {
-			elements.add(LogbackDirective.getInstance(directive.substring(0, 1)));
+			elements.add(LogbackDirective.from(directive.substring(0, 1)));
 		} else {
 	        throw new LogRaterException("Unexpected empty directive at " + elements);
         }

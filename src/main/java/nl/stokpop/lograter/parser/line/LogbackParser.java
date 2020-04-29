@@ -159,7 +159,7 @@ public class LogbackParser<T extends LogbackLogEntry> {
             if (c == '%') {
                 if (isVariable) {
                     // two variables in a row, close previous one
-                    LogbackDirective var = LogbackDirective.getInstance(literal.toString());
+                    LogbackDirective var = LogbackDirective.from(literal.toString());
                     elements.add(var);
                     literal.setLength(0);
                 }
@@ -172,7 +172,7 @@ public class LogbackParser<T extends LogbackLogEntry> {
             if (isVariable && c == '{') {
                 isParameter = true;
                 isVariable = false;
-                LogbackDirective var = LogbackDirective.getInstance(literal.toString());
+                LogbackDirective var = LogbackDirective.from(literal.toString());
                 elements.add(var);
                 literal.setLength(0);
                 // skip this character
@@ -191,7 +191,7 @@ public class LogbackParser<T extends LogbackLogEntry> {
             }
             else if (isVariable && !Character.isLetter(c)) {
                 isVariable = false;
-                LogbackDirective var = LogbackDirective.getInstance(literal.toString());
+                LogbackDirective var = LogbackDirective.from(literal.toString());
                 elements.add(var);
                 literal.setLength(0);
             }
@@ -199,7 +199,7 @@ public class LogbackParser<T extends LogbackLogEntry> {
         }
 		// final element
 		if (isVariable) {
-			LogbackDirective var = LogbackDirective.getInstance(literal.toString());
+			LogbackDirective var = LogbackDirective.from(literal.toString());
 			elements.add(var);
 		}
 		else {

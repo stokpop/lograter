@@ -112,7 +112,7 @@ public class IisLogFormatParser {
 
         for (char c : iisPattern) {
             if (c == ' ') {
-                LogbackDirective entry = LogbackDirective.getInstance(literal.toString());
+                LogbackDirective entry = LogbackDirective.from(literal.toString());
                 elements.add(entry);
                 literal.setLength(0);
                 elements.add(new LogbackLiteral(" "));
@@ -123,7 +123,7 @@ public class IisLogFormatParser {
         }
 		// final element
 		if (literal.length() > 0) {
-            LogbackDirective entry = LogbackDirective.getInstance(literal.toString());
+            LogbackDirective entry = LogbackDirective.from(literal.toString());
 			elements.add(entry);
 			// make sure the final var is being processed, merge a final literal
 			elements.add(new LogbackLiteral(""));

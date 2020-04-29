@@ -37,7 +37,7 @@ public class ApacheLogMapperFactoryTest {
     public void testHttpMethodNoneOrUnknown() {
         List<LogbackElement> elements = new ArrayList<>();
         elements.add(new LogbackLiteral(";\""));
-        elements.add(LogbackDirective.getInstance("r"));
+        elements.add(LogbackDirective.from("r"));
         elements.add(new LogbackLiteral("\";"));
         Map<String, LogEntryMapper<AccessLogEntry>> mapperMap = ApacheLogMapperFactory.initializeMappers(elements, null);
         ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry.class);
@@ -74,7 +74,7 @@ public class ApacheLogMapperFactoryTest {
 
         List<LogbackElement> elements = new ArrayList<>();
         elements.add(new LogbackLiteral(";"));
-        elements.add(LogbackDirective.getInstance("D"));
+        elements.add(LogbackDirective.from("D"));
         elements.add(new LogbackLiteral(";"));
         Map<String, LogEntryMapper<AccessLogEntry>> mapperMap = ApacheLogMapperFactory.initializeMappers(elements);
         ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry.class);

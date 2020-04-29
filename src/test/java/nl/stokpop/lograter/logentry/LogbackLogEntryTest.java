@@ -41,7 +41,7 @@ public class LogbackLogEntryTest {
     private void checkPatternMatching(String directive) {
         List<LogbackElement> elements = new ArrayList<>();
         elements.add(new LogbackLiteral(";"));
-        elements.add(LogbackDirective.getInstance(directive));
+        elements.add(LogbackDirective.from(directive));
         elements.add(new LogbackLiteral(";"));
         Map<String, LogEntryMapper<LogbackLogEntry>> mapperMap = LogbackLogEntry.initializeLogBackMappers(elements);
         LogbackParser<LogbackLogEntry> parser = new LogbackParser<>(elements, mapperMap, LogbackLogEntry.class);
