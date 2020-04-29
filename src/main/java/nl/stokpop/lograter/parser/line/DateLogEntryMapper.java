@@ -20,6 +20,7 @@ import nl.stokpop.lograter.graphs.AbstractGraphCreator;
 import nl.stokpop.lograter.logentry.LogEntry;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,11 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 	public DateLogEntryMapper(String dateFormat) {
 		DateTimeFormatter tempDateTimeFormatter;
 		try {
-			tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(AbstractGraphCreator.DEFAULT_LOCALE);
+			if ("ISO8601".equalsIgnoreCase(dateFormat)) {
+				tempDateTimeFormatter = ISODateTimeFormat.dateTime();
+			} else {
+				tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(AbstractGraphCreator.DEFAULT_LOCALE);
+			}
 		} catch(IllegalArgumentException e) {
 			if (dateFormat.contains(",")) {
 				int idx = dateFormat.indexOf(',');

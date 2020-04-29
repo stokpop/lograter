@@ -81,7 +81,8 @@ public class RequestCounterJsonReport implements LogReport {
                 long maxTpmStartTimeStamp = analyser.maxHitsPerMinute().getMaxHitsPerDurationTimestamp();
                 long overallTotalHits = analyser.totalHits();
 
-                jsonReport.reportOverallCounter(rootNode, analyser, maxTpmStartTimeStamp, overallTotalHits);
+                Double [] reportPercentiles = config.getReportPercentiles();
+                jsonReport.reportOverallCounter(rootNode, analyser, maxTpmStartTimeStamp, overallTotalHits, reportPercentiles);
 
                 ArrayNode counterStoresNodes = rootNode.putArray("counterStores");
                 for (RequestCounterStorePair storePair : dataBundle.getRequestCounterStorePairs()) {
@@ -89,9 +90,9 @@ public class RequestCounterJsonReport implements LogReport {
                     RequestCounterStore successStore = storePair.getRequestCounterStoreSuccess();
                     counterStoreNode.put("name", successStore.getName());
                     if (dataBundle.doesSupportFailureRequestCounters()) {
-                        jsonReport.reportCounters(counterStoreNode, storePair, analyser);
+                        jsonReport.reportCounters(counterStoreNode, storePair, analyser, reportPercentiles);
                     } else {
-                        jsonReport.reportCounters(counterStoreNode, successStore, analyser);
+                        jsonReport.reportCounters(counterStoreNode, successStore, analyser, reportPercentiles);
                     }
                 }
             }

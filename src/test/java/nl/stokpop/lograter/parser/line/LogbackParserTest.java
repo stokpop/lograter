@@ -19,9 +19,7 @@ import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.logentry.LogbackLogEntry;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class LogbackParserTest {
     
@@ -70,6 +68,28 @@ public class LogbackParserTest {
         assertEquals("", entry.getField("boo"));
 
     }
+
+    @Test
+	public void testParseFormattingFromSomeProject() {
+    	// d{ISO8601}        date ISO8601 e.g. 2006-10-20 14:06:49,812
+		// thread            name of the thread
+		// p                 level of the logging event
+		// C{0}              class name caller without package name prefix
+		// X{correlationId}  MDC (mapped diagnostic context) {key:-defaultVal}
+		// m                 application-supplied message
+		// n                 platform dependent line separator char or chars
+		// xEx{short}        short stack trace of exception associated with logging event annotated with packaging info
+    	String logbackpattern = "[%d{ISO8601}] [%thread][%p][%C{0}] transactionId=%X{correlationId} - %m%n%xEx{short}";
+		LogbackParser<LogbackLogEntry> parser = LogbackParser.createLogbackParser(logbackpattern);
+
+		String logline = "[2019-04-06T20:31:00.159+02:00] [myThread-3][ERROR][Classname] transactionId=mdcCorrId - app message\n" +
+				"mainPackage.foo.bar.TestException: Houston we have a problem\n" +
+				"  at mainPackage.foo.bar.TestThrower.fire(TestThrower.java:22)) ~[wombat-1.3.jar:1.3]";
+		LogbackLogEntry entry = parser.parseLogLine(logline);
+
+		assertEquals("myThread-3", entry.getThreadName());
+		assertEquals("ERROR", entry.getLogLevel());
+	}
 
     @Test
     public void testParseFormattingFailure() {
