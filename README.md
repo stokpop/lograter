@@ -4,7 +4,7 @@ LogRater analyses performance behaviour of your applications and services.
 
 Feed logs from your web and application servers to generate performance reports.
 
-LogRater can be run stand-alone from the command line, or be included as jar in any Java project.
+LogRater can be run stand-alone from the command line, or can be included as jar in any Java project.
 
 LogRater is sponsored by Rabobank.
 
