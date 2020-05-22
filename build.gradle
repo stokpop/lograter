@@ -48,6 +48,7 @@ compileJava {
 }
 javadoc {
     options.encoding = "UTF-8"
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 task customFatJar(type: Jar) {
@@ -71,7 +72,7 @@ license {
     header = file("src/main/resources/META-INF/LICENSE.txt")
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
     ext.name = 'Peter Paul Bakker, Stokpop Software Solutions'
-    exclude "**/*.txt"
+    excludes(["**/*.txt", "**/*.properties", "src/test/resources/**"])
     mapping {
         // the standard java style makes intellij complain about dangling javadoc
         java = "SLASHSTAR_STYLE"
