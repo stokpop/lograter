@@ -23,4 +23,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
+      # env TZ: needed for unit tests with time to work correctly
+      env:
+        TZ: Europe/Amsterdam
       run: ./gradlew build
