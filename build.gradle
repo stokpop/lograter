@@ -69,10 +69,12 @@ publishing {
 }
 
 license {
-    header = file("src/main/resources/META-INF/LICENSE.txt")
+    header = rootProject.file("src/main/resources/META-INF/LICENSE.txt")
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
     ext.name = 'Peter Paul Bakker, Stokpop Software Solutions'
-    excludes(["**/*.txt", "**/*.properties", "src/test/resources/**"])
+    excludes(["**/*.txt", "**/*.properties", "src/test/resources/**/*.*"])
+    // keeps complaining about header not present, so added this
+    skipExistingHeaders = true
     mapping {
         // the standard java style makes intellij complain about dangling javadoc
         java = "SLASHSTAR_STYLE"
