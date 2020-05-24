@@ -3,10 +3,11 @@ import org.gradle.api.plugins.internal.DefaultJavaPluginExtension
 plugins {
     id 'java'
     id 'java-library'
-    id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'maven-publish'
     id 'signing'
+    id 'jacoco'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
+    id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'com.github.ben-manes.versions' version '0.28.0'
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'io.codearte.nexus-staging' version '0.21.2'
@@ -49,6 +50,18 @@ compileJava {
 javadoc {
     options.encoding = "UTF-8"
     options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+test {
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
 }
 
 task customFatJar(type: Jar) {
