@@ -11,6 +11,7 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.28.0'
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'io.codearte.nexus-staging' version '0.21.2'
+    id 'com.github.spotbugs' version '4.2.2'
 }
 
 repositories {
@@ -62,6 +63,10 @@ jacocoTestReport {
         csv.enabled false
         html.destination file("${buildDir}/jacocoHtml")
     }
+}
+
+spotbugs {
+    ignoreFailures = true
 }
 
 task customFatJar(type: Jar) {
