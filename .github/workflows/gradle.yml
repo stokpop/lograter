@@ -29,6 +29,4 @@ jobs:
       run: ./gradlew build
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@0.2.0
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
