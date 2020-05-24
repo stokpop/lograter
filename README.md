@@ -1,5 +1,7 @@
 # LogRater
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9088ddf53d0f4de8a3ae77ed93d812a9)](https://app.codacy.com/manual/peter.paul.bakker/lograter?utm_source=github.com&utm_medium=referral&utm_content=stokpop/lograter&utm_campaign=Badge_Grade_Dashboard)
+
 LogRater analyses performance behaviour of your applications and services.
 
 Feed logs from your web and application servers to generate performance reports.
