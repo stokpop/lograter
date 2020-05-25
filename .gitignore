@@ -6,4 +6,5 @@ target
 pom.xml.releaseBackup
 lograter.db
 .gradle
+out
 build
