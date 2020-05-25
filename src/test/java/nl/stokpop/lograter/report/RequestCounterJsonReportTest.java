@@ -29,6 +29,7 @@ import nl.stokpop.lograter.report.json.RequestCounterJsonReport;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 import org.junit.Rule;
@@ -37,7 +38,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -254,11 +256,11 @@ public class RequestCounterJsonReportTest {
     private String createJsonReport(RequestCounterDataBundle bundle) throws IOException {
         RequestCounterJsonReport report = new RequestCounterJsonReport(bundle);
 		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-			try (PrintStream printStream = new PrintStream(outputStream)) {
+			try (PrintWriter printStream = FileUtils.createBufferedPrintWriterWithUTF8(outputStream)) {
 				report.report(printStream);
 				printStream.flush();
 			}
-			return outputStream.toString("UTF-8");
+			return outputStream.toString(StandardCharsets.UTF_8.name());
 		}
     }
 }

@@ -19,6 +19,7 @@ import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.processor.Processor;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.SessionIdParser;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 import nl.stokpop.lograter.util.linemapper.LineMapperCallback;
@@ -26,7 +27,6 @@ import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -47,7 +47,7 @@ public class AccessLogToCsvProcessor implements Processor<AccessLogEntry> {
     private boolean firstLine = true;
 
 	public AccessLogToCsvProcessor(OutputStream csvOutputStream, LineMapperSection mapper, SessionIdParser sessionIdParser) {
-        this.csvWriter = new PrintWriter(new BufferedOutputStream(csvOutputStream));
+        this.csvWriter = FileUtils.createBufferedPrintWriterWithUTF8(csvOutputStream);
         this.mapper = mapper;
         this.sessionIdParser = sessionIdParser;
     }

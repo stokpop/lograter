@@ -47,28 +47,29 @@ public class GcVerboseOpenJdk18Parser {
 
 	// 2017-03-20T15:48:07.506-0100: 1.427: [GC (Allocation Failure) [PSYoungGen: 33280K->4395K(38400K)] 33280K->4403K(125952K), 0.0075649 secs] [Times: user=0.01 sys=0.00, real=0.01 secs]
 	private static final Pattern patternJdk8Gc =
-			Pattern.compile("(?<timestamp>.*): (.*): \\[GC \\((?<gcType>.*)\\) \\[PSYoungGen: (?<youngBefore>[0-9]*)K->(?<youngAfter>.*)K\\((?<youngTotal>.*)K\\)\\] (?<heapBefore>.*)K->(?<heapAfter>.*)K\\((?<heapTotal>.*)K\\), (?<gcDurationSec>.*) secs\\] \\[Times: user=(.*) sys=(.*), real=(.*) secs\\]");
+			Pattern.compile("(?<timestamp>.*): (.*): \\[GC \\((?<gcType>.*)\\) \\[PSYoungGen: (?<youngBefore>[0-9]*)K->(?<youngAfter>.*)K\\((?<youngTotal>.*)K\\)] (?<heapBefore>.*)K->(?<heapAfter>.*)K\\((?<heapTotal>.*)K\\), (?<gcDurationSec>.*) secs] \\[Times: user=(.*) sys=(.*), real=(.*) secs\\]");
 	// 2017-03-20T15:48:10.579-0100: 4.499: [Full GC (Metadata GC Threshold) [PSYoungGen: 5640K->0K(139264K)] [ParOldGen: 8793K->8907K(52736K)] 14434K->8907K(192000K), [Metaspace: 21121K->21121K(1069056K)], 0.0390239 secs] [Times: user=0.12 sys=0.01, real=0.04 secs]
 	private static final Pattern patternJdk8FullGc =
-			Pattern.compile("(?<timestamp>.*): (.*): \\[Full GC \\((?<gcType>.*)\\) \\[PSYoungGen: (?<youngBefore>[0-9]*)K->(?<youngAfter>.*)K\\((?<youngTotal>.*)K\\)\\] \\[ParOldGen: (?<oldBefore>.*)K->(?<oldAfter>.*)K\\((?<oldTotal>.*)K\\)\\] (?<heapBefore>.*)K->(?<heapAfter>.*)K\\((?<heapTotal>.*)K\\), \\[Metaspace: (?<metaBefore>.*)K->(?<metaAfter>.*)K\\((?<metaTotal>.*)K\\)\\], (?<gcDurationSec>.*) secs\\] \\[Times: user=(.*) sys=(.*), real=(?<realTime>.*) secs\\]");
+			Pattern.compile("(?<timestamp>.*): (.*): \\[Full GC \\((?<gcType>.*)\\) \\[PSYoungGen: (?<youngBefore>[0-9]*)K->(?<youngAfter>.*)K\\((?<youngTotal>.*)K\\)] \\[ParOldGen: (?<oldBefore>.*)K->(?<oldAfter>.*)K\\((?<oldTotal>.*)K\\)] (?<heapBefore>.*)K->(?<heapAfter>.*)K\\((?<heapTotal>.*)K\\), \\[Metaspace: (?<metaBefore>.*)K->(?<metaAfter>.*)K\\((?<metaTotal>.*)K\\)], (?<gcDurationSec>.*) secs] \\[Times: user=(.*) sys=(.*), real=(?<realTime>.*) secs]");
 
 	public List<GcLogEntry> analyse(File gcFile) throws IOException {
 
 		List<GcLogEntry> entries = new ArrayList<>();
 
-		try (BufferedReader gcFileInput = FileUtils.getBufferedReader(gcFile)) {
+		try (BufferedReader gcFileInput = FileUtils.createBufferedReader(gcFile)) {
 
 			String line;
 			int gcCount = 0;
+
 			while ((line = gcFileInput.readLine()) != null) {
 
-				GcLogEntry.GcLogEntryBuilder builder = new GcLogEntry.GcLogEntryBuilder();
 				boolean foundMatch = false;
 
 				if (line.trim().length() == 0) {
 					continue;
 				}
 
+				GcLogEntry.GcLogEntryBuilder builder = new GcLogEntry.GcLogEntryBuilder();
 				Matcher gcMatcher = patternJdk8Gc.matcher(line);
 				if (gcMatcher.find()) {
 					foundMatch = true;

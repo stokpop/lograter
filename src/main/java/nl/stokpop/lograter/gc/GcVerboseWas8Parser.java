@@ -72,11 +72,11 @@ class GcVerboseWas8Parser {
 
     //      <sys-start id="3" timestamp="2014-08-15T19:34:58.086" intervalms="3417.370" />
     private static final Pattern patternWas8sysStart =
-            Pattern.compile("<sys-start id=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([\\.0-9]+)\" />");
+            Pattern.compile("<sys-start id=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([.0-9]+)\" />");
 
     //      or in new fix-pack (8.5.5.4?): <sys-start reason="explicit" id="65453" timestamp="2015-03-28T01:25:02.529" intervalms="101255.969" />
     private static final Pattern patternWas8sysStartV2 =
-            Pattern.compile("<sys-start reason=\"(.*)\" id=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([\\.0-9]+)\" />");
+            Pattern.compile("<sys-start reason=\"(.*)\" id=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([.0-9]+)\" />");
 
     //      <sys-end id="14" timestamp="2014-08-15T19:34:58.231" />
     private static final Pattern patternWas8sysEnd =
@@ -84,11 +84,11 @@ class GcVerboseWas8Parser {
 
     //      <exclusive-end id="22220" timestamp="2014-01-30T18:20:48.451" durationms="145.038" />
     private static final Pattern patternWas8ExclusiveEnd =
-            Pattern.compile("<exclusive-end id=\"([0-9]+)\" timestamp=\"(.*)\" durationms=\"([\\.0-9]+)\" />");
+            Pattern.compile("<exclusive-end id=\"([0-9]+)\" timestamp=\"(.*)\" durationms=\"([.0-9]+)\" />");
 
     //      <af-start id="18416" totalBytesRequested="8200" timestamp="2014-01-30T18:06:20.871" intervalms="2719.520" />
     private static final Pattern patternWas8afStart =
-            Pattern.compile("<af-start id=\"([0-9]+)\" totalBytesRequested=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([\\.0-9]+)\" />");
+            Pattern.compile("<af-start id=\"([0-9]+)\" totalBytesRequested=\"([0-9]+)\" timestamp=\"(.*)\" intervalms=\"([.0-9]+)\" />");
 
     //      <cycle-end id="16637" type="scavenge" contextid="16631" timestamp="2014-10-29T16:37:11.112" />
     private static final Pattern patternWas8afEnd =
@@ -100,7 +100,7 @@ class GcVerboseWas8Parser {
 
         List<GcLogEntry> entries = new ArrayList<>();
 
-	    try (BufferedReader gcFileInput = FileUtils.getBufferedReader(gcFile)) {
+	    try (BufferedReader gcFileInput = FileUtils.createBufferedReader(gcFile)) {
 
 		    String line;
 		    boolean isInAfCycle = false;

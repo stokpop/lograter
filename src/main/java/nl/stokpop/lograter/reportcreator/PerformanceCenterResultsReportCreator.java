@@ -21,12 +21,7 @@ import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.command.CommandMain;
 import nl.stokpop.lograter.command.CommandPerformanceCenterResults;
 import nl.stokpop.lograter.graphs.LogGraphCreator;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterConfig;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterDataBundle;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterResultsData;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterResultsReader;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterResultsReaderAccessDb;
-import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterResultsReaderSqlite;
+import nl.stokpop.lograter.processor.performancecenter.*;
 import nl.stokpop.lograter.report.text.PerformanceCenterTextReport;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.time.DateUtils;
@@ -36,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +43,7 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 	private static final Logger log = LoggerFactory.getLogger(PerformanceCenterResultsReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandPerformanceCenterResults cmdPCResults) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandPerformanceCenterResults cmdPCResults) throws IOException {
 		List<String> files = cmdPCResults.files;
 		if (files.size() != 1) {
 			throw new LogRaterException("Please supply one results database path (Results.mdb or Results.db) from performance center.");

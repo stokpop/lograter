@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Create an application log report.
@@ -47,7 +47,7 @@ public class ApplicationLogReportCreator implements ReportCreatorWithCommand<Com
     private static final Logger log = LoggerFactory.getLogger(ApplicationLogReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandApplicationLog cmdApplicationLog) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandApplicationLog cmdApplicationLog) throws IOException {
 		String pattern = StringUtils.useDefaultOrGivenValue(
 				"%d;%t;%p;%marker;%X{session-id};%X{alevel};%X{atype};%X{aid};%X{customer};%X{service};%X{serviceName};%X{serviceId};%c;%m%n %xEx{short}",
 				cmdApplicationLog.logPattern);

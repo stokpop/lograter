@@ -17,31 +17,14 @@ package nl.stokpop.lograter;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import nl.stokpop.lograter.command.AbstractCommandBasic;
-import nl.stokpop.lograter.command.CommandAccessLog;
-import nl.stokpop.lograter.command.CommandAccessLogToCsv;
-import nl.stokpop.lograter.command.CommandApplicationLog;
-import nl.stokpop.lograter.command.CommandGcVerboseLog;
-import nl.stokpop.lograter.command.CommandIisLog;
-import nl.stokpop.lograter.command.CommandJMeter;
-import nl.stokpop.lograter.command.CommandLargeAllocationsToCsv;
-import nl.stokpop.lograter.command.CommandMain;
-import nl.stokpop.lograter.command.CommandPerformanceCenterResults;
-import nl.stokpop.lograter.command.LogRaterCommand;
+import nl.stokpop.lograter.command.*;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.report.LogReport;
 import nl.stokpop.lograter.report.ReportWriter;
-import nl.stokpop.lograter.reportcreator.AccessLogReportCreator;
-import nl.stokpop.lograter.reportcreator.AccessLogToCsvReportCreator;
-import nl.stokpop.lograter.reportcreator.ApplicationLogReportCreator;
-import nl.stokpop.lograter.reportcreator.GcVerboseLogReportCreator;
-import nl.stokpop.lograter.reportcreator.IisLogReportCreator;
-import nl.stokpop.lograter.reportcreator.JMeterReportCreator;
-import nl.stokpop.lograter.reportcreator.LargeAllocationsReportCreator;
-import nl.stokpop.lograter.reportcreator.PerformanceCenterResultsReportCreator;
-import nl.stokpop.lograter.reportcreator.ReportCreator;
+import nl.stokpop.lograter.reportcreator.*;
 import nl.stokpop.lograter.util.DatabaseBootstrap;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -51,14 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.io.PrintWriter;
+import java.util.*;
 
 public class LogRater {
 
@@ -68,14 +45,14 @@ public class LogRater {
     // Do not make static to prevent static methods from calling log without being initialized.
     private Logger log;
 
-	private PrintStream outputStream;
+	private PrintWriter printWriter;
 
-    public LogRater(PrintStream outputStream) {
-        this.outputStream = outputStream;
+    public LogRater(PrintWriter printWriter) {
+        this.printWriter = printWriter;
     }
 
 	public static void main(String[] args) throws Exception {
-        new LogRater(System.out).startLogRater(args);
+        new LogRater(FileUtils.createBufferedPrintWriterWithUTF8(System.out)).startLogRater(args);
 	}
 
     /**
@@ -123,10 +100,10 @@ public class LogRater {
         String version = properties.getProperty("project.version", "Unknown");
         cmdMain.setLogFileRaterVersion(version);
 
-        outputStream.println("LogRater version: " + cmdMain.getLogFileRaterVersion());
+        printWriter.println("LogRater version: " + cmdMain.getLogFileRaterVersion());
 
 		String commandLine = StringUtils.recreateCommandLine(args);
-		outputStream.println("Command line: " + commandLine);
+		printWriter.println("Command line: " + commandLine);
 
 		Map<LogRaterCommand, ReportCreator> reportCreators = new HashMap<>(extraCommands);
 
@@ -160,7 +137,7 @@ public class LogRater {
             jc.parse(args);
         } catch (ParameterException e) {
             final String message = "Unknown command: " + e.getMessage();
-            outputStream.println(message);
+            printWriter.println(message);
             simpleUsage(commandNamesSet);
             throw new LogRaterException(message, e);
         }
@@ -200,7 +177,7 @@ public class LogRater {
         if (entry.isPresent()) {
             Map.Entry<LogRaterCommand, ReportCreator> creatorLightEntry = entry.get();
             ReportCreator reportCreatorLight = creatorLightEntry.getValue();
-            reportCreatorLight.createReport(outputStream, cmdMain);
+            reportCreatorLight.createReport(printWriter, cmdMain);
         } else {
             throw new LogRaterException("No implementation for command: " + parsedCommand);
         }
@@ -213,7 +190,7 @@ public class LogRater {
 		for (String commandName :  commands) {
 			commandsToUse.append(commandName).append(", ");
 		}
-		outputStream.println("Use one of the following commands after the [options] below: " + commandsToUse.subSequence(0, commandsToUse.length() - 2) +
+		printWriter.println("Use one of the following commands after the [options] below: " + commandsToUse.subSequence(0, commandsToUse.length() - 2) +
 				"\nUse --help [command] for command specific help.");
 		jcSimple.usage();
 	}
@@ -231,7 +208,7 @@ public class LogRater {
 
     }
 
-	public static void writeReport(LogReport report, String outputFilename, File reportDirectory, PrintStream out, TimePeriod analysisPeriod) throws IOException {
+	public static void writeReport(LogReport report, String outputFilename, File reportDirectory, PrintWriter out, TimePeriod analysisPeriod) throws IOException {
 		if (outputFilename != null) {
 			ReportWriter.write(outputFilename, reportDirectory, report, analysisPeriod);
 		}

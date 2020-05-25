@@ -23,7 +23,7 @@ import nl.stokpop.lograter.processor.performancecenter.PerformanceCenterDataBund
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Locale;
 
 import static nl.stokpop.lograter.processor.performancecenter.PerformanceCenterAggregationGranularity.AggregationGranularityType.LRA_FILE_EXACT;
@@ -46,7 +46,7 @@ public class PerformanceCenterTextReport extends LogCounterTextReport {
 	}
 
 	@Override
-	public void report(PrintStream out, TimePeriod analysisPeriod) {
+	public void report(PrintWriter out, TimePeriod analysisPeriod) {
         RequestCounterStorePair pair = data.getTotalRequestCounterStorePair();
 
 		PerformanceCenterConfig config = data.getConfig();

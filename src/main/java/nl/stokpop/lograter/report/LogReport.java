@@ -18,8 +18,8 @@ package nl.stokpop.lograter.report;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public interface LogReport {
-    void report(PrintStream printStream, TimePeriod analysisPeriod) throws IOException;
+    void report(PrintWriter writer, TimePeriod analysisPeriod) throws IOException;
 }

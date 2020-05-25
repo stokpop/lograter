@@ -61,14 +61,14 @@ public class GcVerboseWas7Parser {
 
     // use the 2nd occurrance
     private static final Pattern timeTotalmsPattern = Pattern
-            .compile("<time totalms=\"([\\.0-9]+)\" />");
+            .compile("<time totalms=\"([.0-9]+)\" />");
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("MMM dd HH:mm:ss yyyy").withLocale(new Locale("US"));
 
     public List<GcLogEntry> analyse(File gcFile) throws IOException {
         List<GcLogEntry> entries = new ArrayList<>();
 
-        try (BufferedReader gcFileInput = FileUtils.getBufferedReader(gcFile)) {
+        try (BufferedReader gcFileInput = FileUtils.createBufferedReader(gcFile)) {
             String line;
             boolean isInCollectionEntry = false;
 

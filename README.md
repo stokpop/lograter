@@ -12,7 +12,7 @@ LogRater can be run stand-alone from the command line, or can be included as jar
 
 LogRater is sponsored by Rabobank.
 
-# build
+## build
 
 Create an executable jar: 
 
@@ -24,9 +24,9 @@ Execute as (use correct version number):
     
 You can also download a pre-build jar here: https://github.com/stokpop/lograter/releases
 
-# Uses
+## Uses
 
-## Incoming requests
+### Incoming requests
 
 Get logs from your production servers and find out which requests have the highest hits per second.
 For each request see the average response time and the percentiles. 
@@ -83,46 +83,46 @@ Run as follows:
 
 where only lines that contain "`GET`" are included via "`-fffi`" and a report with graphs is created.
 
-## Outgoing requests
+### Outgoing requests
 
 If logs are available for outgoing requests, you can find out how the same for these outgoing requests.
 
-## Compare production to test
+### Compare production to test
 
 If you run load tests on a performance test environment, compare the reports to the reports of production
 to check if the load test covers the same requests and behaves the same in response times as production.
 
-## Automate analysis 
+### Automate analysis 
 
 For automatic tests also automate the analysis of the rest results. 
 
-## Map names
+### Map names
 
 Use mappers to map technical requests (urls) to human readable names. Also use 
 mappers to group urls that are the same actually the same request. 
 For instance because the url contains a unique id that needs to be filtered.
 
-## Load test logs
+### Load test logs
 
 LogRater can make similar analysis for both JMeter logs and Performance Center result zip files.
 
-## Application logs
+### Application logs
 
 For logback style Java application logging, LogRater can parse application logs to find
 common errors and stacktraces. It also gives an indication of 'logging' pressure under load:
 how many lines per minute are logged.
 
-## CPU
+### CPU
 
 When you have sar files from Linux servers, LogRater can determine the average CPU usage
 and show CPU graphs. For instance during a load test.
 
-## Time period
+### Time period
 
 For most LogRater analysis you can specify a start and end time to zoom into the period that is
 of interest. For example a very busy period on production or a period that is (part of) a load test.
 
-## Create graphs
+### Create graphs
 
 Show graphs per request type to easily identify issues or unexpected behaviour.
 The following graphs are available: 
@@ -134,17 +134,17 @@ The following graphs are available:
 
 Both available as png and as interactive javascript/html graphs with popups. 
 
-## Sessions 
+### Sessions 
 
 When session identifiers are available in the logs, LogRater can determine session duration times
 and also common paths that users follow through the application.
 
-## Extend LogRater
+### Extend LogRater
 
 For custom logs you can easily extend LogRater to parse these logs as well and
 produce similar reports and graphs.
   
-### Example run
+#### Example run
 
 To run from the command line, use the executable jar which contains all references.
 For instance to parse apache access logs:
@@ -157,11 +157,11 @@ To see all options:
     
 Download the executable jar here: https://github.com/stokpop/lograter/releases
     
-## Dependency
+### Dependency
 
 To use LogRater from maven or gradle, find the lograter jar in maven central.
 
-## LogRater command line options
+### LogRater command line options
 
     LogRater version: 1.3.4
 

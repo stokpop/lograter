@@ -30,7 +30,7 @@ public enum JdkGcLogVersion {
 
     public static JdkGcLogVersion checkJdkVersion(File gcFile) throws IOException {
 
-        try (BufferedReader gcFileInput = FileUtils.getBufferedReader(gcFile)) {
+        try (BufferedReader gcFileInput = FileUtils.createBufferedReader(gcFile)) {
             String line;
             int lineNumber = 0;
 

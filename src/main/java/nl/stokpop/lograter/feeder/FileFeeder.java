@@ -89,7 +89,7 @@ public class FileFeeder {
 		}
 		log.info("Start processing file: {}", file);
 
-        try (BufferedReader br = FileUtils.getBufferedReader(file)) {
+        try (BufferedReader br = FileUtils.createBufferedReader(file)) {
 
             String logline;
             long linenr = 0;

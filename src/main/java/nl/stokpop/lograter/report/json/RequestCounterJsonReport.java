@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class RequestCounterJsonReport implements LogReport {
 
@@ -54,7 +54,7 @@ public class RequestCounterJsonReport implements LogReport {
         this.jsonReport = new LogCounterJsonReport();
     }
 
-    public void report(PrintStream out, TimePeriod analysisPeriod) throws IOException {
+    public void report(PrintWriter out, TimePeriod analysisPeriod) throws IOException {
 
         JsonNodeFactory factory = new JsonNodeFactory(false);
 
@@ -100,7 +100,7 @@ public class RequestCounterJsonReport implements LogReport {
 	    mapper.writeTree(generator, rootNode);
     }
 
-	public void report(PrintStream out) throws IOException {
+	public void report(PrintWriter out) throws IOException {
 
         final TimePeriod totalTimePeriod = dataBundle.getTotalRequestCounterStorePair().totalTimePeriod();
         final TimePeriod filterPeriod = config.getFilterPeriod();

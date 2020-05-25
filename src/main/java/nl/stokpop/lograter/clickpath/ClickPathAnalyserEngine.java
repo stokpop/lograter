@@ -119,10 +119,10 @@ public class ClickPathAnalyserEngine implements ClickPathAnalyser {
 	private void  finalizeOldSessions(long timestamp) {
 	    Set<String> sessionsToBeRemoved = new HashSet<>();
 	    
-	    for (String key : openSessions.keySet()) {
-	    	long lastTimestamp = openSessions.get(key).getEndTimestamp();
+	    for (Map.Entry<String, ClickPath> key : openSessions.entrySet()) {
+	    	long lastTimestamp = key.getValue().getEndTimestamp();
 	        if (timestamp - lastTimestamp > sessionTimeOutMillis) {
-	            sessionsToBeRemoved.add(key);
+	            sessionsToBeRemoved.add(key.getKey());
 	        }
 	    }
 	    

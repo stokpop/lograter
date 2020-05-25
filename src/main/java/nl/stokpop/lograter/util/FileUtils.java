@@ -21,13 +21,8 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +49,7 @@ public class FileUtils {
         return rootPath.toURI().relativize(completePath.toURI()).getPath();
     }
 
-    public static BufferedReader getBufferedReader(File file) throws IOException {
+    public static BufferedReader createBufferedReader(File file) throws IOException {
         InputStream inputStream = new FileInputStream(file);
 
         final String lowerCaseFilename = file.getName().toLowerCase();
@@ -69,7 +64,7 @@ public class FileUtils {
             inputStream = new BZip2CompressorInputStream(inputStream);
         }
 
-        return new BufferedReader(new InputStreamReader(inputStream));
+        return FileUtils.createBufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
     public static List<File> findFilesThatMatchFilenames(List<String> files) {
@@ -118,15 +113,19 @@ public class FileUtils {
         return filesToProcess;
     }
 
-    public static BufferedReader createBufferedReader(Reader sarReader) {
+    public static BufferedReader createBufferedReader(Reader reader) {
         BufferedReader bufferedReader;
-        if (sarReader instanceof BufferedReader) {
-            bufferedReader = (BufferedReader) sarReader;
+        if (reader instanceof BufferedReader) {
+            bufferedReader = (BufferedReader) reader;
         }
         else {
-            bufferedReader = new BufferedReader(sarReader);
+            bufferedReader = new BufferedReader(reader);
         }
         return bufferedReader;
+    }
+
+    public static InputStreamReader createBufferedInputStreamReader(InputStream inputStream) {
+        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
     }
 
     public static String createFilenameWithTimestampFromPathOrUrl(String name, String extention) {
@@ -181,4 +180,14 @@ public class FileUtils {
         }
         return outputPath;
     }
+
+    public static PrintWriter createBufferedPrintWriterWithUTF8(File file) throws FileNotFoundException {
+        FileOutputStream outputStream = new FileOutputStream(file);
+        return createBufferedPrintWriterWithUTF8(outputStream);
+    }
+
+    public static PrintWriter createBufferedPrintWriterWithUTF8(OutputStream outputStream) {
+        return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream), StandardCharsets.UTF_8)));
+    }
+
 }

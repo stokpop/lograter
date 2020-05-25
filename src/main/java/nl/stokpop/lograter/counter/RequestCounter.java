@@ -107,7 +107,7 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 	public static String createCounterNameThatAlignsInTextReport(String totalCounterName, int additionalColumns) {
 		StringBuilder totalCounterNameSB = new StringBuilder(totalCounterName);
 		for (int i = 0; i < additionalColumns; i++) {
-			totalCounterNameSB.append(",").append("TOTAL");
+			totalCounterNameSB.append(",TOTAL");
 		}
 
 		return totalCounterNameSB.toString();
@@ -134,6 +134,7 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 	/**
 	 * @return iterator of TimeMeasurements ordered on timestamp
 	 */
+	@Override
 	public Iterator<TimeMeasurement> iterator() {
 		return timeMeasurements.iterator();
 	}

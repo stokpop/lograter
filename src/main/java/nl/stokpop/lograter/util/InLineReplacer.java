@@ -208,7 +208,7 @@ public class InLineReplacer {
             postfix = urlPath.substring("https://".length());
         }
 
-        int indexOfFirstSlash = postfix.indexOf("/");
+        int indexOfFirstSlash = postfix.indexOf('/');
         if (indexOfFirstSlash != -1) {
             String possibleDomain = postfix.substring(0, indexOfFirstSlash);
             if (StringUtils.countOccurrences(possibleDomain, ".") > 1) {
@@ -332,7 +332,7 @@ public class InLineReplacer {
         return containsLetter(text) ? replacer.apply(text) : text;
     }
 
-    private static String replaceIfWord(String text, List whiteList, Function<String, String> replacer) {
+    private static String replaceIfWord(String text, List<String> whiteList, Function<String, String> replacer) {
         return !whiteList.contains(text) ? replacer.apply(text) : text;
     }
 
@@ -344,7 +344,7 @@ public class InLineReplacer {
     /**
      * Replace all words that are separated by the separator. Do not replace words in the whitelist.
      */
-    public static String replaceSeparatedWords(String text, String separator, List whiteList, Function<String, String> replacer) {
+    public static String replaceSeparatedWords(String text, String separator, List<String> whiteList, Function<String, String> replacer) {
         return Pattern.compile(Pattern.quote(separator)).splitAsStream(text)
                 .map(s -> InLineReplacer.replaceIfWord(s, whiteList, replacer))
                 .collect(Collectors.joining(separator));

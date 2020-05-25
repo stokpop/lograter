@@ -143,35 +143,29 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 	}
 
 	private long fetchSizeFromDatabase() {
-		PreparedStatement queryCount = null;
-		ResultSet resultSetCount = null;
-		try {
-			queryCount = con.prepareStatement("select count(*) from measurement where counter_id = ? and timestamp >= ? and timestamp <= ?");
+		try (PreparedStatement queryCount = con.prepareStatement("select count(*) from measurement where counter_id = ? and timestamp >= ? and timestamp <= ?")) {
 			queryCount.setLong(1, dbCounterId);
 			queryCount.setLong(2, timePeriod.getStartTime());
 			queryCount.setLong(3, timePeriod.getEndTime());
-
-			resultSetCount = queryCount.executeQuery();
-			if (resultSetCount.next()) {
-				long count = resultSetCount.getLong(1);
-				log.info("Number of {} measurements to get: {}", dbCounterId, count);
-				size = count;
-				return count;
-			} else {
-				log.warn("No measurements found for: {}, returning empty list", name);
-				return 0;
+			try (ResultSet resultSetCount = queryCount.executeQuery()) {
+				if (resultSetCount.next()) {
+					long count = resultSetCount.getLong(1);
+					log.info("Number of {} measurements to get: {}", dbCounterId, count);
+					size = count;
+					return count;
+				} else {
+					log.warn("No measurements found for: {}, returning empty list", name);
+					return 0;
+				}
 			}
 		} catch (SQLException e) {
 			throw new LogRaterException("Cannot get count of time measurements from database for counterId: " + this.dbCounterId + " name: " + this.name, e);
 		} finally {
 			try {
-				if (resultSetCount != null) resultSetCount.close();
-				if (queryCount != null) queryCount.close();
 				con.commit();
 			} catch (SQLException e) {
 				log.warn("Error closing resultsets for time measurements from database for counterId: " + this.dbCounterId + " name: " + this.name, e);
 			}
-
 		}
 	}
 

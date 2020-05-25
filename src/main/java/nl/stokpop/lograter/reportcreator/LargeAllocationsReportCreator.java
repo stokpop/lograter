@@ -26,14 +26,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +43,7 @@ public class LargeAllocationsReportCreator implements ReportCreatorWithCommand<C
 			DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withLocale(new Locale("US"));
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain mainCommand, CommandLargeAllocationsToCsv cmdAllocations) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain mainCommand, CommandLargeAllocationsToCsv cmdAllocations) throws IOException {
 		List<String> filenames = cmdAllocations.files;
 		if (filenames == null || filenames.size() == 0) {
 			throw new LogRaterException("Please supply one or more gc verbose log filenames.");
@@ -64,10 +57,11 @@ public class LargeAllocationsReportCreator implements ReportCreatorWithCommand<C
 
 		log.info("Writing to csv file: {}", csvFile.getPath());
 
-		OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(csvFile));
-		PrintWriter writer = new PrintWriter(new OutputStreamWriter(csvOutputStream, StandardCharsets.UTF_8));
 
-		try {
+		try (
+			OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(csvFile));
+			PrintWriter writer = new PrintWriter(new OutputStreamWriter(csvOutputStream, StandardCharsets.UTF_8))
+		) {
 			writer.println("timestamp,bytes,type,threadname,code location");
 			for (LargeAllocation alloc : largeAllocations) {
 				StringBuilder line = new StringBuilder();
@@ -79,9 +73,6 @@ public class LargeAllocationsReportCreator implements ReportCreatorWithCommand<C
 				line.append(alloc.getStackTraceFirstLine());
 				writer.println(line);
 			}
-		} finally {
-			writer.flush();
-			writer.close();
 		}
 
 		outputStream.printf("Check out result in csv file: %s", csvFile.getPath());

@@ -22,9 +22,10 @@ import nl.stokpop.lograter.reportcreator.ReportCreator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
@@ -38,10 +39,12 @@ public class LogRaterRunTestUtil {
     }
 
     public static String getOutputFromLogRater(String[] runArgs, Map<LogRaterCommand, ReportCreator> extraCommands) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        PrintStream printStream = new PrintStream(baos);
-        new LogRater(printStream).startLogRater(runArgs, extraCommands);
-        return baos.toString("UTF-8");
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(1024)) {
+            try (PrintWriter printWriter = FileUtils.createBufferedPrintWriterWithUTF8(baos)) {
+                new LogRater(printWriter).startLogRater(runArgs, extraCommands);
+            }
+            return baos.toString(StandardCharsets.UTF_8.name());
+        }
     }
 
     /**
@@ -50,7 +53,7 @@ public class LogRaterRunTestUtil {
      * @param testResourcePath path to test resource (or any file on the classpath)
      * @return the test resource as File
      */
-    public static File convertTestResourceIntoFile(Class classToUseForResource, String testResourcePath) {
+    public static File convertTestResourceIntoFile(Class<?> classToUseForResource, String testResourcePath) {
         if (!testResourcePath.startsWith("/")) {
             testResourcePath = "/" + testResourcePath;
         }

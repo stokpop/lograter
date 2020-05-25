@@ -17,11 +17,11 @@ package nl.stokpop.lograter.clickpath;
 
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.counter.SimpleCounter;
+import nl.stokpop.lograter.util.FileUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 /**
@@ -30,7 +30,7 @@ import java.util.Map;
 public class ClickPathReport {
     public static void reportClickpaths(ClickPathCollector clickpathCollector, File clickPathFile, boolean reportStepDuration) {
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(clickPathFile))) {
+        try (PrintWriter writer = FileUtils.createBufferedPrintWriterWithUTF8(clickPathFile)) {
             writer.write("COUNT, EXAMPLE SESSIONID, AVG SESSION DURATION, STEPS, CLICKPATH\n");
             for (Map.Entry<String, SimpleCounter> clickPath : clickpathCollector.getClickPaths().entrySet()) {
                 final String path = clickPath.getKey();
@@ -39,7 +39,7 @@ public class ClickPathReport {
                 final long avgDuration = clickpathCollector.getAvgSessionDurationForClickPath(path);
                 final String pathToReport = reportStepDuration ? clickpathCollector.getPathAsStringWithAvgDuration(path) : path;
                 final long length = clickpathCollector.getClickPathLength(path);
-                writer.write(String.format("%s,%s,%s,%s, %s\n", count, sessionId, avgDuration, length, pathToReport));
+                writer.write(String.format("%s,%s,%s,%s, %s%n", count, sessionId, avgDuration, length, pathToReport));
             }
         } catch (IOException e) {
             throw new LogRaterException("Cannot write to file " + clickPathFile.getPath(), e);

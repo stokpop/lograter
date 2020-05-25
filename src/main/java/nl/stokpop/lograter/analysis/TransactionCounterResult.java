@@ -35,8 +35,9 @@ public class TransactionCounterResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("TransactionCounterResult{");
-        sb.append("tpsPerTimestamp.size=").append(tpsPerTimestamp.size());
+
+        final StringBuilder sb = new StringBuilder( 128);
+        sb.append("TransactionCounterResult{tpsPerTimestamp.size=").append(tpsPerTimestamp.size());
         sb.append(", maxHitsPerDuration=").append(maxHitsPerDuration);
         sb.append(", durationInMillis=").append(durationInMillis);
         sb.append(", maxHitsPerDurationTimestamp=").append(maxHitsPerDurationTimestamp);

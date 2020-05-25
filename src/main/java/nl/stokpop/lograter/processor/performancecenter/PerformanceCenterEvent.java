@@ -22,9 +22,9 @@ import net.jcip.annotations.Immutable;
  */
 @Immutable
 public class PerformanceCenterEvent {
-    private Integer eventID;
-    private String eventType;
-    private String eventName;
+    private final Integer eventID;
+    private final String eventType;
+    private final String eventName;
 
     public PerformanceCenterEvent(Integer eventID, String eventType, String eventName) {
         this.eventID = eventID;

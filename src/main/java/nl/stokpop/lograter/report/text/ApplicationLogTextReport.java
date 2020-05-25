@@ -23,7 +23,7 @@ import nl.stokpop.lograter.processor.applicationlog.ApplicationsLogDetailsKey;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class ApplicationLogTextReport extends LogTextReport {
 		this.config = config;
 	}
 
-	public void report(PrintStream out, TimePeriod analysisPeriod) {
+	public void report(PrintWriter out, TimePeriod analysisPeriod) {
 		// TODO is it necessary to use analysis period?! Might already filtered when reading the data?
 
 		long total = data.getTotalLogLines(); 

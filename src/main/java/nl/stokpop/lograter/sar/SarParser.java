@@ -60,14 +60,14 @@ public class SarParser {
     // 00:05:02          0     50.17      0.01      7.62      6.82      0.00      0.79      3.95      0.00     30.63
     // 00:05:02          1     40.68      0.02      8.29      8.74      0.00      0.00      0.31      0.00     41.96
     private static final Pattern cpuPattern = Pattern
-            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)");
+            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)");
 
     // 00:00:01          CPU     %user     %nice   %system   %iowait    %steal     %idle
     // 00:05:01          all      3.14      0.01      1.03      5.12      0.00     90.71
     // 00:05:01            0      3.24      0.00      1.01      4.90      0.00     90.85
     // 00:05:01            1      3.04      0.00      1.06      5.33      0.00     90.57
     private static final Pattern cpuShortPattern = Pattern
-            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)$");
+            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)$");
 
     // RHEL7 format adds %gnice column
     // 00:00:01        CPU      %usr     %nice      %sys   %iowait    %steal      %irq     %soft    %guest    %gnice     %idle
@@ -75,7 +75,7 @@ public class SarParser {
     // 00:05:01          0      2.07      0.15      1.00      0.22      0.00      0.00      0.02      0.00      0.00     96.53
     // 00:05:01          1      4.80      0.04      1.54      0.35      0.00      0.00      0.01      0.00      0.00     93.25
     private static final Pattern cpuPatternWithGnice = Pattern
-            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)");
+            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)");
 
 	// mpstat command adds interrupts column at the end
 	// 00:00:01        CPU      %usr     %nice      %sys   %iowait    %steal      %irq     %soft    %guest    %gnice     %idle   %interrupts
@@ -83,13 +83,13 @@ public class SarParser {
 	// 00:05:01          0      2.07      0.15      1.00      0.22      0.00      0.00      0.02      0.00      0.00     96.53   11848
 	// 00:05:01          1      4.80      0.04      1.54      0.35      0.00      0.00      0.01      0.00      0.00     93.25   10837
 	private static final Pattern cpuPatternWithGniceAndInterrupts = Pattern
-			.compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)\\s*([\\d\\.]*)");
+			.compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*(\\S*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)\\s*([\\d.]*)");
 
 	// 00:00:01     pswpin/s pswpout/s
     // 00:05:01         0.02      0.00
     // 00:10:01         0.00      0.00
     private static final Pattern swpPattern = Pattern
-            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*([\\d\\.]*)\\s*([\\d\\.]*)");
+            .compile("(\\d\\d:\\d\\d:\\d\\d(?:\\s\\S{2})?)\\s*([\\d.]*)\\s*([\\d.]*)");
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd").withLocale(new Locale("US"));
     private static final DateTimeFormatter dateFormatterPosix = DateTimeFormat.forPattern("MM/dd/yy");
@@ -157,7 +157,7 @@ public class SarParser {
 
         log.info("Start sar log file parsing: {}", sarFile.getAbsolutePath());
 
-        BufferedReader sarFileReader = FileUtils.getBufferedReader(sarFile);
+        BufferedReader sarFileReader = FileUtils.createBufferedReader(sarFile);
 
         return parseSarLog(sarFileReader, timePeriod);
 

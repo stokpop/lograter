@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.gc;
 
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.fit.BestFitLine;
 import nl.stokpop.lograter.util.metric.Point;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -38,9 +39,9 @@ public class GcVerboseReport {
     public static final char NL = '\n';
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-    public static final NumberFormat NUMBER_FORMAT_0_DIGITS = createNumberFormatInstance(0);
-    public static final NumberFormat NUMBER_FORMAT = createNumberFormatInstance(2);
-    public static final NumberFormat NUMBER_FORMAT_3_DIGITS = createNumberFormatInstance(3);
+    public static final ThreadLocal<NumberFormat> NUMBER_FORMAT_0_DIGITS = ThreadLocal.withInitial(() -> createNumberFormatInstance(0));
+    public static final ThreadLocal<NumberFormat> NUMBER_FORMAT = ThreadLocal.withInitial(() -> createNumberFormatInstance(2));
+    public static final ThreadLocal<NumberFormat> NUMBER_FORMAT_3_DIGITS = ThreadLocal.withInitial(() -> createNumberFormatInstance(3));
     public static final int MIN_NUMBER_OF_GCS_FOR_FIT = 5;
 
     private final String logFileRaterVersion;
@@ -65,9 +66,10 @@ public class GcVerboseReport {
      * Supply the period for which the fit analysis needs to be performed.
      */
     public void printReport(OutputStream out, HeapUsageResult heapUsageResult, TimePeriod analysisPeriod, TimePeriod memoryAnalysisPeriod, String runId) {
-        PrintWriter writer = new PrintWriter(out);
-        writer.println(generateReportAsString(heapUsageResult, analysisPeriod, memoryAnalysisPeriod, runId));
-        writer.flush();
+        try (PrintWriter writer = FileUtils.createBufferedPrintWriterWithUTF8(out)) {
+            writer.println(generateReportAsString(heapUsageResult, analysisPeriod, memoryAnalysisPeriod, runId));
+            writer.flush();
+        }
     }
 
     /**
@@ -275,7 +277,7 @@ public class GcVerboseReport {
         } else {
             for (Point outlier : outliers) {
                 String timestamp = DATE_TIME_FORMATTER.print((long) outlier.getX());
-                String sizeInMB = NUMBER_FORMAT_0_DIGITS.format(outlier.getY() / MB);
+                String sizeInMB = NUMBER_FORMAT_0_DIGITS.get().format(outlier.getY() / MB);
                 outliersAsString.append("(").append(timestamp).append(", ").append(sizeInMB).append(" MB").append(") ");
             }
         }

@@ -33,12 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static nl.stokpop.lograter.util.InLineReplacer.THREE_LETTER_HASH;
-import static nl.stokpop.lograter.util.InLineReplacer.replaceBlacklistedWords;
-import static nl.stokpop.lograter.util.InLineReplacer.replaceDomains;
-import static nl.stokpop.lograter.util.InLineReplacer.replaceIPv4;
-import static nl.stokpop.lograter.util.InLineReplacer.replaceSeparatedWords;
-import static nl.stokpop.lograter.util.InLineReplacer.replaceWordsMapperLine;
+import static nl.stokpop.lograter.util.InLineReplacer.*;
 
 public class AnonymizeLog {
 
@@ -103,7 +98,7 @@ public class AnonymizeLog {
     }
 
     private void anonymizeCacheLog(File file, PrintStream printStream) {
-        List cacheWhiteList = Arrays.asList("MISS", "HIT", "READ", "STORE", "INVALIDATE");
+        List<String> cacheWhiteList = Arrays.asList("MISS", "HIT", "READ", "STORE", "INVALIDATE");
         try (Stream<String> stream = Files.lines(Paths.get(file.toURI()))) {
             stream
                     .map(line -> replaceSeparatedWords(line, ";", cacheWhiteList, THREE_LETTER_HASH))

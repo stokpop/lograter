@@ -147,7 +147,7 @@ public class AccessLogReader {
             clickPathProcessor.getClickPathAnalyser().closeAllRemainingSessions();
         }
 
-	    if (config.isDetermineSessionDurationEnabled() & userSessionProcessor != null) {
+	    if (config.isDetermineSessionDurationEnabled() && userSessionProcessor != null) {
 		    SessionDurationCalculator calculator = userSessionProcessor.getSessionDurationCalculator();
 		    long avgSessionDuration = calculator.getAvgSessionDuration();
 		    TimePeriod avgSessionDurationPeriod = TimePeriod.createExcludingEndTime(0, avgSessionDuration);

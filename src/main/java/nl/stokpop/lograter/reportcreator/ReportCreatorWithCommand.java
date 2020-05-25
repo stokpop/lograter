@@ -19,11 +19,11 @@ import nl.stokpop.lograter.command.CommandMain;
 import nl.stokpop.lograter.command.LogRaterCommand;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Create a report on the output stream with the given command.
  */
 public interface ReportCreatorWithCommand<C extends LogRaterCommand> {
-	void createReport(PrintStream outputStream, CommandMain mainCommand, C processorCommand) throws IOException;
+	void createReport(PrintWriter outputStream, CommandMain mainCommand, C processorCommand) throws IOException;
 }

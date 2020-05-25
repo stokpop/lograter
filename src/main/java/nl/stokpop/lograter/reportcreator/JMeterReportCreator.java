@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
 	private static final Logger log = LoggerFactory.getLogger(JMeterReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandJMeter cmdJMeter) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandJMeter cmdJMeter) throws IOException {
         List<String> files = cmdJMeter.files;
         if (files.isEmpty()) {
             throw new LogRaterException("Please supply at least one jMeter jtl file.");
@@ -58,7 +58,7 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
 
     }
 
-    private void processFile(final PrintStream outputStream, final List<String> files, final CommandMain cmdMain, final CommandJMeter cmdJMeter) throws IOException {
+    private void processFile(final PrintWriter outputStream, final List<String> files, final CommandMain cmdMain, final CommandJMeter cmdJMeter) throws IOException {
         log.info("Start file processing {}.", files);
 
         if (files.isEmpty()) {

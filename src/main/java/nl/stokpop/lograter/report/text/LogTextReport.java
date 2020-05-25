@@ -22,7 +22,7 @@ import nl.stokpop.lograter.report.LogReport;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
@@ -52,7 +52,7 @@ public abstract class LogTextReport implements LogReport {
 
 	}
 
-	public abstract void report(PrintStream out, TimePeriod analysisPeriod);
+	public abstract void report(PrintWriter out, TimePeriod analysisPeriod);
 
 	public String reportSummaryHeader(ResponseTimeAnalyser analyser, BasicLogConfig config) {
 		TimePeriod filterPeriod = config.getFilterPeriod();

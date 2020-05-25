@@ -23,11 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteConfig;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,21 +60,24 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
     }
 
 	public Map<Integer, PerformanceCenterEvent> createEventMap(Connection connection) throws SQLException {
-		PreparedStatement preparedStatement = connection.prepareStatement("select [Event ID], [Event Type], [Event Name] from Event_map");
-		ResultSet resultSet = preparedStatement.executeQuery();
 
-		Map<Integer, PerformanceCenterEvent> eventMap = new HashMap<>();
-		while (resultSet.next()) {
-			Integer eventID = resultSet.getInt("Event ID");
-			String eventType = resultSet.getString("Event Type");
-			String eventName = resultSet.getString("Event Name");
-			PerformanceCenterEvent event = new PerformanceCenterEvent(eventID, eventType, eventName);
-			eventMap.put(eventID, event);
-			log.debug("Added event: {}", event);
+		try (
+			PreparedStatement preparedStatement = connection.prepareStatement("select [Event ID], [Event Type], [Event Name] from Event_map");
+			ResultSet resultSet = preparedStatement.executeQuery()
+		) {
+			Map<Integer, PerformanceCenterEvent> eventMap = new HashMap<>();
+			while (resultSet.next()) {
+				Integer eventID = resultSet.getInt("Event ID");
+				String eventType = resultSet.getString("Event Type");
+				String eventName = resultSet.getString("Event Name");
+				PerformanceCenterEvent event = new PerformanceCenterEvent(eventID, eventType, eventName);
+				eventMap.put(eventID, event);
+				log.debug("Added event: {}", event);
+			}
+			resultSet.close();
+			preparedStatement.close();
+			return eventMap;
 		}
-		resultSet.close();
-		preparedStatement.close();
-		return eventMap;
 	}
 
 	@Override
@@ -107,28 +106,27 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 
         Map<Integer, PerformanceCenterEvent> eventMap = createEventMap(connection);
 
-	    PreparedStatement preparedStatement = connection.prepareStatement("select [Event ID], [End Time], [Value], [Acount], [Amaximum], [Aminimum], [AsumSq], [Think Time], [Status1] from Event_meter order by [End Time]");
-        ResultSet resultSet = preparedStatement.executeQuery();
+        try (
+        	PreparedStatement preparedStatement = connection.prepareStatement("select [Event ID], [End Time], [Value], [Acount], [Amaximum], [Aminimum], [AsumSq], [Think Time], [Status1] from Event_meter order by [End Time]");
+        	ResultSet resultSet = preparedStatement.executeQuery()
+		) {
+			while (resultSet.next()) {
+				// note there is unboxing done for most parameters, watch for NullPointerExceptions
+				int eventID = resultSet.getInt(EventMeter.EVENT_ID);
+				double endTime = resultSet.getDouble(EventMeter.END_TIME);
+				double value = resultSet.getDouble(EventMeter.VALUE);
+				int count = (int) resultSet.getDouble(EventMeter.COUNT);
+				double maxValue = resultSet.getDouble(EventMeter.VALUE_MAX);
+				double minValue = resultSet.getDouble(EventMeter.VALUE_MIN);
+				double thinkTime = resultSet.getDouble(EventMeter.THINK_TIME);
+				double sumSq = resultSet.getDouble(EventMeter.SUM_SQ);
+				int status = resultSet.getInt(EventMeter.STATUS_1);
 
-        while (resultSet.next()) {
-            // note there is unboxing done for most parameters, watch for NullPointerExceptions
-            int eventID = resultSet.getInt(EventMeter.EVENT_ID);
-            double endTime = resultSet.getDouble(EventMeter.END_TIME);
-            double value = resultSet.getDouble(EventMeter.VALUE);
-            int count = (int) resultSet.getDouble(EventMeter.COUNT);
-            double maxValue = resultSet.getDouble(EventMeter.VALUE_MAX);
-            double minValue = resultSet.getDouble(EventMeter.VALUE_MIN);
-            double thinkTime = resultSet.getDouble(EventMeter.THINK_TIME);
-            double sumSq = resultSet.getDouble(EventMeter.SUM_SQ);
-            int status = resultSet.getInt(EventMeter.STATUS_1);
+				EventMeter eventMeter = new EventMeter(eventID, endTime, value, minValue, maxValue, sumSq, thinkTime, count, status);
+				addEventsToResultsData(eventMeter, data, eventMap, testStartTimeInSecondsEpoch, granularity.getGranularityMillis());
+			}
 
-            EventMeter eventMeter = new EventMeter(eventID, endTime, value, minValue, maxValue, sumSq, thinkTime, count, status);
-	        addEventsToResultsData(eventMeter, data, eventMap, testStartTimeInSecondsEpoch, granularity.getGranularityMillis());
-        }
-
-        resultSet.close();
-        preparedStatement.close();
-
+		}
         log.info("Finished parsing performance center results: {}", data);
         return data;
     }
@@ -138,17 +136,19 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 		final String sql = String.format(
 				"select distinct [End Time] from Event_meter order by [End Time] limit 2 offset %d",
 				ROW_FETCH_COUNT_FOR_GRANULARITY_DETERMINATION);
-		PreparedStatement preparedStatement = connection.prepareStatement(sql);
-		ResultSet resultSet = preparedStatement.executeQuery();
+		try (
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			ResultSet resultSet = preparedStatement.executeQuery()
+		) {
+			double granularityInSeconds = granularityInSeconds(sql, resultSet);
 
-		double granularityInSeconds = granularityInSeconds(sql, resultSet);
+			log.info("Found PROBABLY FAULTY ESTIMATION of granularity in access database: [{}] seconds.", granularityInSeconds);
 
-		log.info("Found PROBABLY FAULTY ESTIMATION of granularity in access database: [{}] seconds.", granularityInSeconds);
+			resultSet.close();
+			preparedStatement.close();
 
-		resultSet.close();
-		preparedStatement.close();
-
-		return (long) (granularityInSeconds * 1000.0);
+			return (long) (granularityInSeconds * 1000.0);
+		}
 
 	}
 
@@ -172,11 +172,10 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 
         long testStartTimeInSecondsEpoch;
 
-        PreparedStatement queryStartTime = null;
-        ResultSet resultSet = null;
-        try {
-            queryStartTime = con.prepareStatement("select [Start Time], [Time Zone] from Result");
-            resultSet = queryStartTime.executeQuery();
+        try (
+			PreparedStatement queryStartTime = con.prepareStatement("select [Start Time], [Time Zone] from Result");
+			ResultSet resultSet = queryStartTime.executeQuery()
+		) {
             if (resultSet.next()) {
                 testStartTimeInSecondsEpoch = resultSet.getLong("Start Time");
 	            long timeZoneOffset = resultSet.getLong("Time Zone");
@@ -188,8 +187,6 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
             throw new LogRaterException("Cannot get Start Time from database", e);
         } finally {
             try {
-                if (resultSet != null) resultSet.close();
-                if (queryStartTime != null) queryStartTime.close();
                 con.commit();
             } catch (SQLException e) {
                 log.warn("Error closing resultset for getting Start Time from Result table");

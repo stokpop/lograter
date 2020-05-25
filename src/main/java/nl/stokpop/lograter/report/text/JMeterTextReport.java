@@ -22,7 +22,7 @@ import nl.stokpop.lograter.processor.jmeter.JMeterDataBundle;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class JMeterTextReport extends LogCounterTextReport {
 
@@ -43,7 +43,7 @@ public class JMeterTextReport extends LogCounterTextReport {
 	}
 
     @Override
-    public void report(PrintStream out, TimePeriod analysisPeriod) {
+    public void report(PrintWriter out, TimePeriod analysisPeriod) {
         RequestCounterStorePair requestCounterStorePair = dataBundle.getTotalRequestCounterStorePair();
 
 	    ResponseTimeAnalyser analyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, requestCounterStorePair.getTotalRequestCounterPair());

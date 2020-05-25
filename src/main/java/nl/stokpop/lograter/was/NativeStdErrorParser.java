@@ -71,7 +71,7 @@ public class NativeStdErrorParser {
 
         List<LargeAllocation> allocations = new ArrayList<>();
 
-        BufferedReader fileInput = FileUtils.getBufferedReader(nativeStdErrorFile);
+        BufferedReader fileInput = FileUtils.createBufferedReader(nativeStdErrorFile);
 
         String line;
 

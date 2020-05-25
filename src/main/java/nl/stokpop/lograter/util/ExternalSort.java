@@ -18,15 +18,7 @@ package nl.stokpop.lograter.util;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.store.TimeMeasurement;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class ExternalSort {
 
@@ -49,9 +41,8 @@ public class ExternalSort {
 			FileInputStream fis = new FileInputStream(serializedFile);
 			BufferedInputStream bis = new BufferedInputStream(fis, 256 * 1024);
 
-			ois[i] = new DataInputStream(bis);
-
 			try {
+				ois[i] = new DataInputStream(bis);
 				// unshared to avoid "memory leak": otherwise all objects will be held for future reference
 				TimeMeasurement timeMeasurement = readTimeMeasurement(ois[i]);
 				topNums[i] = timeMeasurement;
@@ -62,12 +53,14 @@ public class ExternalSort {
 
 		}
 
-		File totalSerializedFile = new File(tempDir, createTotalSerializedFilename(name));
-		FileOutputStream fos = new FileOutputStream(totalSerializedFile);
-		BufferedOutputStream bos = new BufferedOutputStream(fos, 1024 * 1024);
-		DataOutputStream dos = new DataOutputStream(bos);
 
-		try {
+		File totalSerializedFile = new File(tempDir, createTotalSerializedFilename(name));
+
+		try (
+				FileOutputStream fos = new FileOutputStream(totalSerializedFile);
+				BufferedOutputStream bos = new BufferedOutputStream(fos, 1024 * 1024);
+				DataOutputStream dos = new DataOutputStream(bos)
+			) {
 
 			for (int i = 0; i < size; i++) {
 				TimeMeasurement min = topNums[0];
@@ -91,9 +84,6 @@ public class ExternalSort {
 				}
 			}
 		} finally {
-			dos.close();
-			bos.close();
-			fos.close();
 			for (int i = 0; i < slices; i++)
 				ois[i].close();
 		}

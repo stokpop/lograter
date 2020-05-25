@@ -23,15 +23,7 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,19 +145,17 @@ public class TimeMeasurementStoreToFiles extends AbstractTimeMeasurementStore {
 				if (!newFileOK) throw new LogRaterException("File create failed: " + filePath);
 			}
 
-			FileOutputStream fileOutputStream = new FileOutputStream(file);
-			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-			DataOutputStream oos = new DataOutputStream(bufferedOutputStream);
-			try {
+			try (
+				FileOutputStream fileOutputStream = new FileOutputStream(file);
+				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+				DataOutputStream oos = new DataOutputStream(bufferedOutputStream)
+			) {
 				if (!isOrdered) {
 					timeMeasurements.sort(TimeMeasurement.ORDER_TIMESTAMP);
 				}
 				for (TimeMeasurement tm : timeMeasurements) {
 					ExternalSort.writeTimeMeasurement(oos, tm);
 				}
-			} finally {
-				oos.flush();
-				oos.close();
 			}
 		} catch (IOException e) {
 			throw new LogRaterException(String.format("Cannot serialize file: %s", filePath), e);

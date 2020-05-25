@@ -37,12 +37,7 @@ import nl.stokpop.lograter.util.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +49,7 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 	private static final Logger log = LoggerFactory.getLogger(AccessLogToCsvReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandAccessLogToCsv cmdAccessLog) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandAccessLogToCsv cmdAccessLog) throws IOException {
 
 		List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdAccessLog.mapperFile);
 
@@ -94,9 +89,7 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 		
 		log.info("Writing to csv file: {}", csvFile.getPath());
 
-		OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(csvFile));
-
-		try {
+		try (OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(csvFile))) {
 			// TODO: using default mappers now... or rather the first mapper table only
 			AccessLogToCsvProcessor processor = new AccessLogToCsvProcessor(csvOutputStream, lineMappers.get(0),
 					new SessionIdParser(config.getSessionField(), config.getSessionFieldRegexp()));
@@ -107,9 +100,6 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 			FileFeeder feeder = new FileFeeder(cmdAccessLog.fileFeederFilterIncludes, cmdAccessLog.fileFeederFilterExcludes);
 			feeder.feedFilesAsString(cmdAccessLog.files, parser);
 
-		} finally {
-			csvOutputStream.flush();
-			csvOutputStream.close();
 		}
 
 		log.info("Check out result in csv file: {}", csvFile.getPath());

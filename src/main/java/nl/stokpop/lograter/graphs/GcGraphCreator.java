@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -48,16 +47,12 @@ public class GcGraphCreator extends AbstractGraphCreator {
 		
 		File gcGraphHtmlFile = new File(dir, "gc-graphs-" + dateStr + ".html");
 	
-		try {
-			FileWriter outFile = new FileWriter(gcGraphHtmlFile);
-			PrintWriter out = new PrintWriter(outFile);
-
+		try (PrintWriter out = FileUtils.createBufferedPrintWriterWithUTF8(gcGraphHtmlFile)) {
             String relativeFileName = FileUtils.findRelativePath(dir, graphFile);
 			out.println("<html>");
 			out.println("<h3> Gc Graph with fit</h3>");
 			out.println("<img src=\"" + relativeFileName.replace('\\', '/') + "\"/><br/>");
 			out.println("</html>");
-			out.close();
 		} catch (IOException e){
 			log.error("Problem writing gc graph file: " + gcGraphHtmlFile, e);
 		}

@@ -18,23 +18,14 @@ package nl.stokpop.lograter.reportcreator;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.command.CommandGcVerboseLog;
 import nl.stokpop.lograter.command.CommandMain;
-import nl.stokpop.lograter.gc.GcLogEntry;
-import nl.stokpop.lograter.gc.GcVerboseConfig;
-import nl.stokpop.lograter.gc.GcVerboseParser;
-import nl.stokpop.lograter.gc.GcVerboseReport;
-import nl.stokpop.lograter.gc.HeapUsageResult;
+import nl.stokpop.lograter.gc.*;
 import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,7 +37,7 @@ public class GcVerboseLogReportCreator implements ReportCreatorWithCommand<Comma
 	private static final Logger log = LoggerFactory.getLogger(GcVerboseLogReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandGcVerboseLog cmdGcVerboseLog) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandGcVerboseLog cmdGcVerboseLog) throws IOException {
 		GcVerboseConfig config = new GcVerboseConfig();
 		config.setRunId(cmdMain.runId);
 		config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
@@ -64,9 +55,8 @@ public class GcVerboseLogReportCreator implements ReportCreatorWithCommand<Comma
 
 		log.info("Writing to report file: {}", reportFile.getPath());
 
-		final OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
 
-		try {
+		try (OutputStream csvOutputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
 			String description = "Results for " + Arrays.toString(cmdGcVerboseLog.files.toArray());
 			HeapUsageResult heapUsageResult = new HeapUsageResult(description, gcLogEntriesFromFiles, files);
 
@@ -94,9 +84,6 @@ public class GcVerboseLogReportCreator implements ReportCreatorWithCommand<Comma
 
 			report.printReport(csvOutputStream, heapUsageResult, analysisPeriod, memoryAnalysisPeriod, config.getRunId());
 
-		} finally {
-			csvOutputStream.flush();
-			csvOutputStream.close();
 		}
 
 		log.info("Check out gc verbose report in file: {}", reportFile.getPath());

@@ -30,11 +30,7 @@ import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.counter.RequestCounter;
-import nl.stokpop.lograter.store.RequestCounterStore;
-import nl.stokpop.lograter.store.RequestCounterStorePair;
-import nl.stokpop.lograter.store.RequestCounterStoreType;
-import nl.stokpop.lograter.store.TimeMeasurement;
-import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
+import nl.stokpop.lograter.store.*;
 import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.RandomGenerator;
 import nl.stokpop.lograter.util.metric.MetricPoint;
@@ -44,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -287,7 +282,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
     private File createOverallChartFile(File dir, String chartFileName, List<ChartFile> chartFiles) {
         File chartHtmlFile = new File(dir, chartFileName);
 
-        try (FileWriter outFile = new FileWriter(chartHtmlFile); PrintWriter out = new PrintWriter(outFile)) {
+        try (PrintWriter out = FileUtils.createBufferedPrintWriterWithUTF8(chartHtmlFile)) {
             out.println("<html>");
             out.println(insertCollapsibleSnippet());
             out.println("<h1>LogRater Graphs</h1>");
@@ -314,9 +309,9 @@ public class LogGraphCreator extends AbstractGraphCreator {
     }
 
     private String insertCollabsebleButton(String buttonTitle, String collabsebleContent) {
-        return String.format("<button class=\"collapsible\">%s</button>\n" +
-                "<div class=\"content\">\n" +
-                "  <p>%s</p>\n" +
+        return String.format("<button class=\"collapsible\">%s</button>%n" +
+                "<div class=\"content\">%n" +
+                "  <p>%s</p>%n" +
                 "</div>", buttonTitle, collabsebleContent);
     }
 
@@ -524,8 +519,6 @@ public class LogGraphCreator extends AbstractGraphCreator {
         String yAxisLabel = "number of hits";
 
         ITrace2D trace = createHistoTrace(graphname, chart, lineColor, yAxisLabel);
-        ITrace2D logNormalLineTrace = createLogNormalLineTrace();
-        ITrace2D normalLineTrace = createNormalLineTrace();
 
         // Add the trace to the chart. This has to be done before adding points
         // (deadlock prevention):

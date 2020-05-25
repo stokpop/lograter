@@ -15,6 +15,8 @@
  */
 package nl.stokpop.lograter.util;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +43,7 @@ public class ThreeLetterWords {
                 Path filePath = Paths.get(resource.toURI());
                 words = Files.lines(filePath).map(String::toLowerCase).collect(Collectors.toList());
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             words = Collections.emptyList();
         }
         threeLetterWords = Collections.unmodifiableList(words);

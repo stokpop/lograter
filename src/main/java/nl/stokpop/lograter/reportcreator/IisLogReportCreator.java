@@ -29,12 +29,7 @@ import nl.stokpop.lograter.feeder.FileFeeder;
 import nl.stokpop.lograter.graphs.LogGraphCreator;
 import nl.stokpop.lograter.parser.IisLogParser;
 import nl.stokpop.lograter.parser.line.IisLogFormatParser;
-import nl.stokpop.lograter.processor.accesslog.AccessLogClickPathProcessor;
-import nl.stokpop.lograter.processor.accesslog.AccessLogConfig;
-import nl.stokpop.lograter.processor.accesslog.AccessLogDataBundle;
-import nl.stokpop.lograter.processor.accesslog.AccessLogReader;
-import nl.stokpop.lograter.processor.accesslog.AccessLogUrlMapperProcessor;
-import nl.stokpop.lograter.processor.accesslog.AccessLogUserSessionProcessor;
+import nl.stokpop.lograter.processor.accesslog.*;
 import nl.stokpop.lograter.report.text.AccessLogTextReport;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
@@ -53,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +62,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 	private static final Logger log = LoggerFactory.getLogger(IisLogReportCreator.class);
 
 	@Override
-	public void createReport(PrintStream outputStream, CommandMain cmdMain, CommandIisLog cmdIisLog) throws IOException {
+	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandIisLog cmdIisLog) throws IOException {
 		List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdIisLog.mapperFile);
 
 		RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(cmdMain.storage);
@@ -159,7 +154,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 			clickPathProcessor.getClickPathAnalyser().closeAllRemainingSessions();
 		}
 
-		if (config.isDetermineSessionDurationEnabled() & userSessionProcessor != null) {
+		if (config.isDetermineSessionDurationEnabled() && userSessionProcessor != null) {
 			SessionDurationCalculator calculator = userSessionProcessor.getSessionDurationCalculator();
 			long avgSessionDuration = calculator.getAvgSessionDuration();
 			TimePeriod avgSessionDurationPeriod = TimePeriod.createExcludingEndTime(0, avgSessionDuration);

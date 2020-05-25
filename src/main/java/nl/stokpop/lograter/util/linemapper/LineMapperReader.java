@@ -16,15 +16,11 @@
 package nl.stokpop.lograter.util.linemapper;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,7 +41,7 @@ public class LineMapperReader {
     }
 
     public List<LineMapperSection> initializeMappers(InputStream mapperConfigFile) throws IOException {
-        return loadMappers(new InputStreamReader(mapperConfigFile));
+        return loadMappers(FileUtils.createBufferedInputStreamReader(mapperConfigFile));
     }
 
     public List<LineMapperSection> initializeMappers(File mapperFile) throws IOException {
@@ -59,17 +55,18 @@ public class LineMapperReader {
         log.info("Using line mapper config file: [{}]", mapperFile);
 
         List<LineMapperSection> mappers;
-        try (FileReader fileReader = new FileReader(mapperFile)) {
-            mappers = loadMappers(fileReader);
+        try (BufferedReader reader = FileUtils.createBufferedReader(mapperFile)) {
+            mappers = loadMappers(reader);
         }
 
         return mappers;
     }
 
-
     private List<LineMapperSection> loadMappers(InputStreamReader mappersReader) throws IOException {
+        return loadMappers(new BufferedReader(mappersReader));
+    }
 
-        BufferedReader bufferedReader = new BufferedReader(mappersReader);
+    private List<LineMapperSection> loadMappers(BufferedReader mappersReader) throws IOException {
 
         List<LineMapperSection> lineMappers = new ArrayList<>();
 
@@ -79,7 +76,7 @@ public class LineMapperReader {
 
         LineMapperSection lineMapper = new LineMapperSection("default");
 
-        while ((line = bufferedReader.readLine()) != null) {
+        while ((line = mappersReader.readLine()) != null) {
             linenr++;
             String trimmedLine = line.trim();
             if (trimmedLine.length() == 0) {

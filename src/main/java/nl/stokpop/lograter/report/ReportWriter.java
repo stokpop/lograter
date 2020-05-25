@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.report;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class ReportWriter {
 
@@ -31,7 +32,6 @@ public class ReportWriter {
 
     public static File write(String outputFilename, File reportDirectory, LogReport report, TimePeriod analysisPeriod) throws IOException {
         final File outFile;
-        final PrintStream printStream;
 
         final String filename = DateUtils.replaceTimestampMarkerInFilename(outputFilename);
         final File file = new File(filename);
@@ -46,15 +46,15 @@ public class ReportWriter {
             outFile = file;
         }
 
-        printStream = new PrintStream(outFile);
-
-        write(printStream, report, analysisPeriod);
+        try (PrintWriter printWriter = FileUtils.createBufferedPrintWriterWithUTF8(outFile)) {
+            write(printWriter, report, analysisPeriod);
+        }
 
         log.info("Report: {}", outFile.getAbsolutePath());
         return outFile;
     }
 
-    public static void write(PrintStream printStream, LogReport report, TimePeriod analysisPeriod) throws IOException {
+    public static void write(PrintWriter printStream, LogReport report, TimePeriod analysisPeriod) throws IOException {
 	    if (!analysisPeriod.hasBothTimestampsSet()) {
 		    throw new LogRaterException("Do not supply a non-set analysis period to the report.");
 	    }

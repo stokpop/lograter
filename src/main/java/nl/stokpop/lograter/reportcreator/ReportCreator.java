@@ -18,11 +18,11 @@ package nl.stokpop.lograter.reportcreator;
 import nl.stokpop.lograter.command.CommandMain;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Create a report on the given output stream.
  */
 public interface ReportCreator {
-	void createReport(PrintStream outputStream, CommandMain mainCommand) throws IOException;
+	void createReport(PrintWriter writer, CommandMain mainCommand) throws IOException;
 }
