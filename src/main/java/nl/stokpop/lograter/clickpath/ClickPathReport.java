@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public class ClickPathReport {
     public static void reportClickpaths(ClickPathCollector clickpathCollector, File clickPathFile, boolean reportStepDuration) {
-
         try (PrintWriter writer = FileUtils.createBufferedPrintWriterWithUTF8(clickPathFile)) {
             writer.write("COUNT, EXAMPLE SESSIONID, AVG SESSION DURATION, STEPS, CLICKPATH\n");
             for (Map.Entry<String, SimpleCounter> clickPath : clickpathCollector.getClickPaths().entrySet()) {

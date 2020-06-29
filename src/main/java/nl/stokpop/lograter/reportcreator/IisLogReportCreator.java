@@ -199,6 +199,12 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		graphConfig.setGraphWithTrueTPSEnabled(cmdIisLog.graphWithTrueTPS);
 		graphConfig.setBaseUnit(cmdMain.baseUnit);
 
+		if (!reportDir.exists()) {
+			if (!reportDir.mkdirs()) {
+				throw new LogRaterException(String.format("Cannot create directories: %s", reportDir));
+			}
+		}
+
 		if (graphConfig.isGraphRequested()) {
 			LogGraphCreator graphCreator = new LogGraphCreator(graphConfig);
 			File graphFile = graphCreator.createHtmlChartFile(reportDir, "iis-log-rater-charts.html", dataBundle.getRequestCounterStorePairs(), analysisPeriod);

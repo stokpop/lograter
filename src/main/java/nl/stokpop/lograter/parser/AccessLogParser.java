@@ -19,6 +19,8 @@ import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.parser.line.LogFormatParser;
 import nl.stokpop.lograter.processor.Processor;
+import nl.stokpop.lograter.util.LogRaterUtils;
+import nl.stokpop.lograter.util.SessionIdParser;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +31,21 @@ import java.util.List;
 public class AccessLogParser implements LogFileParser<AccessLogEntry> {
 	
 	private static final Logger log = LoggerFactory.getLogger(AccessLogParser.class);
-	
+
 	private final LogFormatParser<AccessLogEntry> lineParser;
 	private final List<Processor<AccessLogEntry>> processors = new ArrayList<>();
 	private final TimePeriod filterTimePeriod;
+	private final SessionIdParser sessionIdParser;
 
-	public AccessLogParser(LogFormatParser<AccessLogEntry> lineParser, TimePeriod filterPeriod) {
+	public AccessLogParser(LogFormatParser<AccessLogEntry> lineParser, TimePeriod filterPeriod, SessionIdParser sessionIdParser) {
 		super();
 		this.lineParser = lineParser;
 		this.filterTimePeriod = filterPeriod;
+		this.sessionIdParser = sessionIdParser;
+	}
+
+	public AccessLogParser(LogFormatParser<AccessLogEntry> lineParser, TimePeriod filterPeriod) {
+		this(lineParser, filterPeriod, SessionIdParser.NO_SESSION_ID_PARSER);
 	}
 
 	@Override
@@ -49,6 +57,15 @@ public class AccessLogParser implements LogFileParser<AccessLogEntry> {
 		}
 
 		AccessLogEntry entry = this.lineParser.parseLogLine(logLine);
+
+		String sessionId = sessionIdParser.parseSessionId(entry);
+
+		if (!LogRaterUtils.isEmpty(entry.getSessionId())) {
+			log.warn("SessionId is already present. This is not expected! Entry: {}", entry);
+		}
+		else {
+			entry.setSessionId(sessionId);
+		}
 
         // sanity check: is at least the url present?
         if (entry.getUrl() == null) {

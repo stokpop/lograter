@@ -31,9 +31,7 @@ public class IisLogParser implements LogFileParser<AccessLogEntry> {
 
     private final static Logger log = LoggerFactory.getLogger(IisLogParser.class);
 
-    public static final SessionIdParser NO_SESSION_ID_PARSER = new SessionIdParser(null, null);
-
-    private final IisLogFormatParser lineParser;
+	private final IisLogFormatParser lineParser;
 	private final List<Processor<AccessLogEntry>> processors = new ArrayList<>();
 	private final SessionIdParser sessionIdParser;
 
@@ -44,7 +42,7 @@ public class IisLogParser implements LogFileParser<AccessLogEntry> {
 	}
 
     public IisLogParser(IisLogFormatParser iisLogFormatParser) {
-        this(iisLogFormatParser, NO_SESSION_ID_PARSER);
+        this(iisLogFormatParser, SessionIdParser.NO_SESSION_ID_PARSER);
     }
 
     @Override

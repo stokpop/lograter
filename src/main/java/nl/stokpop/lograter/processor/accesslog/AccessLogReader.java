@@ -28,13 +28,12 @@ import nl.stokpop.lograter.logentry.NginxLogMapperFactory;
 import nl.stokpop.lograter.logentry.UrlSplitter;
 import nl.stokpop.lograter.parser.AccessLogParser;
 import nl.stokpop.lograter.parser.LogFileParser;
-import nl.stokpop.lograter.parser.line.ApacheLogFormatParser;
-import nl.stokpop.lograter.parser.line.LogEntryMapper;
-import nl.stokpop.lograter.parser.line.LogbackElement;
-import nl.stokpop.lograter.parser.line.NginxLogFormatParser;
+import nl.stokpop.lograter.parser.line.*;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.LogRaterUtils;
+import nl.stokpop.lograter.util.SessionIdParser;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
@@ -63,10 +62,37 @@ public class AccessLogReader {
 
         List<AccessLogUrlMapperProcessor> urlMapperProcessors = LineMapperUtils.createUrlMapperProcessors(csFactory, config);
 
-        final AccessLogParser accessLogParser;
         final CommandAccessLog.LogType logType = config.getLogType();
 
         final UrlSplitter urlSplitter = config.isRemoveParametersFromUrl() ? AccessLogEntry.URL_SPLITTER_DEFAULT : null;
+
+        AccessLogUserSessionProcessor userSessionProcessor = null;
+        if (config.isDetermineSessionDurationEnabled()) {
+            if (LogRaterUtils.isEmpty(config.getSessionField())) {
+                throw new LogRaterException("If user session duration need to be determined, then supply a session field");
+            }
+            SessionDurationCalculator calculator = new SessionDurationCalculator();
+            userSessionProcessor = new AccessLogUserSessionProcessor(calculator);
+        }
+
+        final AccessLogClickPathProcessor clickPathProcessor;
+        final InMemoryClickpathCollector clickPathCollector;
+
+        if (config.isDetermineClickpathsEnabled()) {
+            if (LogRaterUtils.isEmpty(config.getSessionField())) {
+                throw new LogRaterException("If clickpaths need to be determined, then supply a session field");
+            }
+            clickPathCollector = new InMemoryClickpathCollector();
+            ClickPathAnalyser clickPathAnalyser = new ClickPathAnalyserEngine(clickPathCollector, config.getClickpathEndOfSessionSnippet());
+            // TODO: using default mappers now... or rather the first mapper table only
+            clickPathProcessor = new AccessLogClickPathProcessor(clickPathAnalyser, config.getLineMappers().get(0));
+        }
+        else {
+            clickPathProcessor = null;
+            clickPathCollector = null;
+        }
+
+        LogFormatParser<AccessLogEntry> lineParser;
 
         if (logType == CommandAccessLog.LogType.apache) {
             String pattern = StringUtils.useDefaultOrGivenValue(
@@ -77,10 +103,8 @@ public class AccessLogReader {
 
             Map<String, LogEntryMapper<AccessLogEntry>> mappers =
                     ApacheLogMapperFactory.initializeMappers(elements, urlSplitter, config.getBaseUnit());
-            ApacheLogFormatParser<AccessLogEntry> lineParser =
+            lineParser =
                     new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
-
-            accessLogParser = new AccessLogParser(lineParser, config.getFilterPeriod());
         }
         else if (logType == CommandAccessLog.LogType.nginx){
             String pattern = StringUtils.useDefaultOrGivenValue(
@@ -90,15 +114,24 @@ public class AccessLogReader {
             List<LogbackElement> elements = NginxLogFormatParser.parse(pattern);
             Map<String, LogEntryMapper<AccessLogEntry>> mappers =
                     NginxLogMapperFactory.initializeMappers(elements, urlSplitter);
-            NginxLogFormatParser<AccessLogEntry> lineParser =
+            lineParser =
                     new NginxLogFormatParser<>(elements, mappers, AccessLogEntry.class);
-
-            accessLogParser = new AccessLogParser(lineParser, config.getFilterPeriod());
         }
         else {
             String msg = "Unsupported log type:" + logType;
             log.error(msg);
             throw new LogRaterException(msg);
+        }
+
+        final AccessLogParser accessLogParser = config.isDetermineSessionDurationEnabled() || config.isDetermineClickpathsEnabled()
+            ? new AccessLogParser(lineParser, config.getFilterPeriod(), new SessionIdParser(config.getSessionField(), config.getSessionFieldRegexp()))
+            : new AccessLogParser(lineParser, config.getFilterPeriod());
+
+        if (config.isDetermineClickpathsEnabled()) {
+            accessLogParser.addProcessor(clickPathProcessor);
+        }
+        if (config.isDetermineSessionDurationEnabled()) {
+            accessLogParser.addProcessor(userSessionProcessor);
         }
 
         List<RequestCounterStorePair> requestCounterStoresPairs = new ArrayList<>();
@@ -109,24 +142,6 @@ public class AccessLogReader {
 	        RequestCounterStore storeFailure = urlMapperProcessor.getMappersRequestCounterStoreFailure();
 	        RequestCounterStorePair storePair = new RequestCounterStorePair(storeSuccess, storeFailure);
 	        requestCounterStoresPairs.add(storePair);
-        }
-
-	    AccessLogUserSessionProcessor userSessionProcessor = null;
-	    if (config.isDetermineSessionDurationEnabled()) {
-		    SessionDurationCalculator calculator = new SessionDurationCalculator();
-		    userSessionProcessor = new AccessLogUserSessionProcessor(calculator);
-		    accessLogParser.addProcessor(userSessionProcessor);
-	    }
-
-        AccessLogClickPathProcessor clickPathProcessor = null;
-        InMemoryClickpathCollector clickPathCollector = null;
-
-        if (config.isDetermineClickpathsEnabled()) {
-            clickPathCollector = new InMemoryClickpathCollector();
-            ClickPathAnalyser clickPathAnalyser = new ClickPathAnalyserEngine(clickPathCollector, config.getClickpathEndOfSessionSnippet());
-            // TODO: using default mappers now... or rather the first mapper table only
-            clickPathProcessor = new AccessLogClickPathProcessor(clickPathAnalyser, config.getLineMappers().get(0));
-            accessLogParser.addProcessor(clickPathProcessor);
         }
 
         int additionalColumns = 0;
@@ -168,8 +183,10 @@ public class AccessLogReader {
             Map<String, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getCounterKeyToLineMapMap();
             allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
         }
-	    
-	    return new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
+
+        return clickPathCollector == null ?
+            new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair) :
+            new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
     }
 
     public static List<RequestCounterStorePair> createAccessLogCounterProcessors(

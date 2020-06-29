@@ -1,5 +1,7 @@
 import org.gradle.api.plugins.internal.DefaultJavaPluginExtension
 
+import java.time.Year
+
 plugins {
     id 'java'
     id 'java-library'
@@ -88,7 +90,7 @@ publishing {
 
 license {
     header = rootProject.file("src/main/resources/META-INF/LICENSE.txt")
-    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    ext.year = Year.now().value
     ext.name = 'Peter Paul Bakker, Stokpop Software Solutions'
     excludes(["**/*.txt", "**/*.properties", "src/test/resources/**/*.*"])
     // keeps complaining about header not present, so added this

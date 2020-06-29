@@ -29,7 +29,9 @@ import java.util.regex.Pattern;
 public class SessionIdParser {
 
 	private static final Logger log = LoggerFactory.getLogger(SessionIdParser.class);
-	
+
+	public static final SessionIdParser NO_SESSION_ID_PARSER = new SessionIdParser(null, null);
+
 	private final String sessionField;
 	private final Pattern sessionFieldRegexp;
 

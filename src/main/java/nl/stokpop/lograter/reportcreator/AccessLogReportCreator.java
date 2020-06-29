@@ -17,6 +17,7 @@ package nl.stokpop.lograter.reportcreator;
 
 import nl.stokpop.lograter.GraphConfig;
 import nl.stokpop.lograter.LogRater;
+import nl.stokpop.lograter.clickpath.ClickPathReport;
 import nl.stokpop.lograter.command.AbstractCommandAccessLog;
 import nl.stokpop.lograter.command.CommandAccessLog;
 import nl.stokpop.lograter.command.CommandMain;
@@ -74,6 +75,7 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 		config.setCounterStorageDir(cmdMain.storageDir);
 		config.setDetermineClickpaths(cmdAccessLog.determineClickpaths);
 		config.setDetermineSessionDuration(cmdAccessLog.determineSessionDuration);
+		config.setClickpathEndOfSessionSnippet(cmdAccessLog.clickpathEndOfSessionSnippet);
 		config.setSessionField(cmdAccessLog.sessionField);
 		config.setSessionFieldRegexp(cmdAccessLog.sessionFieldRegexp);
 		config.setLogPattern(cmdAccessLog.logPattern);
@@ -115,5 +117,10 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 			log.info("Check out graphs: {}", graphFile);
 		}
 
+		if (accessLogDataBundle.getClickPathCollector() != AccessLogDataBundle.NOOP_CLICK_PATH_COLLECTOR) {
+			File clickpathFile = new File(reportDirectory, "clickpath-report-" + System.currentTimeMillis() + ".csv");
+			ClickPathReport.reportClickpaths(accessLogDataBundle.getClickPathCollector(), clickpathFile, config.isClickpathReportStepDurations());
+			log.info("The clickpath report: {}", clickpathFile.getPath());
+		}
 	}
 }

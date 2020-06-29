@@ -24,18 +24,12 @@ import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class AccessLogClickPathProcessor implements Processor<AccessLogEntry> {
 	
 	private final static Logger log = LoggerFactory.getLogger(AccessLogClickPathProcessor.class);
 
 	private ClickPathAnalyser clickPathAnalyser;
 	private LineMapperSection lineMapper;
-	
-	Set<String> reportedNonMatchers = new HashSet<>();
-	Set<String> reportedMultiMatchers = new HashSet<>();
 
 	public AccessLogClickPathProcessor(ClickPathAnalyser clickPathAnalyser, LineMapperSection lineMapper) {
 		this.clickPathAnalyser = clickPathAnalyser;
@@ -49,12 +43,7 @@ public class AccessLogClickPathProcessor implements Processor<AccessLogEntry> {
 			
 			@Override
 			public void noMatchFound(String line) {
-				int hashCode = line.hashCode();
-				if (!reportedNonMatchers.contains(line)) {
-					log.info("No match found for: {} Using line hashCode in clickpath: {}", line, hashCode);
-					reportedNonMatchers.add(line);
-				}					
-				getClickPathAnalyser().addLineEntry(entry.getSessionId(), Integer.toString(hashCode), entry.getTimestamp());
+				getClickPathAnalyser().addLineEntry(entry.getSessionId(), line, entry.getTimestamp());
 			}
 			
 			@Override

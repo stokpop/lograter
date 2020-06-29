@@ -49,7 +49,6 @@ public class ClickPathAnalyserEngine implements ClickPathAnalyser {
 
 	@Override
 	public void addLineEntry(String sessionId, String url, long timestamp) {
-	    
 	    // create new session if not exists
 	   if (!openSessions.containsKey(sessionId)) {       
 	        addNewSession(sessionId, url, timestamp);
@@ -63,7 +62,7 @@ public class ClickPathAnalyserEngine implements ClickPathAnalyser {
 	            closeAndStartNewSession(sessionId, url, timestamp);
 	        }
 	        // if logout is clicked
-	        else if (url.contains(logOutSnippet)) {
+	        else if (logOutSnippet != null && url.contains(logOutSnippet)) {
 	            // add this click and close session
 	            addAndCloseSession(sessionId, url, timestamp);
 	        }
