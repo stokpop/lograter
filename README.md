@@ -163,7 +163,7 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
 
 ### LogRater command line options
 
-    LogRater version: 1.3.4
+    LogRater version: 1.3.6
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:
@@ -188,7 +188,7 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
           Clear the database.
           Default: false
         -debug
-          Print stacktraces with errors.
+          Log debug statements and print stacktraces with errors.
           Default: false
         -runid
           A run id to identify a test run with a report. Is displayed in reports.

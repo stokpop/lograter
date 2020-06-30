@@ -42,8 +42,7 @@ public class LogRater {
     private static final String PROPERTY_FILE_NAME = "lograter.properties";
     private static final String LOGBACK_CONFIGURATION_FILE = "logback.configurationFile";
 
-    // Do not make static to prevent static methods from calling log without being initialized.
-    private Logger log;
+    private static Logger log;
 
 	private PrintWriter printWriter;
 
@@ -52,16 +51,31 @@ public class LogRater {
     }
 
 	public static void main(String[] args) throws Exception {
+        boolean debug = Arrays.asList(args).contains("-debug");
+        initLogbackLogger(debug);
+        log = LoggerFactory.getLogger(LogRater.class);
         new LogRater(FileUtils.createBufferedPrintWriterWithUTF8(System.out)).startLogRater(args);
 	}
 
     /**
      * Use other name than standard logback.xml so projects with a dependency on lograter.jar
      * will not complain about multiple logback.xml's on the classpath.
+     *
+     * Needs to be called before any logger is created!
      */
-    private static void initLogbackLogger() {
-        if (System.getProperty(LOGBACK_CONFIGURATION_FILE) == null) {
-            System.setProperty(LOGBACK_CONFIGURATION_FILE, "logback-lograter.xml");
+    private static void initLogbackLogger(boolean debug) {
+        String alreadyDefinedLogbackConfigFile = System.getProperty(LOGBACK_CONFIGURATION_FILE);
+        if (alreadyDefinedLogbackConfigFile == null) {
+            String logbackFile = debug ? "logback-lograter-debug.xml" : "logback-lograter.xml";
+            System.setProperty(LOGBACK_CONFIGURATION_FILE, logbackFile);
+        }
+        else {
+            if (debug) {
+                System.err.println("WARN: -debug flag was found but will be ignored, because " + LOGBACK_CONFIGURATION_FILE + " is set to " + alreadyDefinedLogbackConfigFile);
+            }
+            else {
+                System.err.println("INFO: " + LOGBACK_CONFIGURATION_FILE + " is set to " + alreadyDefinedLogbackConfigFile);
+            }
         }
     }
 
@@ -92,7 +106,6 @@ public class LogRater {
     }
 
     public void startLogRater(String[] args, Map<LogRaterCommand, ReportCreator> extraCommands) throws IOException {
-        initLogbackLogger();
 
         CommandMain cmdMain = new CommandMain();
 
@@ -141,12 +154,6 @@ public class LogRater {
             simpleUsage(commandNamesSet);
             throw new LogRaterException(message, e);
         }
-
-        if (cmdMain.debug) {
-            System.err.println("WARN: Please use debug configuration of your logging framework to show TRACE or DEBUG in logging.");
-        }
-
-        log = LoggerFactory.getLogger(LogRater.class);
 
         if (cmdMain.storage == CounterStorageType.Database) {
             DatabaseBootstrap.instance().bootstrapDatabase(cmdMain.clearDb);
