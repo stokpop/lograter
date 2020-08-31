@@ -35,9 +35,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.time.ZoneId;
 import java.util.*;
 
 public class LogRater {
+
+    public static final Locale DEFAULT_LOCALE = Locale.US;
+    public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
     private static final String PROPERTY_FILE_NAME = "lograter.properties";
     private static final String LOGBACK_CONFIGURATION_FILE = "logback.configurationFile";
@@ -176,6 +180,17 @@ public class LogRater {
         long timestamp = System.currentTimeMillis();
         cmdMain.reportDirectory = DateUtils.replaceTimestampMarkerInFilename(cmdMain.reportDirectory, timestamp);
         cmdMain.outputFilename = DateUtils.replaceTimestampMarkerInFilename(cmdMain.outputFilename, timestamp);
+
+        File reportDirectory = new File(cmdMain.reportDirectory);
+        if (!reportDirectory.exists()) {
+            log.info("Report directory not found, create directory: {}", reportDirectory.getAbsolutePath());
+            if (!reportDirectory.mkdir()) {
+                throw new LogRaterException("Failed to create directory: " + reportDirectory.getAbsolutePath());
+            }
+        }
+        if (!reportDirectory.canWrite()) {
+            throw new LogRaterException("Unable to write to directory: " + reportDirectory.getAbsolutePath());
+        }
 
         Optional<Map.Entry<LogRaterCommand, ReportCreator>> entry = reportCreators.entrySet().stream()
                 .filter(k -> k.getKey().getCommandName().equalsIgnoreCase(parsedCommand))

@@ -22,16 +22,8 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 @NotThreadSafe
 public class RequestCounterStoreSqLite implements RequestCounterStore {
@@ -279,8 +271,8 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	}
 
     @Override
-    public List<String> getCounterKeys() {
-        return new ArrayList<>(cachedCounters.keySet());
+    public Set<String> getCounterKeys() {
+        return Collections.unmodifiableSet(cachedCounters.keySet());
     }
 
 	@Override

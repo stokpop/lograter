@@ -24,6 +24,7 @@ import info.monitorenter.gui.chart.labelformatters.LabelFormatterDate;
 import info.monitorenter.gui.chart.rangepolicies.RangePolicyFixedViewport;
 import info.monitorenter.gui.chart.traces.Trace2DSimple;
 import info.monitorenter.util.Range;
+import nl.stokpop.lograter.LogRater;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.util.FileUtils;
 import org.joda.time.format.DateTimeFormat;
@@ -39,13 +40,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class AbstractGraphCreator {
     private static final Logger log = LoggerFactory.getLogger(AbstractGraphCreator.class);
 
-    public static final Locale DEFAULT_LOCALE = Locale.US;
 	private static final DateTimeFormatter STANDARD_DATE_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmss");
 	public static final String STANDARD_TIME_FORMAT_STRING = "yyyyMMddTHHmmss";
 
@@ -127,7 +126,7 @@ public class AbstractGraphCreator {
 
         // Set a date formatter
 		@SuppressWarnings("PMD.AvoidSimpleDateFormat") // SimpleDateFormat is needed by API
-		final SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss", DEFAULT_LOCALE);
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss", LogRater.DEFAULT_LOCALE);
         xAxis.setFormatter(new LabelFormatterDate(dateFormat));
         xAxis.setAxisTitle(new AxisTitle("absolute time"));
         xAxis.setPaintScale(true);

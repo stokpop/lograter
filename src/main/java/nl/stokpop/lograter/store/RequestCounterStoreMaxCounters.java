@@ -17,8 +17,9 @@ package nl.stokpop.lograter.store;
 
 import nl.stokpop.lograter.counter.RequestCounter;
 
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Wraps a RequestCounterStore to limit the number of unique counters.
@@ -42,8 +43,8 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     }
 
     @Override
-    public List<String> getCounterKeys() {
-        return store.getCounterKeys();
+    public Set<String> getCounterKeys() {
+        return Collections.unmodifiableSet(store.getCounterKeys());
     }
 
     @Override

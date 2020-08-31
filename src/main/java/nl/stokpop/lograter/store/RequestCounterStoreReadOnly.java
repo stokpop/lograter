@@ -18,7 +18,7 @@ package nl.stokpop.lograter.store;
 import nl.stokpop.lograter.counter.RequestCounter;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
@@ -34,7 +34,7 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
         return store.getName();
     }
 
-    public List<String> getCounterKeys() {
+    public Set<String> getCounterKeys() {
         return store.getCounterKeys();
     }
 

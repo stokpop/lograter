@@ -16,7 +16,7 @@ LogRater is sponsored by Rabobank.
 
 Create an executable jar: 
 
-    ./gradlew customFatJar
+    ./gradlew clean customFatJar
     
 Execute as (use correct version number):
 

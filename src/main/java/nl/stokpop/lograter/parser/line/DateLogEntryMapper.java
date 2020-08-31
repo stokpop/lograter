@@ -15,8 +15,8 @@
  */
 package nl.stokpop.lograter.parser.line;
 
+import nl.stokpop.lograter.LogRater;
 import nl.stokpop.lograter.LogRaterException;
-import nl.stokpop.lograter.graphs.AbstractGraphCreator;
 import nl.stokpop.lograter.logentry.LogEntry;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -36,7 +36,7 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 			if ("ISO8601".equalsIgnoreCase(dateFormat)) {
 				tempDateTimeFormatter = ISODateTimeFormat.dateTime();
 			} else {
-				tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(AbstractGraphCreator.DEFAULT_LOCALE);
+				tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(LogRater.DEFAULT_LOCALE);
 			}
 		} catch(IllegalArgumentException e) {
 			if (dateFormat.contains(",")) {
@@ -45,7 +45,7 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 				dateFormat = dateFormat.substring(0, idx);			
 				log.warn("No support for timezones, skipping '{}', using '{}'", timezone, dateFormat);
 			}
-			tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(AbstractGraphCreator.DEFAULT_LOCALE);
+			tempDateTimeFormatter = DateTimeFormat.forPattern(dateFormat).withLocale(LogRater.DEFAULT_LOCALE);
 		}
 		dateFormatter = tempDateTimeFormatter;
 	}

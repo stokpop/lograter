@@ -19,12 +19,7 @@ import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @NotThreadSafe
 public class RequestCounterStoreHashMap implements RequestCounterStore {
@@ -97,8 +92,8 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
     @Override
-    public List<String> getCounterKeys() {
-        return new ArrayList<>(counters.keySet());
+    public Set<String> getCounterKeys() {
+        return Collections.unmodifiableSet(counters.keySet());
     }
 
 	@Override

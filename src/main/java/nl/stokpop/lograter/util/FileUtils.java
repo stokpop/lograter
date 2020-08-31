@@ -39,8 +39,9 @@ public class FileUtils {
     private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
 	private static final Pattern PATTERN_NON_FILE_CHARS = Pattern.compile("[^a-zA-Z0-9.-]");
+    public static final int FOUR_MB = 4 * 1024 * 1024;
 
-	private FileUtils() {}
+    private FileUtils() {}
 
     /**
      * Returns relative path for completePath from rootPath
@@ -119,7 +120,7 @@ public class FileUtils {
             bufferedReader = (BufferedReader) reader;
         }
         else {
-            bufferedReader = new BufferedReader(reader);
+            bufferedReader = new BufferedReader(reader, FOUR_MB);
         }
         return bufferedReader;
     }

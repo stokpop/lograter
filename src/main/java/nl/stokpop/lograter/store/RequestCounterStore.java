@@ -17,7 +17,7 @@ package nl.stokpop.lograter.store;
 
 import nl.stokpop.lograter.counter.RequestCounter;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * A RequestCounterStore has one RequestCounter for the total of all requests.
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public interface RequestCounterStore extends Iterable<RequestCounter> {
 	String getName();
-    List<String> getCounterKeys();
+    Set<String> getCounterKeys();
 	RequestCounter get(String counterKey);
 	RequestCounter getTotalRequestCounter();
 

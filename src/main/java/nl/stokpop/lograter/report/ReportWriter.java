@@ -31,6 +31,7 @@ public class ReportWriter {
     private final static Logger log = LoggerFactory.getLogger(ReportWriter.class);
 
     public static File write(String outputFilename, File reportDirectory, LogReport report, TimePeriod analysisPeriod) throws IOException {
+
         final File outFile;
 
         final String filename = DateUtils.replaceTimestampMarkerInFilename(outputFilename);
