@@ -35,7 +35,10 @@ public enum GcAlgorithm {
     MARK_SWEEP_COMPACT_JAVA_10("Copy", "Mark Sweep Compact", MemoryMarkSweepCompactJava10.class,
             "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,Copy,MarkSweepCompact,Metaspace,CodeHeap'non-nmethods',TenuredGen,EdenSpace,CodeHeap'profilednmethods',SurvivorSpace,CompressedClassSpace,CodeHeap'non-profilednmethods'"),
     PARALLEL("PSMarkSweep", "Parallel Scavenge", MemoryParallelGc.class,
-            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,PSOldGen,PSEdenSpace,CompressedClassSpace,CodeCache,PSSurvivorSpace");
+            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,PSOldGen,PSEdenSpace,CompressedClassSpace,CodeCache,PSSurvivorSpace"),
+    PARALLEL_JAVA_11("PSMarkSweep", "Parallel Scavenge", MemoryParallelGcJava11.class,
+            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,CodeHeap'non-nmethods',PSOldGen,CodeHeap'profilednmethods',CompressedClassSpace,PSSurvivorSpace,PSEdenSpace,CodeHeap'non-profilednmethods'");
+
 
     private final String youngGenerationGcAlgorithm;
     private final String oldGenerationGcAlgorithm;
