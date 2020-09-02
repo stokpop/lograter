@@ -51,6 +51,11 @@ public class GcAlgorithmDetectorTest {
         assertEquals(PARALLEL, GcAlgorithmDetector.INSTANCE.detect(getFile("jmx/jvm-heap-metrics-parallel.log")));
     }
 
+    @Test
+    public void detectParallelJava11PlusTest() {
+        assertEquals(PARALLEL_JAVA_11, GcAlgorithmDetector.INSTANCE.detect(getFile("jmx/jvm-heap-metrics-parallel-java-11.log")));
+    }
+
     @Test(expected = GcLogParseException.class)
     public void detectNonExistingTest() {
         GcAlgorithmDetector.INSTANCE.detect(getFile("jmx/sar28"));
