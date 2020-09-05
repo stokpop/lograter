@@ -163,7 +163,7 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
 
 ### LogRater command line options
 
-    LogRater version: 1.3.6
+    LogRater version: 1.3.8
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:

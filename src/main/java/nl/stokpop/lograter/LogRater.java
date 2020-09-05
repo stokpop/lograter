@@ -46,18 +46,19 @@ public class LogRater {
     private static final String PROPERTY_FILE_NAME = "lograter.properties";
     private static final String LOGBACK_CONFIGURATION_FILE = "logback.configurationFile";
 
-    private static Logger log;
+    private final Logger log;
 
-	private PrintWriter printWriter;
+	private final PrintWriter printWriter;
 
     public LogRater(PrintWriter printWriter) {
         this.printWriter = printWriter;
+        // logger cannot be static here, because we want to init logging before LogRater starts
+        log = LoggerFactory.getLogger(LogRater.class);
     }
 
 	public static void main(String[] args) throws Exception {
         boolean debug = Arrays.asList(args).contains("-debug");
         initLogbackLogger(debug);
-        log = LoggerFactory.getLogger(LogRater.class);
         new LogRater(FileUtils.createBufferedPrintWriterWithUTF8(System.out)).startLogRater(args);
 	}
 
@@ -84,6 +85,7 @@ public class LogRater {
     }
 
     private Properties readPropertiesFile() {
+        log.debug("Reading properties file: {}", PROPERTY_FILE_NAME);
         final InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(PROPERTY_FILE_NAME);
         if (resourceAsStream == null) {
             log.error("Property file not found on classpath: " + PROPERTY_FILE_NAME + " Properties will not be present.");
