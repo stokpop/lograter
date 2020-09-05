@@ -20,31 +20,27 @@ import nl.stokpop.lograter.logentry.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NginxLogFormatParser<T extends LogEntry> implements LogFormatParser<T> {
 
 	private static final Logger log = LoggerFactory.getLogger(NginxLogFormatParser.class.getName());
 
-	private List<LogbackElement> elements;
-	private Map<String, LogEntryMapper<T>> mappers;
+	private final List<LogbackElement> elements;
+	private final Map<String, LogEntryMapper<T>> mappers;
 
-	// to create new instance
-	private Class<T> clazzOfT;
+	private final LogEntryFactory<T> logEntryFactory;
 
-	public NginxLogFormatParser(List<LogbackElement> elements, Map<String, LogEntryMapper<T>> mappers, Class<T> clazzOfT) {
-		this.elements = elements;
-		this.mappers = mappers;
-		this.clazzOfT = clazzOfT;
+	public NginxLogFormatParser(List<LogbackElement> elements, Map<String, LogEntryMapper<T>> mappers, LogEntryFactory<T> logEntryFactory) {
+		this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
+		this.mappers = Collections.unmodifiableMap(new HashMap<>(mappers));
+		this.logEntryFactory = logEntryFactory;
 	}
 
 	@Override
 	public T parseLogLine(String logline) {
 		
-		T entry = newInstanceOfT();
+		T entry = logEntryFactory.newInstance();
 
         entry.setLogline(logline);
 
@@ -91,15 +87,6 @@ public class NginxLogFormatParser<T extends LogEntry> implements LogFormatParser
 		}
 		return entry;
 	}
-
-	private T newInstanceOfT() {
-		try {
-			return clazzOfT.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-			throw new LogRaterException("Cannot instantiate class: " + clazzOfT.getName(), e);
-		}
-	}
-
 
 	public static List<LogbackElement> parse(String pattern) {
 		List<LogbackElement> elements = new ArrayList<>();

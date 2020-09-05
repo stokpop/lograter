@@ -38,7 +38,7 @@ public class NginxLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = NginxLogMapperFactory.initializeMappers(elements);
-        NginxLogFormatParser<AccessLogEntry> parser = new NginxLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        NginxLogFormatParser<AccessLogEntry> parser = new NginxLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "10.239.208.214 - pp [12/Mar/2018:20:03:01 +0100] \"POST /story-api/createStory HTTP/1.1\" 400 192 \"-\" \"Apache-HttpClient/4.5 (Java/1.8.0_102)\"";
         AccessLogEntry entry = parser.parseLogLine(logline);

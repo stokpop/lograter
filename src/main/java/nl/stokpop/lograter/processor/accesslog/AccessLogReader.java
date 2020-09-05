@@ -104,7 +104,7 @@ public class AccessLogReader {
             Map<String, LogEntryMapper<AccessLogEntry>> mappers =
                     ApacheLogMapperFactory.initializeMappers(elements, urlSplitter, config.getBaseUnit());
             lineParser =
-                    new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+                    new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
         }
         else if (logType == CommandAccessLog.LogType.nginx){
             String pattern = StringUtils.useDefaultOrGivenValue(
@@ -115,7 +115,7 @@ public class AccessLogReader {
             Map<String, LogEntryMapper<AccessLogEntry>> mappers =
                     NginxLogMapperFactory.initializeMappers(elements, urlSplitter);
             lineParser =
-                    new NginxLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+                    new NginxLogFormatParser<>(elements, mappers, AccessLogEntry::new);
         }
         else {
             String msg = "Unsupported log type:" + logType;

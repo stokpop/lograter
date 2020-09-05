@@ -52,7 +52,7 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 	
 	protected long dateParser(String value) {
         try {
-            return dateFormatter.parseDateTime(value).getMillis();
+            return dateFormatter.parseMillis(value);
         } catch (IllegalArgumentException e) {
             throw new LogRaterException("Could not parse date.", e);
         }

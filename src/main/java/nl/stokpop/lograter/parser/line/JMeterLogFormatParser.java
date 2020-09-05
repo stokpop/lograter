@@ -20,21 +20,18 @@ import nl.stokpop.lograter.processor.jmeter.JMeterLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JMeterLogFormatParser {
 
     private static final Logger log = LoggerFactory.getLogger(IisLogFormatParser.class.getName());
 
     private final Map<String, LogEntryMapper<JMeterLogEntry>> mappers;
-    private List<LogbackElement> elements;
+    private final List<LogbackElement> elements;
 
     public JMeterLogFormatParser(final List<LogbackElement> elements, final Map<String, LogEntryMapper<JMeterLogEntry>> mappers) {
-        this.elements = elements;
-        this.mappers = mappers;
+        this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
+        this.mappers = Collections.unmodifiableMap(new HashMap<>(mappers));
     }
 
     public static Map<String, LogEntryMapper<JMeterLogEntry>> initializeMappers() {

@@ -15,11 +15,7 @@
  */
 package nl.stokpop.lograter.logentry;
 
-import nl.stokpop.lograter.parser.line.LogEntryMapper;
-import nl.stokpop.lograter.parser.line.LogbackDirective;
-import nl.stokpop.lograter.parser.line.LogbackElement;
-import nl.stokpop.lograter.parser.line.LogbackLiteral;
-import nl.stokpop.lograter.parser.line.LogbackParser;
+import nl.stokpop.lograter.parser.line.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -44,7 +40,7 @@ public class LogbackLogEntryTest {
         elements.add(LogbackDirective.from(directive));
         elements.add(new LogbackLiteral(";"));
         Map<String, LogEntryMapper<LogbackLogEntry>> mapperMap = LogbackLogEntry.initializeLogBackMappers(elements);
-        LogbackParser<LogbackLogEntry> parser = new LogbackParser<>(elements, mapperMap, LogbackLogEntry.class);
+        LogbackParser<LogbackLogEntry> parser = new LogbackParser<>(elements, mapperMap, LogbackLogEntry::new);
 
         String expectedMessage = "This is a message.";
         LogbackLogEntry logEntry = parser.parseLogLine(";" + expectedMessage + ";");

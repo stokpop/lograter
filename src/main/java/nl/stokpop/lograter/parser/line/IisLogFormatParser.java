@@ -21,9 +21,7 @@ import nl.stokpop.lograter.logentry.IisLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IisLogFormatParser {
 	
@@ -31,12 +29,12 @@ public class IisLogFormatParser {
 
 	private static final Logger log = LoggerFactory.getLogger(IisLogFormatParser.class.getName());
 	
-	private List<LogbackElement> elements;
-	private Map<String, LogEntryMapper<IisLogEntry>> mappers;
+	private final List<LogbackElement> elements;
+	private final Map<String, LogEntryMapper<IisLogEntry>> mappers;
 	
 	public IisLogFormatParser(List<LogbackElement> elements, Map<String, LogEntryMapper<IisLogEntry>> mappers) {
-		this.elements = elements;
-		this.mappers = mappers;
+		this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
+		this.mappers = Collections.unmodifiableMap(new HashMap<>(mappers));
 	}
 
     public static IisLogFormatParser createIisLogFormatParser(String pattern) {

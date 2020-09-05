@@ -20,7 +20,6 @@ import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.logentry.ApacheLogMapperFactory;
 import org.junit.Test;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +50,7 @@ public class ApacheLogFormatParserTest {
 		assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
 		Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-		ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+		ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
 		String logline = "\"1.2.3.4\" www.stokpop.nl [02/Jan/2017:17:35:24 +0100] \"GET /customer/?language=en HTTP/1.0\" 200 7635 73206 \"KQdIuYTlckCM\" \"https://entry.stokpop.nl\" \"https://entry.stokpop.nl/customer/?language=en\" \"Mozilla/5.0 (iPad; CPU OS 10_2 like Mac OS X) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0 Mobile/14C92 Safari/602.1\"";
         AccessLogEntry entry = parser.parseLogLine(logline);
@@ -82,7 +81,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "\"127.0.0.1\" www.stokpop.nl [21/Dec/2012:00:01:05 +0100] \"GET /service/order/v1 HTTP/1.0\" 200" +
                 " 501 353552 \"https://entry.stokpop.nl\" \"-\" \"Stokpop Mobiel, 3.0.2, Android, 2.3.4, samsung, GT-I9100\"";
@@ -112,7 +111,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", 26, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "127.0.0.1:20053 - - [08/Nov/2019:12:01:04 +0100] \"POST / HTTP/1.1\" 200 2114 \"-\" \"Client\" asldkfjhasldk 33087usec";
 
@@ -151,7 +150,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline =
                 "127.0.0.1 - - [05/Mar/2019:10:33:34 +0100] /research/beverages.html" +
@@ -194,7 +193,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "127.0.0.1  www.stokpop.com  - - 23/May/2016:07:15:14.257  C-Site  SUCCESS  foo bar \"POST /request/ HTTP/1.1\" 200 1436 23887 \"-\" \"Apache-HttpClient/4.2.5 (java 1.5)\"  abc";
 
@@ -226,7 +225,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "1.2.3.4 foo.lograter.stokpop.nl - - [07/Jan/2019:00:56:00 +0100] \"GET ABCdef123/243215/ HTTP/1.1\" 200 4196 2160841008 \"-\" \"http://foo.lograter.stokpop.nl\" \"-\" \"Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 6.0; en-US)\"";
 
@@ -259,7 +258,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline =
                 "\"-\" lograter.stokpop.nl [05/Apr/2019:00:01:40 +0200] \"GET ABCdef123/servlet/34873?version=5 HTTP/1.1\" 200 31678 9597 \"-\" \"-\" \"-\" \"Mozilla/4.0 (compatible; MSIE 4.01; Windows NT)\"";
@@ -291,7 +290,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "\"-\" linux.stokpop.nl [24/May/2019:00:01:02 +0200] \"OPTIONS * HTTP/1.0\" 200 - 106 \"-\" \"-\" \"-\" \"Apache (internal dummy connection)\"";
 
@@ -323,7 +322,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "22.222.222.22  linux.stokpop.nl  - - 17/May/2019:04:21:29.485  servery.acme.nl  SUCCESS  BAR FOO \"POST /vla HTTP/1.1\" 200 448 98796 \"-\" \"Apache-HttpClient/4.5.2 (Java/1.7.0)\"  ABCDEFGH";
 
@@ -372,7 +371,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         testCase1(parser);
 
@@ -428,7 +427,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "2019-03-15 10:56:05 {\"message\":\"{ 'tpc-connect':'success', 'connect-nano-duration':1790913, 'close-nano-duration':40900, 'host':'database.stokpop.nl', 'port':1433 }\",\"name\":\"Afterburner-One\",\"durationInMillis\":2}\n";
 
@@ -442,7 +441,7 @@ public class ApacheLogFormatParserTest {
     }
 
     @Test
-    public void testCloudLog() throws ParseException {
+    public void testCloudLog() {
         String pattern =
                 "%{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]}t \"%r\" %s %{two}X response_time:%T %{three}X";
 
@@ -452,7 +451,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.xxx.yyy.zzz.nl - [2020-01-29T15:45:44.813+0000] \"GET /delay?duration=200 HTTP/1.1\" 200 0 85 \"-\" \"curl/7.64.1\" \"1.1.1.1:555\" \"2.2.2.2:4444\" x_forwarded_for:\"3.3.3.3\" x_forwarded_proto:\"https\" vcap_request_id:\"xxxx-1d3f-411a-56de-yyyy\" response_time:0.477786246 app_id:\"xxx-6c11-4f8f-a8cc-yyy\" app_index:\"0\" x_client_ip:\"-\" x_session_id:\"-\" x_b3_traceid:\"eorituwerio\" x_b3_spanid:\"weopirtu\" x_b3_parentspanid:\"-\" b3:\"woiertu\"";
 
@@ -468,7 +467,7 @@ public class ApacheLogFormatParserTest {
     }
 
     @Test
-    public void testCloudLogWithNanoPrecision() throws ParseException {
+    public void testCloudLogWithNanoPrecision() {
         String pattern =
             "%{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ]}t \"%r\" %s %{two}X response_time:%T %{three}X";
 
@@ -478,7 +477,7 @@ public class ApacheLogFormatParserTest {
         assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
 
         Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 
         String logline = "    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.xxx.yyy.zzz.nl - [2020-01-29T15:45:44.123555666Z] \"GET /delay?duration=200 HTTP/1.1\" 200 0 85 \"-\" \"curl/7.64.1\" \"1.1.1.1:555\" \"2.2.2.2:4444\" x_forwarded_for:\"3.3.3.3\" x_forwarded_proto:\"https\" vcap_request_id:\"xxxx-1d3f-411a-56de-yyyy\" response_time:0.477786246 app_id:\"xxx-6c11-4f8f-a8cc-yyy\" app_index:\"0\" x_client_ip:\"-\" x_session_id:\"-\" x_b3_traceid:\"eorituwerio\" x_b3_spanid:\"weopirtu\" x_b3_parentspanid:\"-\" b3:\"woiertu\"";
 

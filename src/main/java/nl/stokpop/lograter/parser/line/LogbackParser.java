@@ -21,38 +21,34 @@ import nl.stokpop.lograter.logentry.LogbackLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LogbackParser<T extends LogbackLogEntry> {
 	
 	private static final Logger log = LoggerFactory.getLogger(LogbackParser.class.getName());
 	
-	private List<LogbackElement> elements;
-	private Map<String, LogEntryMapper<T>> mappers;
-	
-	// to create new instance
-	private Class<T> clazzOfT;
+	private final List<LogbackElement> elements;
+	private final Map<String, LogEntryMapper<T>> mappers;
 
-	public LogbackParser(List<LogbackElement> elements, Map<String, LogEntryMapper<T>> mappers, Class<T> clazzOfT) {
-		this.elements = elements;
-		this.mappers = mappers;
-		this.clazzOfT = clazzOfT;
+	private final LogEntryFactory<T> logEntryFactory;
+
+	public LogbackParser(List<LogbackElement> elements, Map<String, LogEntryMapper<T>> mappers, LogEntryFactory<T> logEntryFactory) {
+		this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
+		this.mappers = Collections.unmodifiableMap(new HashMap<>(mappers));
+		this.logEntryFactory = logEntryFactory;
 	}
 
     public static LogbackParser<LogbackLogEntry> createLogbackParser(String logbackpattern) {
         List<LogbackElement> elements = parse(logbackpattern);
         Map<String, LogEntryMapper<LogbackLogEntry>> mappers = LogbackLogEntry.initializeLogBackMappers(elements);
-        return new LogbackParser<>(elements, mappers, LogbackLogEntry.class);
+        return new LogbackParser<>(elements, mappers, LogbackLogEntry::new);
     }
 
     public T parseLogLine(String logline) {
 		
 		logline = logline.trim();
 		
-		T entry = newInstanceOfT();
+		T entry = logEntryFactory.newInstance();
 		
 		int locationInLine = 0;
 		LogbackDirective var = null;
@@ -140,21 +136,13 @@ public class LogbackParser<T extends LogbackLogEntry> {
         return "X".equals(logbackDirective.getDirective()) || "mdc".equals(logbackDirective.getDirective());
     }
 
-    private T newInstanceOfT() {
-		try {
-			return clazzOfT.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-			throw new LogRaterException("Cannot instantiate class: " + clazzOfT.getName(), e);
-		}
-    }
-
-	public static List<LogbackElement> parse(String logbackpattern) {
+	public static List<LogbackElement> parse(String logbackPattern) {
 		List<LogbackElement> elements = new ArrayList<>();
 		
 		boolean isVariable = false;
 		boolean isParameter = false;
 		StringBuilder literal = new StringBuilder();
-		char[] lbp = logbackpattern.toCharArray();
+		char[] lbp = logbackPattern.toCharArray();
         for (char c : lbp) {
             if (c == '%') {
                 if (isVariable) {

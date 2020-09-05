@@ -15,30 +15,6 @@
  */
 package nl.stokpop.lograter.parser.line;
 
-public class LogbackLiteral implements LogbackElement {
-	private final String literal;
-
-	public LogbackLiteral(String literal) {
-		this.literal = literal;
-	}
-
-	@Override
-	public String toString() {
-		return "Literal [" + getLiteral() + "]";
-	}
-
-    public String getLiteral() {
-        return literal;
-    }
-
-	@Override
-	public boolean equals(Object o) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int hashCode() {
-		throw new UnsupportedOperationException();
-	}
-
+public interface LogEntryFactory<T> {
+    T newInstance();
 }

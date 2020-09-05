@@ -25,7 +25,7 @@ import nl.stokpop.lograter.LogRaterException;
  */
 public class LogbackDirective implements LogbackElement {
 	
-	private String directive;
+	private final String directive;
 	private String variable;
 
 	private LogbackDirective(String directive) {

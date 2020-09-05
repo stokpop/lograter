@@ -17,11 +17,7 @@ package nl.stokpop.lograter.logentry;
 
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.counter.HttpMethod;
-import nl.stokpop.lograter.parser.line.ApacheLogFormatParser;
-import nl.stokpop.lograter.parser.line.LogEntryMapper;
-import nl.stokpop.lograter.parser.line.LogbackDirective;
-import nl.stokpop.lograter.parser.line.LogbackElement;
-import nl.stokpop.lograter.parser.line.LogbackLiteral;
+import nl.stokpop.lograter.parser.line.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -40,7 +36,7 @@ public class ApacheLogMapperFactoryTest {
         elements.add(LogbackDirective.from("r"));
         elements.add(new LogbackLiteral("\";"));
         Map<String, LogEntryMapper<AccessLogEntry>> mapperMap = ApacheLogMapperFactory.initializeMappers(elements, null);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry::new);
 
         AccessLogEntry logEntryNone = parser.parseLogLine(";\"- /url?version=1.0 2.0\";");
         assertEquals(HttpMethod.NONE, logEntryNone.getHttpMethod());
@@ -77,7 +73,7 @@ public class ApacheLogMapperFactoryTest {
         elements.add(LogbackDirective.from("D"));
         elements.add(new LogbackLiteral(";"));
         Map<String, LogEntryMapper<AccessLogEntry>> mapperMap = ApacheLogMapperFactory.initializeMappers(elements);
-        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry.class);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mapperMap, AccessLogEntry::new);
 
         AccessLogEntry entryOneMirco = parser.parseLogLine(";1;");
         assertEquals(0, entryOneMirco.getDurationInMillis());

@@ -85,7 +85,7 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 		Map<String, LogEntryMapper<AccessLogEntry>> mappers =
 				ApacheLogMapperFactory.initializeMappers(elements, splitter, config.getBaseUnit());
 		ApacheLogFormatParser<AccessLogEntry> lineParser =
-				new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry.class);
+				new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
 		
 		log.info("Writing to csv file: {}", csvFile.getPath());
 
