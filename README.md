@@ -12,18 +12,37 @@ LogRater can be run stand-alone from the command line, or can be included as jar
 
 LogRater is sponsored by Rabobank.
 
-## build
+# Quick start
 
-Create an executable jar: 
+You can download a pre-build jar here: https://github.com/stokpop/lograter/releases
 
-    ./gradlew clean customFatJar
+with curl: 
+
+    curl -O -L https://github.com/stokpop/lograter/releases/download/1.3.8/lograter-exec-1.3.8.jar
+
+use java 8+ to run lograter:
+
+    java -jar lograter-exec-1.3.8.jar
+
+download an example dataset:
+
+    curl -O -L ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
+  
+process this file:
+
+     java -jar lograter-exec-1.3.8.jar access -single-mapper NASA_access_log_Jul95.gz  
     
-Execute as (use correct version number):
+check the reports/access-log-rater-charts.html:
 
-    java -jar build/libs/lograter-exec-X.Y.Z-SNAPSHOT.jar  
+![nasa hps image](images/nasa-hps.png)
+
+You can see clearly the week days and weekend days pattern and a busy day.
+The busy day is probably because of some space shuttle events on that day.
+
+Also notice there is no response times recorded in this access log.
+If you have access log files that include response times, a lot more
+performance information will be revealed.
     
-You can also download a pre-build jar here: https://github.com/stokpop/lograter/releases
-
 ## Uses
 
 ### Incoming requests
@@ -973,7 +992,15 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
                Include basic urls in iis and access logs.
                Default: false
 
+## build
 
-              
+Create an executable jar: 
+
+    ./gradlew clean customFatJar
+    
+Execute as (use correct version number):
+
+    java -jar build/libs/lograter-exec-X.Y.Z-SNAPSHOT.jar  
+
 
    

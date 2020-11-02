@@ -48,7 +48,7 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 
 	@Override
 	public void createReport(PrintWriter outputStream, CommandMain cmdMain, AbstractCommandAccessLog cmdAccessLog) throws IOException {
-		List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdAccessLog.mapperFile);
+		List<LineMapperSection> lineMappers = cmdAccessLog.useSingleMapper ? LineMapperSection.SINGLE_MAPPER : LineMapperUtils.createLineMapper(cmdAccessLog.mapperFile);
 
 		AccessLogConfig config = new AccessLogConfig();
 		config.setRunId(cmdMain.runId);

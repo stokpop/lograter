@@ -25,6 +25,7 @@ import nl.stokpop.lograter.processor.jmeter.JMeterConfig;
 import nl.stokpop.lograter.processor.jmeter.JMeterDataBundle;
 import nl.stokpop.lograter.processor.jmeter.JMeterLogReader;
 import nl.stokpop.lograter.report.text.JMeterTextReport;
+import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -98,20 +99,24 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
     }
 
     private JMeterConfig createJMeterConfig(CommandMain cmdMain, CommandJMeter cmdJMeter) throws IOException {
-        JMeterConfig config = new JMeterConfig();
+
+        List<LineMapperSection> lineMapper = cmdJMeter.useSingleMapper ? LineMapperSection.SINGLE_MAPPER : LineMapperUtils.createLineMapper(cmdJMeter.mapperFile);
+
+	    JMeterConfig config = new JMeterConfig();
         LogRater.populateBasicCounterLogSettings(cmdJMeter, config);
         config.setRunId(cmdMain.runId);
         config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
         config.setDoCountMultipleMapperHits(cmdJMeter.doCountMultipleMapperHits);
         config.setDoFilterOnHttpStatus(cmdJMeter.doGroupByHttpStatus);
         config.setIgnoreMultiAndNoMatches(cmdJMeter.ignoreMultiAndNoMatches);
-        config.setLineMappers(LineMapperUtils.createLineMapper(cmdJMeter.mapperFile));
+        config.setLineMappers(lineMapper);
         config.setIncludeMapperRegexpColumn(cmdJMeter.includeMapperRegexpColumn);
         config.setLogPattern(cmdJMeter.logPattern);
         config.setCounterStorage(cmdMain.storage);
         config.setCounterStorageDir(cmdMain.storageDir);
         config.setFileFeederFilterIncludes(cmdJMeter.fileFeederFilterIncludes);
         config.setFileFeederFilterExcludes(cmdJMeter.fileFeederFilterExcludes);
+
         return config;
     }
 }

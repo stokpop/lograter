@@ -51,7 +51,7 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 	@Override
 	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandAccessLogToCsv cmdAccessLog) throws IOException {
 
-		List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdAccessLog.mapperFile);
+		List<LineMapperSection> lineMappers = cmdAccessLog.useSingleMapper ? LineMapperSection.SINGLE_MAPPER : LineMapperUtils.createLineMapper(cmdAccessLog.mapperFile);
 
 		AccessLogConfig config = new AccessLogConfig();
 		config.setRunId(cmdMain.runId);

@@ -63,7 +63,8 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 
 	@Override
 	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandIisLog cmdIisLog) throws IOException {
-		List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdIisLog.mapperFile);
+
+		List<LineMapperSection> lineMappers = cmdIisLog.useSingleMapper ? LineMapperSection.SINGLE_MAPPER : LineMapperUtils.createLineMapper(cmdIisLog.mapperFile);
 
 		RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(cmdMain.storage);
 

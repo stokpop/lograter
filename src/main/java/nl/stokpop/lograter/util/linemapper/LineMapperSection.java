@@ -19,12 +19,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 public class LineMapperSection {
 	
 	private static final Logger log = LoggerFactory.getLogger(LineMapperSection.class);
+
+	public static final List<LineMapperSection> SINGLE_MAPPER;
+
+	static {
+		List<LineMapperSection> single = new ArrayList<>(1);
+		LineMapperSection section = new LineMapperSection("Single line mapper");
+		section.addMapperRule(".*", "SINGLE-MAPPER");
+		single.add(section);
+		SINGLE_MAPPER = Collections.unmodifiableList(single);
+	}
 
     private final List<LineMap> lineMaps = new ArrayList<>();
 

@@ -54,6 +54,8 @@ import java.util.Map;
 public class AccessLogReader {
 
     private final static Logger log = LoggerFactory.getLogger(AccessLogReader.class);
+    public static final String COMMON_LOG_PATTERN_APACHE = "%h %l %u %t \"%r\" %>s %b";
+    public static final String COMMON_LOG_PATTERN_NGINX = "$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"";
 
     public AccessLogDataBundle readAndProcessAccessLogs(AccessLogConfig config, List<File> files) {
 
@@ -95,9 +97,7 @@ public class AccessLogReader {
         LogFormatParser<AccessLogEntry> lineParser;
 
         if (logType == CommandAccessLog.LogType.apache) {
-            String pattern = StringUtils.useDefaultOrGivenValue(
-                    "\"%{X-Client-IP}i\" %V %t \"%r\" %>s %b %D \"%{x-host}i\" \"%{Referer}i\" \"%{User-Agent}i\"",
-                    config.getLogPattern());
+            String pattern = StringUtils.useDefaultOrGivenValue(COMMON_LOG_PATTERN_APACHE, config.getLogPattern());
 
             List<LogbackElement> elements = ApacheLogFormatParser.parse(pattern);
 
@@ -107,9 +107,7 @@ public class AccessLogReader {
                     new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
         }
         else if (logType == CommandAccessLog.LogType.nginx){
-            String pattern = StringUtils.useDefaultOrGivenValue(
-                    "$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
-                    config.getLogPattern());
+            String pattern = StringUtils.useDefaultOrGivenValue(COMMON_LOG_PATTERN_NGINX, config.getLogPattern());
 
             List<LogbackElement> elements = NginxLogFormatParser.parse(pattern);
             Map<String, LogEntryMapper<AccessLogEntry>> mappers =

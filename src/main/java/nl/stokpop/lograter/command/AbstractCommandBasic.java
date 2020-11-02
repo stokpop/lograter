@@ -105,6 +105,10 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
 			description = "Mapper file to use. Also used in clickpath analysis.")
 	public String mapperFile;
 
+	@Parameter(names = { "-single-mapper" },
+			description = "Use single mapper for all counters. Mapper file is ignored.")
+	public boolean useSingleMapper = false;
+
 	@Parameter(names = { "--max-unique-counters" },
             description = "Maximum number of unique counters before an overflow counter is used that combines all further counters" +
             " (named OVERFLOW_COUNTER).")
@@ -165,6 +169,7 @@ public abstract class AbstractCommandBasic extends LogRaterCommand {
                 ", determineSessionDuration=" + determineSessionDuration +
                 ", sessionField='" + sessionField + '\'' +
                 ", mapperFile='" + mapperFile + '\'' +
+                ", singleMapper='" + useSingleMapper + '\'' +
                 ", maxUniqueCounters=" + maxUniqueCounters +
                 ", sessionFieldRegexp='" + sessionFieldRegexp + '\'' +
                 ", clickPathShortCodeLength=" + clickPathShortCodeLength +
