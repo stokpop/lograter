@@ -75,7 +75,8 @@ public class AccessLogRunTest {
                 tempFolder.getRoot().getPath(),
                 //"-debug",
                 "access",
-                // works better with mapper sections
+				"-lp",
+				"\"%{X-Client-IP}i\" %V %t \"%r\" %>s %b %D \"%{x-host}i\" \"%{Referer}i\" \"%{User-Agent}i\"",                // works better with mapper sections
                 "--ignore-multi-and-no-matches",
 //                "-failure-aware",
 //                "false",
@@ -106,6 +107,8 @@ public class AccessLogRunTest {
                 "--report.dir",
                 tempFolder.getRoot().getPath(),
                 "access",
+				"-lp",
+				"\"%{X-Client-IP}i\" %V %t \"%r\" %>s %b %D \"%{x-host}i\" \"%{Referer}i\" \"%{User-Agent}i\"",
                 "--max-unique-counters",
                 "2",
                 "--ignore-multi-and-no-matches",

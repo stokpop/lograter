@@ -34,7 +34,12 @@ public class LogRaterAsLibTest {
     @Test
     public void lograterAsLib() throws IOException {
         LogRater logRater = new LogRater(DEV_NULL_WRITER);
-        String[] args = {"-debug", "access", "src/test/resources/access-log/access.log"};
+        String[] args = {
+                "-debug",
+                "access",
+                "-lp",
+                "\"%{X-Client-IP}i\" %V %t \"%r\" %>s %b %D \"%{x-host}i\" \"%{Referer}i\" \"%{User-Agent}i\"",
+                "src/test/resources/access-log/access.log"};
         // should not fail (fixed issue: NullPointerException on log field)
         logRater.startLogRater(args);
     }
