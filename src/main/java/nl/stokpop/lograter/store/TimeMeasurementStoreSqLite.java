@@ -267,6 +267,11 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return getSize() == 0;
+	}
+
+	@Override
     public String toString() {
         return "TimeMeasurementStoreSqLite{" +
                 "bufferIdx=" + bufferIdx +

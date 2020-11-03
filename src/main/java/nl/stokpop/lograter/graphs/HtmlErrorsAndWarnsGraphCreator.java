@@ -26,11 +26,7 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -91,6 +87,10 @@ public class HtmlErrorsAndWarnsGraphCreator {
 	private final static String CHART_EMBED_TEMPLATE =
 			"@CHART_SCRIPT_TEMPLATE\n@CHART_DIV_TEMPLATE\n";
 
+
+	private final static String NO_DATA_TEMPLATE = "" +
+		"<html><h1>No errors or warnings found in log file: no graph.</h1></html>";
+
 	public static Element createDocumentElement(Document doc, TimePeriod testPeriod, RequestCounter errorsOverTime, RequestCounter warnsOverTime, long bucketPeriodMillis) {
 
         Element parentDiv = doc.createElement("div");
@@ -128,6 +128,10 @@ public class HtmlErrorsAndWarnsGraphCreator {
 	}
 
 	public static ChartFile createErrorAndWarningGraph(File reportDirectory, TimePeriod testPeriod, long bucketPeriodMillis, RequestCounter errorsOverTime, RequestCounter warnsOverTime) {
+		if (errorsOverTime.isEmpty() && warnsOverTime.isEmpty()) {
+			return createApplicationLogGraphFile(reportDirectory, NO_DATA_TEMPLATE);
+		}
+
 		String template = CHART_HTML_TEMPLATE;
 		template = PATTERN_CHART_SCRIPT_TEMPLATE.matcher(template).replaceFirst(CHART_SCRIPT_TEMPLATE);
 		template = PATTERN_CHART_DIV_TEMPLATE.matcher(template).replaceFirst(CHART_DIV_TEMPLATE);

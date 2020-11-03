@@ -229,6 +229,8 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 		return timeMeasurements.getSize();
 	}
 
+	public boolean isEmpty() { return timeMeasurements.isEmpty(); }
+
 	@Override
 	public String toString() {
 		return "RequestCounter{name=" + super.getCounterKey() +

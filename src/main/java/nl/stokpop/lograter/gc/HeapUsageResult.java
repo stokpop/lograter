@@ -70,7 +70,7 @@ public class HeapUsageResult {
     }
 
     private void validateGcLogEntriesOrder(List<GcLogEntry> gcLogEntries) {
-        if (gcLogEntries.size() == 0) return;
+        if (gcLogEntries.isEmpty()) return;
         long previousTimestamp = gcLogEntries.get(0).getTimestamp();
         for (int i = 1; i < gcLogEntries.size(); i++) {
             long currentTimestamp = gcLogEntries.get(i).getTimestamp();
@@ -81,7 +81,7 @@ public class HeapUsageResult {
     }
 
     public long getAvgTotalHeapUsageInBytes(TimePeriod timeWindow) {
-        if (gcLogEntries.size() == 0) return 0;
+        if (gcLogEntries.isEmpty()) return 0;
 
         long totalHeapSizeInBytes = 0;
         int entries = 0;
@@ -100,7 +100,7 @@ public class HeapUsageResult {
     }
 
     public long getAvgTotalHeapUsageInBytesStandardDev() {
-        if (gcLogEntries.size() == 0) return 0;
+        if (gcLogEntries.isEmpty()) return 0;
 
         long[] totalUsedHeapSizes = new long[gcLogEntries.size()];
         int i = 0;
@@ -112,7 +112,7 @@ public class HeapUsageResult {
     }
 
     public long getAvgTotalHeapUsageTenuredInBytes() {
-        if (gcLogEntries.size() == 0) return 0;
+        if (gcLogEntries.isEmpty()) return 0;
 
         long totalHeapSizeInBytes = 0;
         for (GcLogEntry entry : gcLogEntries) {
@@ -122,7 +122,7 @@ public class HeapUsageResult {
     }
 
     public long getAvgTotalHeapUsageTenuredInBytesStandardDev() {
-        if (gcLogEntries.size() == 0) return 0;
+        if (gcLogEntries.isEmpty()) return 0;
 
         long[] totalUsedHeapSizes = new long[gcLogEntries.size()];
         int i = 0;

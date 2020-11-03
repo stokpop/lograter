@@ -74,7 +74,7 @@ public class RequestCounterPair {
     }
 
     public boolean isEmpty() {
-        return counterFailure.getHits() == 0 && counterSuccess.getHits() == 0;
+        return counterFailure.isEmpty() && counterSuccess.isEmpty();
     }
 
     public boolean isIncludeFailuresInAnalysis() {

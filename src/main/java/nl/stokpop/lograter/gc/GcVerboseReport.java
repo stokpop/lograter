@@ -184,7 +184,7 @@ public class GcVerboseReport {
         List<GcLogEntry> nonSystemGcs = heapUsageResult.getNonSystemGlobalGcs(timePeriod);
         StringBuilder subReport = new StringBuilder();
         subReport.append("-- All global GCs (non-sys) --").append(NL);
-        if (nonSystemGcs.size() == 0) {
+        if (nonSystemGcs.isEmpty()) {
             subReport.append("No global (non-sys) GCs found.").append(NL);
         }
         else {
@@ -204,7 +204,7 @@ public class GcVerboseReport {
         List<GcLogEntry> systemGcs = heapUsageResult.getSystemGcs(timePeriod);
         StringBuilder subReport = new StringBuilder();
         subReport.append("-- Sys GCs --").append(NL);
-        if (systemGcs.size() == 0) {
+        if (systemGcs.isEmpty()) {
             subReport.append("No sys GCs found.").append(NL);
         }
         else {
@@ -237,7 +237,7 @@ public class GcVerboseReport {
         StringBuilder subReport = new StringBuilder();
         subReport.append(String.format("-- GCs longer than %d ms --", maxDurationMs)).append(NL);
 
-        if (longGcs.size() == 0) {
+        if (longGcs.isEmpty()) {
             List<GcLogEntry> nonSystemGcs = heapUsageResult.getNonSystemGcs(timePeriod);
             double longestGc = HeapUsageResult.findLongestGcMillis(nonSystemGcs);
             subReport.append(String.format("No long GCs found. All are below %.0f ms.", longestGc)).append(NL);

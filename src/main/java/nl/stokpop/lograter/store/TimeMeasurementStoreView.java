@@ -156,6 +156,11 @@ public class TimeMeasurementStoreView implements TimeMeasurementStore {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return size == 0;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		throw new UnsupportedOperationException();
 	}

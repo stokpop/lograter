@@ -100,6 +100,11 @@ public class TimeMeasurementStoreInMemory extends AbstractTimeMeasurementStore {
 		};
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return timeMeasurements.isEmpty();
+	}
+
 	private void order() {
 		timeMeasurements.sort(TimeMeasurement.ORDER_TIMESTAMP);
 		isOrdered = true;

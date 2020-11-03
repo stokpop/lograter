@@ -252,6 +252,11 @@ public class TimeMeasurementStoreToFiles extends AbstractTimeMeasurementStore {
 
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return size == 0;
+	}
+
 	private void lockAndWrite() {
 		isLocked = true;
 		// push out remaining data

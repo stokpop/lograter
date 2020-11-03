@@ -30,4 +30,6 @@ public interface TimeMeasurementStore extends Iterable<TimeMeasurement> {
 	long getSize();
 
 	TimeMeasurementIterator iterator();
+
+    boolean isEmpty();
 }

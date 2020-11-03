@@ -107,8 +107,8 @@ public class FileFeeder {
                     final boolean includeLine = filterPatternIncludes == null || filterPatternIncludes.matcher(logline).find();
                     final boolean excludeLine = filterPatternExcludes != null && filterPatternExcludes.matcher(logline).find();
                     if (log.isDebugEnabled()) {
-                        if (filterPatternIncludes != null) log.debug("Log line included by filter pattern include '{}': {}", filterPatternIncludes, includeLine);
-                        if (filterPatternExcludes != null) log.debug("Log line excluded by filter pattern exclude '{}': {}", filterPatternExcludes, excludeLine);
+                        if (filterPatternIncludes != null) log.debug("Log line {} included by filter pattern include '{}': {}", linenr, filterPatternIncludes, includeLine);
+                        if (filterPatternExcludes != null) log.debug("Log line {} excluded by filter pattern exclude '{}': {}", linenr, filterPatternExcludes, excludeLine);
                     }
                     if (includeLine && !excludeLine) {
                         feeder.addLogLine(file.getName(), logline);
@@ -234,12 +234,10 @@ public class FileFeeder {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FileFeeder{");
-        sb.append("filterPatternIncludes=").append(filterPatternIncludes);
-        sb.append(", filterPatternExcludes=").append(filterPatternExcludes);
-        sb.append(", skipLines=").append(skipLines);
-        sb.append('}');
-        return sb.toString();
+		return "FileFeeder{" + "filterPatternIncludes=" + filterPatternIncludes +
+			", filterPatternExcludes=" + filterPatternExcludes +
+			", skipLines=" + skipLines +
+			'}';
     }
 }
 
