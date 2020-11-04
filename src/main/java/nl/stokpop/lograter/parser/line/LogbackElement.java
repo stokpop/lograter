@@ -15,6 +15,29 @@
  */
 package nl.stokpop.lograter.parser.line;
 
+import java.util.List;
+
 public interface LogbackElement {
+
+    /**
+     * Find variable for a logback element/directive.
+     *
+     * As in %t{yyyy-MM-dd}: the element is t and the variable is yyyy-MM-dd.
+     *
+     * @param elements the list of logback elements to look in
+     * @param elementName the name of the element/directive
+     * @return the variable or null if there is no variable
+     */
+    static String findVariableForElement(List<LogbackElement> elements, String elementName) {
+        for (LogbackElement element : elements) {
+            if (element instanceof LogbackDirective) {
+                LogbackDirective directive = (LogbackDirective) element;
+                if (elementName.equals(directive.getDirective())) {
+                    return directive.getVariable();
+                }
+            }
+        }
+        return null;
+    }
 
 }

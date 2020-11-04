@@ -19,7 +19,6 @@ import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.parser.line.DateLogEntryMapper;
 import nl.stokpop.lograter.parser.line.LogEntryMapper;
-import nl.stokpop.lograter.parser.line.LogbackDirective;
 import nl.stokpop.lograter.parser.line.LogbackElement;
 import nl.stokpop.lograter.parser.line.StringEntryMapper;
 import nl.stokpop.lograter.util.time.DateUtils;
@@ -41,22 +40,13 @@ public class ApacheLogMapperFactory {
     private ApacheLogMapperFactory() {}
 
     public static String determineDateTimePattern(List<LogbackElement> elements) {
-        String dateTimePattern = null ;
-        for (LogbackElement element : elements) {
-            if (element instanceof LogbackDirective) {
-                LogbackDirective directive = (LogbackDirective) element;
-                if ("t".equals(directive.getDirective())) {
-                    String variable = directive.getVariable();
-                    if (variable != null) {
-                        dateTimePattern = DateUtils.convertStrfTimePatternToDateTimeFormatterPattern(variable);
-                    }
-                }
-            }
+        String variable = LogbackElement.findVariableForElement(elements, "t");
+        if (variable != null) {
+            return DateUtils.convertStrfTimePatternToDateTimeFormatterPattern(variable);
         }
-        if (dateTimePattern == null) {
-            dateTimePattern = DEFAULT_DATE_TIME_LOG_PATTERN;
+        else {
+            return DEFAULT_DATE_TIME_LOG_PATTERN;
         }
-        return dateTimePattern;
     }
 
     public static Map<String, LogEntryMapper<AccessLogEntry>> initializeMappers(List<LogbackElement> elements) {

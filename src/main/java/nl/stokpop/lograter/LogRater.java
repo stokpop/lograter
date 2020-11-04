@@ -134,6 +134,7 @@ public class LogRater {
         final CommandGcVerboseLog commandGcVerboseLog = new CommandGcVerboseLog();
         final CommandPerformanceCenterResults commandPerformanceCenterResults = new CommandPerformanceCenterResults();
         final CommandJMeter commandJMeter = new CommandJMeter();
+        final CommandLatencyLog commandLatency = new CommandLatencyLog();
 
         reportCreators.put(commandAccessLog, (o, c) -> new AccessLogReportCreator().createReport(o, c, commandAccessLog));
         reportCreators.put(commandAccessLogToCsv, (o, c) -> new AccessLogToCsvReportCreator().createReport(o, c, commandAccessLogToCsv));
@@ -143,7 +144,8 @@ public class LogRater {
         reportCreators.put(commandGcVerboseLog, (o, c) -> new GcVerboseLogReportCreator().createReport(o, c, commandGcVerboseLog));
         reportCreators.put(commandPerformanceCenterResults, (o, c) -> new PerformanceCenterResultsReportCreator().createReport(o, c, commandPerformanceCenterResults));
         reportCreators.put(commandJMeter, (o, c) -> new JMeterReportCreator().createReport(o, c, commandJMeter));
-        // not implemented?? commandAndCreate.put(new CommandSarLog(), new S);
+        reportCreators.put(commandLatency, (o, c) -> new LatencyLogReportCreator().createReport(o, c, commandLatency));
+        // not implemented?? reportCreators.put(new CommandSarLog(), new S...);
         
         JCommander jc = new JCommander();
         jc.addObject(cmdMain);
@@ -166,7 +168,6 @@ public class LogRater {
         }
 
         String parsedCommand = jc.getParsedCommand();
-
 
         if (parsedCommand == null) {
             simpleUsage(commandNamesSet);
