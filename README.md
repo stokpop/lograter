@@ -78,7 +78,7 @@ latency
 -fffi
 \[RTR/
 --counter-fields
-url
+http-method,http-code,http-url
 -session-duration
 -sessionfield
 x_b3_traceid
