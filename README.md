@@ -18,11 +18,11 @@ You can download a pre-build jar here: https://github.com/stokpop/lograter/relea
 
 with curl: 
 
-    curl -O -L https://github.com/stokpop/lograter/releases/download/1.3.8/lograter-exec-1.3.8.jar
+    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.0/lograter-exec-1.4.0.jar
 
 use java 8+ to run lograter:
 
-    java -jar lograter-exec-1.3.8.jar
+    java -jar lograter-exec-1.4.0.jar
 
 download an example dataset:
 
@@ -30,7 +30,7 @@ download an example dataset:
   
 process this file:
 
-     java -jar lograter-exec-1.3.8.jar access -single-mapper NASA_access_log_Jul95.gz  
+     java -jar lograter-exec-1.4.0.jar access -single-mapper NASA_access_log_Jul95.gz  
     
 check the reports/access-log-rater-charts.html:
 
@@ -43,6 +43,65 @@ Also notice there is no response times recorded in this access log.
 If you have access log files that include response times, a lot more
 performance information will be revealed.
     
+### Commands
+
+The available commands:
+
+* `iis`     parse a IIS log file
+* `access`      parse an access log file
+* `pc`      parse a performance center results database
+* `application`      parse an (Java logback) application log file
+* `latency`      parse a log file that contains latency/duration numbers
+* `alloc`      parse WebSphere application server logs with large allocation 
+* `gc`      parse WebSphere verbose garbage collection log files
+* `accessToCsv`      transform an access log to a csv file
+* `jmeter`      parse jtl file from a jMeter run
+    
+### Option file
+
+For multiple command line options it is adviced to use a file with options.
+
+This also helps when defining a log pattern and you need to escape quotes on the command line.
+
+Put all the options in a file, one option and one parameter per line, with no additional spaces.
+
+For example, create a `latency.options` file like the following to parse log lines like
+
+    2020-06-14T10:51:32.51-0700 [RTR/1]      OUT www.example.com - [14/06/2020:17:51:32.459 +0000] "GET /user/ HTTP/1.1" 200 0 103455 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.123 Safari/537.30" 192.0.2.132:46359 x_forwarded_for:"198.51.100.120" x_forwarded_proto:"http" vcap_request_id:9365d216-623a-45cb-6ef6-eba495c19fa8 response_time:0.059468637 app_id:79cc58aa-3737-43ae-ac71-39a2843b5178 x_b3_traceid:"39a2843b5178" x_b3_spanid:"39a2843b5179" x_b3_parentspanid:"-" b3:"%X{39a2843b5178-39a2843b5179}"
+
+Based on: https://docs.cloudfoundry.org/devguide/deploy-apps/streaming-logs.html    
+    
+```
+-r
+my-report-{ts}
+latency
+-fffi
+\[RTR/
+--counter-fields
+url
+-session-duration
+-sessionfield
+x_b3_traceid
+-clickpath
+-latency-field
+response_time
+-latency-unit
+seconds
+-lp
+%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [RTR/%X{rtr-nr}]%X{whitespace}OUT %X{host} - [%X{timestamp}] "%X{http-method} %X{http-url} %X{http-version}" %X{http-code} %X{http-something} %X{http-bytes} "%X{unknown1}" "%X{http-referer}" %X{remote-ip}:%X{remote-port} x_forwarded_for:"%X{x_forwarded_for}" x_forwarded_proto:"%X{x_forwarded_proto}" vcap_request_id:%X{vcap_request_id} response_time:%X{response_time} app_id:%X{app_id} x_b3_traceid:"%X{x_b3_traceid}" x_b3_spanid:"%X{x_b3_spanid}" x_b3_parentspanid:"%X{x_b3_parentspanid}" b3:"%X{b3}"
+# this is a comment, but you can also place a filename here
+```
+
+This will use a file feeder filter include (fffi) to only process lines that match the regexp "\[RTR/".
+It will use the `url` field to create performance counters and click path.
+The `x_b3_traceid` is used to determine click paths and session duration.
+Response time (or latency) is parsed from the `response_time` field. The `response_time` field contains seconds.
+Put reports in a directory called `my-report-{ts}`, where {ts} is replaced with current timestamp.
+
+Now call LogRater as:
+
+    java -jar lograter-exec-1.4.0.jar @latency.options cloud-foundy.log  
+
 ## Uses
 
 ### Incoming requests
@@ -52,10 +111,11 @@ For each request see the average response time and the percentiles.
 
 For each type of request, see how many concurrent requests there are.
 
-The following web logs are supported:
+Lograter can scan following web logs:
 * apache 
 * nginx
 * iis
+* latency: any log file that contains timestamp, url and latency
 
 Use the log pattern to define your log line structure. LogRater needs at least:
  * a timestamp
@@ -82,8 +142,7 @@ To parse a line like this, you can use this log pattern:
 
 LogRater will use the literals to parse the line (first is "` - `" so all before that character sequence is "read" into `%{one}X`). 
 
-Notice the second timestamp in the log line is 
-used for parsing actual parsing. 
+Notice the second timestamp in the log line is used for parsing actual parsing. 
 
 The `%r` is used to get the url (%r is actually the triplet <http command, url, and http version>).
 
@@ -91,7 +150,7 @@ The `%s` is for the http status code to detect errors.
 
 And `%T` is for the response time in seconds.
 
-Notice that information in `%{one}X`, `%{two}X` and `%{three}X` is not used and is basically discarded.
+Note that information in `%{one}X`, `%{two}X` and `%{three}X` is not used and is basically discarded.
 
 The default pattern for `%t` is `[dd/MMM/yyyy:HH:mm:ss Z]`. In this example an override is provided
 to match the log file timestamp format.
@@ -104,7 +163,8 @@ where only lines that contain "`GET`" are included via "`-fffi`" and a report wi
 
 ### Outgoing requests
 
-If logs are available for outgoing requests, you can find out how the same for these outgoing requests.
+If logs are available for outgoing requests, you can create performance analysis reports for these as well.
+For example using the `latency` command.
 
 ### Compare production to test
 
@@ -139,7 +199,7 @@ and show CPU graphs. For instance during a load test.
 ### Time period
 
 For most LogRater analysis you can specify a start and end time to zoom into the period that is
-of interest. For example a very busy period on production or a period that is (part of) a load test.
+of interest. For example, a very busy period on production, or a certain period of a load test.
 
 ### Create graphs
 
@@ -173,16 +233,14 @@ For instance to parse apache access logs:
 To see all options:
 
     java -jar lograter-exec.jar -h
-    
-Download the executable jar here: https://github.com/stokpop/lograter/releases
-    
+        
 ### Dependency
 
-To use LogRater from maven or gradle, find the lograter jar in maven central.
+To use LogRater from Maven or Gradle. Find the LogRater jar in Maven Central.
 
 ### LogRater command line options
 
-    LogRater version: 1.3.8
+    LogRater version: 1.4.0
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:
@@ -207,11 +265,11 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
           Clear the database.
           Default: false
         -debug
-          Log debug statements and print stacktraces with errors.
+          Print stacktraces with errors.
           Default: false
         -runid
           A run id to identify a test run with a report. Is displayed in reports.
-          Default: 38ebb3ca-0389-4d79-981b-158b645a54fd
+          Default: 0b699f70-17f1-47ce-b336-5913791656a8
         -storage
           The type of storage to use. Options: mem (in memory, default), 
           externalsort or database (in sqlite database)
@@ -224,9 +282,11 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
         -use-db
           Only use database input, skip file parsing.
           Default: false
-      Commands:
-        iis      Parse a IIS log file.
-          Usage: iis [options] <List of files to parse, or a file prefix to 
+
+### Help `latency` command:
+
+        latency      Parse a log file that contains latency numbers.
+          Usage: latency [options] <List of files to parse, or a file prefix to 
                 automatically load a set of files>
             Options:
               -ag, --aggregate-duration
@@ -245,10 +305,10 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
                 Length of parts between slashes in clickpath urls, to shorten the 
                 path. 
                 Default: 3
-              -multi-hit, --count-multiple-hits-in-mapper
-                Will count all hits in the mapper file, otherwise only the first 
-                hit will be counted.
-                Default: false
+              -cf, --counter-fields
+                Counter fields to use for counting. Comma separated list of field 
+                names. 
+                Default: service,operation
               -fffe, --filefeederfilter-excludes
                 Regular expression to use in the file feeder. Matches will NOT be 
                 included. Matches are made on complete logline.
@@ -274,31 +334,15 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
               -gt, --graphs-tps
                 Create TPS graphs
                 Default: false
-              -imm, --ignore-multi-and-no-matches
-                Ignore multi match and no match warnings. Do not display a list of 
-                the no matches.
-                Default: false
-              -regexp, --include-mapper-regexp-column
-                Include the mapper regexp column in the iis and access log report.
-                Default: false
               -lp, --log-pattern
                 The logback/httpd LogFormat pattern to use.
+                Default: %d;%X{sessionId};%X{service};%X{operation};%X{latency}%n
               -mf, --mapper-file
                 Mapper file to use. Also used in clickpath analysis.
               --max-unique-counters
                 Maximum number of unique counters before an overflow counter is 
                 used that combines all further counters (named OVERFLOW_COUNTER).
                 Default: 512
-              -nompr, --nomappers
-                Exclude mappers in access logs.
-                Default: false
-              -ref, --referers
-                Include referers in iis and access logs.
-                Default: false
-              -rpu, --remove-params-from-url
-                Remove the parameters before parsing the access log urls (split at 
-                question mark)
-                Default: false
               -conc, --report-concurrent-transactions
                 Calculate and report concurrent calls based on log time and 
                 duration. Adds a conc column in the report that shows the max 
@@ -310,16 +354,9 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
               -tps, --report-transactions-per-second
                 Calculate and report transactions per second (next to TPM).
                 Default: false
-              -ua, --useragents
-                Include agents in iis and access logs.
-                Default: false
               -clickpath
                 Determine and report click paths (BETA). Set sessionfield for the 
                 session id to use.
-                Default: false
-              -count-no-mapper-as-one
-                Will count all no-mappers as one line, default count all 
-                no-mappers separately.
                 Default: false
               -failure-aware
                 Be failure aware if possible. Report on failed hits in each 
@@ -328,18 +365,6 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
                 If histo graphs are enabled, also merge a simulation of the 
                 histogram based on stub delay generator.
                 Default: false
-              -group-by-fields
-                Group by the given comma separated fields as specified in the used 
-                logformat. Url will be the mapped url.
-                Default: []
-              -group-by-http-method
-                Group by http method (POST, GET, ...) by adding it to the counter 
-                name and adding a http method column in text report.
-                Default: false
-              -group-by-http-status
-                Group by http status code by adding it to the counter name and 
-                adding a http status column in text report.
-                Default: false
               -include-failed-hits-in-analysis
                 Include failed hits in analysis. When false the reported number of 
                 failures and failure percentage are the same for each counter, but 
@@ -347,6 +372,14 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
                 percentiles will not include failed hits. "Default behaviour can 
                 differ for different modules. Most have true, performance center 
                 analysis has false.
+              -latency-field
+                Field used for latency. Also specify the latency unit!
+                Default: latency
+              -latency-unit
+                Unit used for latency: seconds, milliseconds, microseconds, 
+                nanoseconds. Default is milliseconds.
+                Default: milliseconds
+                Possible Values: [seconds, milliseconds, microseconds, nanoseconds]
               -report-percentiles
                 List of percentiles to report. These are comma separated double 
                 values, for example: 99,99.9,99.995
@@ -364,633 +397,9 @@ To use LogRater from maven or gradle, find the lograter jar in maven central.
               -sessionfield-regexp
                 Regexp to use to get the sessionId from the sessionField. Use a 
                 capture group () to specify the sessionId capture.
-              -urls
-                Include basic urls in iis and access logs.
+              -single-mapper
+                Use single mapper for all counters. Mapper file is ignored.
                 Default: false
-    
-       access      Parse an access log file.
-         Usage: access [options] <List of files to parse, or a file prefix to 
-               automatically load a set of files>
-           Options:
-             -ag, --aggregate-duration
-               Aggregate graph values per time period in seconds. Aggregation 
-               kicks in for graphs with more than 10000 points. The graph name 
-               will tell that aggregation took place.
-               Default: 5
-             --clickpath-end-of-session-snippet
-               Url's that contain this snippet are used as end of session marker 
-               (default: logout)
-               Default: logout
-             --clickpath-report-step-duration
-               Report the average duration between clickpath steps in millis.
-               Default: false
-             --clickpath-short-code-length
-               Length of parts between slashes in clickpath urls, to shorten the 
-               path. 
-               Default: 3
-             -multi-hit, --count-multiple-hits-in-mapper
-               Will count all hits in the mapper file, otherwise only the first 
-               hit will be counted.
-               Default: false
-             -fffe, --filefeederfilter-excludes
-               Regular expression to use in the file feeder. Matches will NOT be 
-               included. Matches are made on complete logline.
-             -fffi, --filefeederfilter-includes
-               Regular expression to use in the file feeder. Matches will be 
-               included. Matches are made on complete logline.
-             -gtps, --graph-with-tps
-               Use true TPS per second in graphs instead of moving avg. (TPS per 
-               minute is default)
-               Default: false
-             -gh, --graphs-histo
-               Create histogram graphs
-               Default: false
-             -ghtml, --graphs-html
-               Output html google charts style graphs
-               Default: false
-             -gp, --graphs-percentile
-               Create percentile graphs
-               Default: false
-             -gr, --graphs-responsetimes
-               Create response times graphs
-               Default: false
-             -gt, --graphs-tps
-               Create TPS graphs
-               Default: false
-             -imm, --ignore-multi-and-no-matches
-               Ignore multi match and no match warnings. Do not display a list of 
-               the no matches.
-               Default: false
-             -regexp, --include-mapper-regexp-column
-               Include the mapper regexp column in the iis and access log report.
-               Default: false
-             -lp, --log-pattern
-               The logback/httpd LogFormat pattern to use.
-             -mf, --mapper-file
-               Mapper file to use. Also used in clickpath analysis.
-             --max-unique-counters
-               Maximum number of unique counters before an overflow counter is 
-               used that combines all further counters (named OVERFLOW_COUNTER).
-               Default: 512
-             -nompr, --nomappers
-               Exclude mappers in access logs.
-               Default: false
-             -ref, --referers
-               Include referers in iis and access logs.
-               Default: false
-             -rpu, --remove-params-from-url
-               Remove the parameters before parsing the access log urls (split at 
-               question mark)
-               Default: false
-             -conc, --report-concurrent-transactions
-               Calculate and report concurrent calls based on log time and 
-               duration. Adds a conc column in the report that shows the max 
-               concurrent requests for that particular url or request mapper.
-               Default: false
-             -sd, --report-standard-dev
-               Calculate and report standard deviation of durations.
-               Default: false
-             -tps, --report-transactions-per-second
-               Calculate and report transactions per second (next to TPM).
-               Default: false
-             -ua, --useragents
-               Include agents in iis and access logs.
-               Default: false
-             -clickpath
-               Determine and report click paths (BETA). Set sessionfield for the 
-               session id to use.
-               Default: false
-             -count-no-mapper-as-one
-               Will count all no-mappers as one line, default count all 
-               no-mappers separately.
-               Default: false
-             -failure-aware
-               Be failure aware if possible. Report on failed hits in each 
-               analysis line. If not set the module defaults are used.
-             -graphs-histo-simulator
-               If histo graphs are enabled, also merge a simulation of the 
-               histogram based on stub delay generator.
-               Default: false
-             -group-by-fields
-               Group by the given comma separated fields as specified in the used 
-               logformat. Url will be the mapped url.
-               Default: []
-             -group-by-http-method
-               Group by http method (POST, GET, ...) by adding it to the counter 
-               name and adding a http method column in text report.
-               Default: false
-             -group-by-http-status
-               Group by http status code by adding it to the counter name and 
-               adding a http status column in text report.
-               Default: false
-             -include-failed-hits-in-analysis
-               Include failed hits in analysis. When false the reported number of 
-               failures and failure percentage are the same for each counter, but 
-               the other calculated values such as min, max, tps, averaqe, 
-               percentiles will not include failed hits. "Default behaviour can 
-               differ for different modules. Most have true, performance center 
-               analysis has false.
-             -log-type
-               Type of log file: apache (default) or nginx. Use apache logformat 
-               (e.g. %t, %D, etc...) or use nginx style log format (e.g. with 
-               $request, $status, ...
-               Default: apache
-               Possible Values: [apache, nginx]
-             -report-percentiles
-               List of percentiles to report. These are comma separated double 
-               values, for example: 99,99.9,99.995
-               Default: [99.0]
-             -report-stub-delays
-               Add stub delay column settings in report.
-               Default: false
-             -session-duration
-               Determine the average session duration. Set sessionfield for the 
-               session id to use.
-               Default: false
-             -sessionfield
-               Name of the session field to use for clickpath and session 
-               duration analysis, from logpattern.
-             -sessionfield-regexp
-               Regexp to use to get the sessionId from the sessionField. Use a 
-               capture group () to specify the sessionId capture.
-             -urls
-               Include basic urls in iis and access logs.
-               Default: false
-    
-       pc      Parse a performance center results database.
-         Usage: pc [options] <List of files to parse, or a file prefix to 
-               automatically load a set of files>
-           Options:
-             -ag, --aggregate-duration
-               Aggregate graph values per time period in seconds. Aggregation 
-               kicks in for graphs with more than 10000 points. The graph name 
-               will tell that aggregation took place.
-               Default: 5
-             --clickpath-end-of-session-snippet
-               Url's that contain this snippet are used as end of session marker 
-               (default: logout)
-               Default: logout
-             --clickpath-report-step-duration
-               Report the average duration between clickpath steps in millis.
-               Default: false
-             --clickpath-short-code-length
-               Length of parts between slashes in clickpath urls, to shorten the 
-               path. 
-               Default: 3
-             -fffe, --filefeederfilter-excludes
-               Regular expression to use in the file feeder. Matches will NOT be 
-               included. Matches are made on complete logline.
-             -fffi, --filefeederfilter-includes
-               Regular expression to use in the file feeder. Matches will be 
-               included. Matches are made on complete logline.
-             -gtps, --graph-with-tps
-               Use true TPS per second in graphs instead of moving avg. (TPS per 
-               minute is default)
-               Default: false
-             -gh, --graphs-histo
-               Create histogram graphs
-               Default: false
-             -ghtml, --graphs-html
-               Output html google charts style graphs
-               Default: false
-             -gp, --graphs-percentile
-               Create percentile graphs
-               Default: false
-             -gr, --graphs-responsetimes
-               Create response times graphs
-               Default: false
-             -gt, --graphs-tps
-               Create TPS graphs
-               Default: false
-             -lp, --log-pattern
-               The logback/httpd LogFormat pattern to use.
-             -mf, --mapper-file
-               Mapper file to use. Also used in clickpath analysis.
-             --max-unique-counters
-               Maximum number of unique counters before an overflow counter is 
-               used that combines all further counters (named OVERFLOW_COUNTER).
-               Default: 512
-             -conc, --report-concurrent-transactions
-               Calculate and report concurrent calls based on log time and 
-               duration. Adds a conc column in the report that shows the max 
-               concurrent requests for that particular url or request mapper.
-               Default: false
-             -sd, --report-standard-dev
-               Calculate and report standard deviation of durations.
-               Default: false
-             -tps, --report-transactions-per-second
-               Calculate and report transactions per second (next to TPM).
-               Default: false
-             -clickpath
-               Determine and report click paths (BETA). Set sessionfield for the 
-               session id to use.
-               Default: false
-             -failure-aware
-               Be failure aware if possible. Report on failed hits in each 
-               analysis line. If not set the module defaults are used.
-             -graphs-histo-simulator
-               If histo graphs are enabled, also merge a simulation of the 
-               histogram based on stub delay generator.
-               Default: false
-             -include-failed-hits-in-analysis
-               Include failed hits in analysis. When false the reported number of 
-               failures and failure percentage are the same for each counter, but 
-               the other calculated values such as min, max, tps, averaqe, 
-               percentiles will not include failed hits. "Default behaviour can 
-               differ for different modules. Most have true, performance center 
-               analysis has false.
-             -report-percentiles
-               List of percentiles to report. These are comma separated double 
-               values, for example: 99,99.9,99.995
-               Default: [99.0]
-             -report-stub-delays
-               Add stub delay column settings in report.
-               Default: false
-             -session-duration
-               Determine the average session duration. Set sessionfield for the 
-               session id to use.
-               Default: false
-             -sessionfield
-               Name of the session field to use for clickpath and session 
-               duration analysis, from logpattern.
-             -sessionfield-regexp
-               Regexp to use to get the sessionId from the sessionField. Use a 
-               capture group () to specify the sessionId capture.
-    
-       application      Parse an (Java logback) application log file.
-         Usage: application [options] <List of files to parse, or a file prefix 
-               to automatically load a set of files>
-           Options:
-             -ag, --aggregate-duration
-               Aggregate graph values per time period in seconds. Aggregation 
-               kicks in for graphs with more than 10000 points. The graph name 
-               will tell that aggregation took place.
-               Default: 5
-             --clickpath-end-of-session-snippet
-               Url's that contain this snippet are used as end of session marker 
-               (default: logout)
-               Default: logout
-             --clickpath-report-step-duration
-               Report the average duration between clickpath steps in millis.
-               Default: false
-             --clickpath-short-code-length
-               Length of parts between slashes in clickpath urls, to shorten the 
-               path. 
-               Default: 3
-             -fffe, --filefeederfilter-excludes
-               Regular expression to use in the file feeder. Matches will NOT be 
-               included. Matches are made on complete logline.
-             -fffi, --filefeederfilter-includes
-               Regular expression to use in the file feeder. Matches will be 
-               included. Matches are made on complete logline.
-             -gtps, --graph-with-tps
-               Use true TPS per second in graphs instead of moving avg. (TPS per 
-               minute is default)
-               Default: false
-             -gh, --graphs-histo
-               Create histogram graphs
-               Default: false
-             -ghtml, --graphs-html
-               Output html google charts style graphs
-               Default: false
-             -gp, --graphs-percentile
-               Create percentile graphs
-               Default: false
-             -gr, --graphs-responsetimes
-               Create response times graphs
-               Default: false
-             -gt, --graphs-tps
-               Create TPS graphs
-               Default: false
-             -lp, --log-pattern
-               The logback/httpd LogFormat pattern to use.
-             -mf, --mapper-file
-               Mapper file to use. Also used in clickpath analysis.
-             --max-unique-counters
-               Maximum number of unique counters before an overflow counter is 
-               used that combines all further counters (named OVERFLOW_COUNTER).
-               Default: 512
-             -conc, --report-concurrent-transactions
-               Calculate and report concurrent calls based on log time and 
-               duration. Adds a conc column in the report that shows the max 
-               concurrent requests for that particular url or request mapper.
-               Default: false
-             -sd, --report-standard-dev
-               Calculate and report standard deviation of durations.
-               Default: false
-             -tps, --report-transactions-per-second
-               Calculate and report transactions per second (next to TPM).
-               Default: false
-             -clickpath
-               Determine and report click paths (BETA). Set sessionfield for the 
-               session id to use.
-               Default: false
-             -failure-aware
-               Be failure aware if possible. Report on failed hits in each 
-               analysis line. If not set the module defaults are used.
-             -graphs-histo-simulator
-               If histo graphs are enabled, also merge a simulation of the 
-               histogram based on stub delay generator.
-               Default: false
-             -include-failed-hits-in-analysis
-               Include failed hits in analysis. When false the reported number of 
-               failures and failure percentage are the same for each counter, but 
-               the other calculated values such as min, max, tps, averaqe, 
-               percentiles will not include failed hits. "Default behaviour can 
-               differ for different modules. Most have true, performance center 
-               analysis has false.
-             -report-percentiles
-               List of percentiles to report. These are comma separated double 
-               values, for example: 99,99.9,99.995
-               Default: [99.0]
-             -report-stub-delays
-               Add stub delay column settings in report.
-               Default: false
-             -session-duration
-               Determine the average session duration. Set sessionfield for the 
-               session id to use.
-               Default: false
-             -sessionfield
-               Name of the session field to use for clickpath and session 
-               duration analysis, from logpattern.
-             -sessionfield-regexp
-               Regexp to use to get the sessionId from the sessionField. Use a 
-               capture group () to specify the sessionId capture.
-    
-       alloc      Parse WebSphere application server logs with large allocation 
-               traces. 
-         Usage: alloc [options] List of files to parse. Normally the 
-               native_stderr.log of Websphere Application Server.
-           Options:
-             --csv-file
-               Csv file to write output to. Defaults to 
-               large-allocations-log-{ts}.csv in current dir.
-               Default: large-allocations-log-{ts}.csv
-    
-       gc      Parse WebSphere verbose garbage collection log files.
-         Usage: gc [options] List of gc verbose files to parse. Websphere 
-               Application Server 7 or 8 style supported. OpenJ9 gc verbose might 
-               work too.
-           Options:
-             -et-analysis, --endtime-analysis
-               The end time of analysis period: yyyyMMddTHHmmss
-             -et-memory-fit, --endtime-memory-fit
-               The end time of memory fit period: yyyyMMddTHHmmss
-             --report-file
-               Text file to write output to. Defaults to 
-               verbose-gc-report-{ts}.txt in current dir.
-               Default: verbose-gc-report-{ts}.txt
-             -st-analysis, --starttime-analysis
-               The start time of analysis period: yyyyMMddTHHmmss
-             -st-memory-fit, --starttime-memory-fit
-               The start time of memory fit period: yyyyMMddTHHmmss
-    
-       accessToCsv      Transform an access log to a csv file.
-         Usage: accessToCsv [options] <List of files to parse, or a file prefix 
-               to automatically load a set of files>
-           Options:
-             -ag, --aggregate-duration
-               Aggregate graph values per time period in seconds. Aggregation 
-               kicks in for graphs with more than 10000 points. The graph name 
-               will tell that aggregation took place.
-               Default: 5
-             --clickpath-end-of-session-snippet
-               Url's that contain this snippet are used as end of session marker 
-               (default: logout)
-               Default: logout
-             --clickpath-report-step-duration
-               Report the average duration between clickpath steps in millis.
-               Default: false
-             --clickpath-short-code-length
-               Length of parts between slashes in clickpath urls, to shorten the 
-               path. 
-               Default: 3
-             --csv-file
-               Csv file to write output to. Defaults to access-log-{ts}.csv in 
-               current dir.
-               Default: access-log-{ts}.csv
-             -fffe, --filefeederfilter-excludes
-               Regular expression to use in the file feeder. Matches will NOT be 
-               included. Matches are made on complete logline.
-             -fffi, --filefeederfilter-includes
-               Regular expression to use in the file feeder. Matches will be 
-               included. Matches are made on complete logline.
-             -gtps, --graph-with-tps
-               Use true TPS per second in graphs instead of moving avg. (TPS per 
-               minute is default)
-               Default: false
-             -gh, --graphs-histo
-               Create histogram graphs
-               Default: false
-             -ghtml, --graphs-html
-               Output html google charts style graphs
-               Default: false
-             -gp, --graphs-percentile
-               Create percentile graphs
-               Default: false
-             -gr, --graphs-responsetimes
-               Create response times graphs
-               Default: false
-             -gt, --graphs-tps
-               Create TPS graphs
-               Default: false
-             -lp, --log-pattern
-               The logback/httpd LogFormat pattern to use.
-             -mf, --mapper-file
-               Mapper file to use. Also used in clickpath analysis.
-             --max-unique-counters
-               Maximum number of unique counters before an overflow counter is 
-               used that combines all further counters (named OVERFLOW_COUNTER).
-               Default: 512
-             -conc, --report-concurrent-transactions
-               Calculate and report concurrent calls based on log time and 
-               duration. Adds a conc column in the report that shows the max 
-               concurrent requests for that particular url or request mapper.
-               Default: false
-             -sd, --report-standard-dev
-               Calculate and report standard deviation of durations.
-               Default: false
-             -tps, --report-transactions-per-second
-               Calculate and report transactions per second (next to TPM).
-               Default: false
-             -clickpath
-               Determine and report click paths (BETA). Set sessionfield for the 
-               session id to use.
-               Default: false
-             -failure-aware
-               Be failure aware if possible. Report on failed hits in each 
-               analysis line. If not set the module defaults are used.
-             -graphs-histo-simulator
-               If histo graphs are enabled, also merge a simulation of the 
-               histogram based on stub delay generator.
-               Default: false
-             -include-failed-hits-in-analysis
-               Include failed hits in analysis. When false the reported number of 
-               failures and failure percentage are the same for each counter, but 
-               the other calculated values such as min, max, tps, averaqe, 
-               percentiles will not include failed hits. "Default behaviour can 
-               differ for different modules. Most have true, performance center 
-               analysis has false.
-             -report-percentiles
-               List of percentiles to report. These are comma separated double 
-               values, for example: 99,99.9,99.995
-               Default: [99.0]
-             -report-stub-delays
-               Add stub delay column settings in report.
-               Default: false
-             -session-duration
-               Determine the average session duration. Set sessionfield for the 
-               session id to use.
-               Default: false
-             -sessionfield
-               Name of the session field to use for clickpath and session 
-               duration analysis, from logpattern.
-             -sessionfield-regexp
-               Regexp to use to get the sessionId from the sessionField. Use a 
-               capture group () to specify the sessionId capture.
-    
-       jmeter      Parse jtl file from a jMeter run.
-         Usage: jmeter [options] <List of files to parse, or a file prefix to 
-               automatically load a set of files>
-           Options:
-             -ag, --aggregate-duration
-               Aggregate graph values per time period in seconds. Aggregation 
-               kicks in for graphs with more than 10000 points. The graph name 
-               will tell that aggregation took place.
-               Default: 5
-             --clickpath-end-of-session-snippet
-               Url's that contain this snippet are used as end of session marker 
-               (default: logout)
-               Default: logout
-             --clickpath-report-step-duration
-               Report the average duration between clickpath steps in millis.
-               Default: false
-             --clickpath-short-code-length
-               Length of parts between slashes in clickpath urls, to shorten the 
-               path. 
-               Default: 3
-             -multi-hit, --count-multiple-hits-in-mapper
-               Will count all hits in the mapper file, otherwise only the first 
-               hit will be counted.
-               Default: false
-             -fffe, --filefeederfilter-excludes
-               Regular expression to use in the file feeder. Matches will NOT be 
-               included. Matches are made on complete logline.
-             -fffi, --filefeederfilter-includes
-               Regular expression to use in the file feeder. Matches will be 
-               included. Matches are made on complete logline.
-             -gtps, --graph-with-tps
-               Use true TPS per second in graphs instead of moving avg. (TPS per 
-               minute is default)
-               Default: false
-             -gh, --graphs-histo
-               Create histogram graphs
-               Default: false
-             -ghtml, --graphs-html
-               Output html google charts style graphs
-               Default: false
-             -gp, --graphs-percentile
-               Create percentile graphs
-               Default: false
-             -gr, --graphs-responsetimes
-               Create response times graphs
-               Default: false
-             -gt, --graphs-tps
-               Create TPS graphs
-               Default: false
-             -imm, --ignore-multi-and-no-matches
-               Ignore multi match and no match warnings. Do not display a list of 
-               the no matches.
-               Default: false
-             -regexp, --include-mapper-regexp-column
-               Include the mapper regexp column in the iis and access log report.
-               Default: false
-             -lp, --log-pattern
-               The logback/httpd LogFormat pattern to use.
-             -mf, --mapper-file
-               Mapper file to use. Also used in clickpath analysis.
-             --max-unique-counters
-               Maximum number of unique counters before an overflow counter is 
-               used that combines all further counters (named OVERFLOW_COUNTER).
-               Default: 512
-             -nompr, --nomappers
-               Exclude mappers in access logs.
-               Default: false
-             -ref, --referers
-               Include referers in iis and access logs.
-               Default: false
-             -rpu, --remove-params-from-url
-               Remove the parameters before parsing the access log urls (split at 
-               question mark)
-               Default: false
-             -conc, --report-concurrent-transactions
-               Calculate and report concurrent calls based on log time and 
-               duration. Adds a conc column in the report that shows the max 
-               concurrent requests for that particular url or request mapper.
-               Default: false
-             -sd, --report-standard-dev
-               Calculate and report standard deviation of durations.
-               Default: false
-             -tps, --report-transactions-per-second
-               Calculate and report transactions per second (next to TPM).
-               Default: false
-             -ua, --useragents
-               Include agents in iis and access logs.
-               Default: false
-             -clickpath
-               Determine and report click paths (BETA). Set sessionfield for the 
-               session id to use.
-               Default: false
-             -count-no-mapper-as-one
-               Will count all no-mappers as one line, default count all 
-               no-mappers separately.
-               Default: false
-             -failure-aware
-               Be failure aware if possible. Report on failed hits in each 
-               analysis line. If not set the module defaults are used.
-             -graphs-histo-simulator
-               If histo graphs are enabled, also merge a simulation of the 
-               histogram based on stub delay generator.
-               Default: false
-             -group-by-fields
-               Group by the given comma separated fields as specified in the used 
-               logformat. Url will be the mapped url.
-               Default: []
-             -group-by-http-method
-               Group by http method (POST, GET, ...) by adding it to the counter 
-               name and adding a http method column in text report.
-               Default: false
-             -group-by-http-status
-               Group by http status code by adding it to the counter name and 
-               adding a http status column in text report.
-               Default: false
-             -include-failed-hits-in-analysis
-               Include failed hits in analysis. When false the reported number of 
-               failures and failure percentage are the same for each counter, but 
-               the other calculated values such as min, max, tps, averaqe, 
-               percentiles will not include failed hits. "Default behaviour can 
-               differ for different modules. Most have true, performance center 
-               analysis has false.
-             -report-percentiles
-               List of percentiles to report. These are comma separated double 
-               values, for example: 99,99.9,99.995
-               Default: [99.0]
-             -report-stub-delays
-               Add stub delay column settings in report.
-               Default: false
-             -session-duration
-               Determine the average session duration. Set sessionfield for the 
-               session id to use.
-               Default: false
-             -sessionfield
-               Name of the session field to use for clickpath and session 
-               duration analysis, from logpattern.
-             -sessionfield-regexp
-               Regexp to use to get the sessionId from the sessionField. Use a 
-               capture group () to specify the sessionId capture.
-             -urls
-               Include basic urls in iis and access logs.
-               Default: false
 
 ## build
 
