@@ -30,9 +30,11 @@ download an example dataset:
   
 process this file:
 
-     java -jar lograter-exec-1.4.0.jar access -single-mapper NASA_access_log_Jul95.gz  
-    
-check the reports/access-log-rater-charts.html:
+     java -jar lograter-exec-1.4.0.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
+
+(Note: there are some errors for some lines that contain invalid urls with unexpected quotes. These can be ignored.)
+   
+Check the reports/access-log-rater-charts.html (the `-gt` stands for "graph for tps"):
 
 ![nasa hps image](images/nasa-hps.png)
 
@@ -100,7 +102,7 @@ Put reports in a directory called `my-report-{ts}`, where {ts} is replaced with 
 
 Now call LogRater as:
 
-    java -jar lograter-exec-1.4.0.jar @latency.options cloud-foundy.log  
+    java -jar lograter-exec-1.4.0.jar @latency.options cloud-foundry.log  
 
 ## Uses
 
