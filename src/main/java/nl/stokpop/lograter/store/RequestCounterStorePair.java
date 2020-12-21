@@ -39,13 +39,13 @@ import java.util.Objects;
 public class RequestCounterStorePair {
 	private final RequestCounterStore storeSuccess;
 	private final RequestCounterStore storeFailure;
-    private final RequestCounterStoreReadOnly readonlyStoreSuccess;
+    private final RequestCounterStoreReadOnly readOnlyStoreSuccess;
     private final RequestCounterStoreReadOnly readOnlyStoreFailure;
 
     public RequestCounterStorePair(RequestCounterStore storeSuccess, RequestCounterStore storeFailure) {
         this.storeSuccess = storeSuccess;
 		this.storeFailure = storeFailure;
-		this.readonlyStoreSuccess = new RequestCounterStoreReadOnly(storeSuccess);
+		this.readOnlyStoreSuccess = new RequestCounterStoreReadOnly(storeSuccess);
 		this.readOnlyStoreFailure = new RequestCounterStoreReadOnly(storeFailure);
 
         sanityCheckMaxCountersThrowsException(storeSuccess, storeFailure);
@@ -72,7 +72,7 @@ public class RequestCounterStorePair {
      * @return read only request counter
 	 */
 	public RequestCounterStore getRequestCounterStoreSuccess() {
-		return readonlyStoreSuccess;
+		return readOnlyStoreSuccess;
 	}
 
 	/**

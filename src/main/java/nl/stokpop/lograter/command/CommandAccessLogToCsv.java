@@ -19,7 +19,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(separators = "=", commandDescription = "Transform an access log to a csv file.")
-public class CommandAccessLogToCsv extends AbstractCommandBasic {
+public class CommandAccessLogToCsv extends AbstractCommandMapperAndClickPath {
 
     private static final String COMMANDNAME = "accessToCsv";
     private static final String DEFAULT_ACCESS_LOG_CSV_FILE = "access-log-{ts}.csv";

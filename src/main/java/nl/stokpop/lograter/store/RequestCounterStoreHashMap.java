@@ -18,6 +18,7 @@ package nl.stokpop.lograter.store;
 import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -50,10 +51,11 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 		return "RequestCounterStoreHashMap{" +
 				"name='" + name + '\'' +
 				", timePeriod=" + timePeriod +
+				", totalCounterHits=" + totalRequestCounter.getHits() +
 				'}';
 	}
 
-	public Iterator<RequestCounter> iterator() {
+	public @NotNull Iterator<RequestCounter> iterator() {
 		List<RequestCounter> values = new ArrayList<>(counters.values());
 		Collections.sort(values);
 		return values.iterator();

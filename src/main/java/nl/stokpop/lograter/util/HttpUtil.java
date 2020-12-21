@@ -13,33 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.command;
+package nl.stokpop.lograter.util;
 
-import com.beust.jcommander.Parameters;
+public class HttpUtil {
 
-@Parameters(separators = "=", commandDescription = "Parse a IIS log file.")
-public class CommandIisLog extends AbstractCommandAccessLog {
-	
-	private static final String COMMAND_NAME = "iis";
-
-	@Override
-	public String toString() {
-		return "CommandIisLog{}";
-	}
-
-	@Override
-	public String getCommandName() {
-		return COMMAND_NAME;
-	}
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
+    /**
+     * Defines error codes for http as 4** and 5** ranges, including 418 (https://www.google.com/teapot).
+     * @return true if httpStatus is an error code
+     */
+    public static boolean isHttpError(int httpStatus) {
+        return httpStatus >= 400 && httpStatus < 600;
     }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
 }

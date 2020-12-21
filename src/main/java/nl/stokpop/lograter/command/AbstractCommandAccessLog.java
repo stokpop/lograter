@@ -20,7 +20,7 @@ import com.beust.jcommander.Parameter;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractCommandAccessLog extends AbstractCommandBasic {
+public abstract class AbstractCommandAccessLog extends AbstractCommandMapperAndClickPath {
 
 	@Parameter(names = { "-rpu", "--remove-params-from-url" },
             description = "Remove the parameters before parsing the access log urls (split at question mark)")

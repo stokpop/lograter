@@ -15,26 +15,60 @@
  */
 package nl.stokpop.lograter.processor.latency;
 
+import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.command.FailureFieldType;
 import nl.stokpop.lograter.command.LatencyUnit;
-import nl.stokpop.lograter.processor.BasicCounterLogConfig;
+import nl.stokpop.lograter.processor.accesslog.MapperAndClickPathConfig;
 
-public class LatencyLogConfig extends BasicCounterLogConfig {
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class LatencyLogConfig extends MapperAndClickPathConfig {
 	
-	private String counterFields;
+	private List<String> counterFields;
 	private String logPattern;
-	private boolean determineClickpaths;
-	private String mapperFile;
-	private String sessionField;
-	private int clickPathShortCodeLength;
 	private String latencyField;
 	private LatencyUnit latencyUnit;
+	private String failureField;
+	private FailureFieldType failureFieldType;
+	private String failureFieldRegexp;
 
-	public String getCounterFields() {
+	public String getFailureField() {
+		return failureField;
+	}
+
+	public void setFailureField(String failureField) {
+		this.failureField = failureField;
+	}
+
+	public FailureFieldType getFailureFieldType() {
+		return failureFieldType;
+	}
+
+	public void setFailureFieldType(FailureFieldType failureFieldType) {
+		this.failureFieldType = failureFieldType;
+	}
+
+	public String getFailureFieldRegexp() {
+		return failureFieldRegexp;
+	}
+
+	public void setFailureFieldRegexp(String failureFieldRegexp) {
+		this.failureFieldRegexp = failureFieldRegexp;
+	}
+
+	private static List<String> counterFieldsToStringArray(String counterFields) {
+		return Collections.unmodifiableList(Arrays.asList(counterFields.replace(" ", "").split(",")));
+	}
+
+	public List<String> getCounterFields() {
 		return counterFields;
 	}
 
 	public void setCounterFields(String counterFields) {
-		this.counterFields = counterFields;
+		if (counterFields == null || counterFields.isEmpty()) throw new LogRaterException("counterFields cannot be null or empty.");
+		this.counterFields = counterFieldsToStringArray(counterFields);
 	}
 
 	public String getLogPattern() {
@@ -43,38 +77,6 @@ public class LatencyLogConfig extends BasicCounterLogConfig {
 
 	public void setLogPattern(String logPattern) {
 		this.logPattern = logPattern;
-	}
-
-	public boolean isDetermineClickpaths() {
-		return determineClickpaths;
-	}
-
-	public void setDetermineClickpaths(boolean determineClickpaths) {
-		this.determineClickpaths = determineClickpaths;
-	}
-
-	public String getMapperFile() {
-		return mapperFile;
-	}
-
-	public void setMapperFile(String mapperFile) {
-		this.mapperFile = mapperFile;
-	}
-
-	public String getSessionField() {
-		return sessionField;
-	}
-
-	public void setSessionField(String sessionField) {
-		this.sessionField = sessionField;
-	}
-
-	public int getClickPathShortCodeLength() {
-		return clickPathShortCodeLength;
-	}
-
-	public void setClickPathShortCodeLength(int clickPathShortCodeLength) {
-		this.clickPathShortCodeLength = clickPathShortCodeLength;
 	}
 
 	@Override
@@ -101,5 +103,18 @@ public class LatencyLogConfig extends BasicCounterLogConfig {
 
 	public void setLatencyUnit(LatencyUnit latencyUnit) {
 		this.latencyUnit = latencyUnit;
+	}
+
+	@Override
+	public String toString() {
+		return "LatencyLogConfig{" +
+			"counterFields=" + counterFields +
+			", logPattern='" + logPattern + '\'' +
+			", latencyField='" + latencyField + '\'' +
+			", latencyUnit=" + latencyUnit +
+			", failureField='" + failureField + '\'' +
+			", failureFieldType=" + failureFieldType +
+			", failureFieldRegexp='" + failureFieldRegexp + '\'' +
+			"} " + super.toString();
 	}
 }

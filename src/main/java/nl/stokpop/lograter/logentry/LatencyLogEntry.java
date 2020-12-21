@@ -16,11 +16,13 @@
 package nl.stokpop.lograter.logentry;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.command.FailureFieldType;
 import nl.stokpop.lograter.command.LatencyUnit;
 import nl.stokpop.lograter.parser.line.LogEntryMapper;
 import nl.stokpop.lograter.parser.line.LogbackElement;
 import nl.stokpop.lograter.parser.line.StringEntryMapper;
 import nl.stokpop.lograter.processor.latency.LatencyLogConfig;
+import nl.stokpop.lograter.util.HttpUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -30,8 +32,15 @@ import java.util.regex.Pattern;
 
 public class LatencyLogEntry extends LogbackLogEntry {
 
+	public static LogEntrySuccessFactor<LatencyLogEntry> ALWAYS_SUCCESS = entry -> true;
+
+	private final LogEntrySuccessFactor<LatencyLogEntry> logEntrySuccessFactor;
+
 	private int durationInMillis;
 
+	public LatencyLogEntry(LogEntrySuccessFactor<LatencyLogEntry> logEntrySuccessFactor) {
+		this.logEntrySuccessFactor = logEntrySuccessFactor;
+	}
     /**
      * The Latency Log mapper for the latency field translates the duration in milliseconds.
      * Otherwise equal to LogBackLogEntry.
@@ -39,7 +48,7 @@ public class LatencyLogEntry extends LogbackLogEntry {
 	public static Map<String, LogEntryMapper<LatencyLogEntry>> initializeLatencyLogMappers(List<LogbackElement> elements, LatencyLogConfig latencyConfig) {
 		Map<String, LogEntryMapper<LatencyLogEntry>> mappers = new HashMap<>();
 
-        LogbackMappers.initializeMappers(elements, mappers);
+        LatencyMappers.initializeMappers(elements, mappers, latencyConfig.getCounterFields().get(0));
 
 		final Pattern latencyPattern = findLatencyPattern(elements, latencyConfig.getLatencyField());
 
@@ -75,6 +84,9 @@ public class LatencyLogEntry extends LogbackLogEntry {
 		}
 	}
 
+	/**
+	 *  @return latency pattern if found, null if it is no regexp pattern: does not contain "(" and ")" for a regexp group.
+	 */
 	@Nullable
 	private static Pattern findLatencyPattern(List<LogbackElement> elements, String latencyField) {
 		Pattern latencyPattern;
@@ -101,6 +113,42 @@ public class LatencyLogEntry extends LogbackLogEntry {
 
 	public void setDurationInMillis(int durationInMillis) {
 		this.durationInMillis = durationInMillis;
+	}
+
+	public boolean isSuccess() {
+		return logEntrySuccessFactor.isSuccess(this);
+	}
+
+	public static LogEntrySuccessFactor<LatencyLogEntry> successFactorInstance(String failureField, FailureFieldType type, Pattern failureFieldRegexp) {
+		if (type == FailureFieldType.regexp && failureFieldRegexp == null) throw new LogRaterException("failureFieldReqexp cannot be null when failureFieldType is regexp");
+	    return entry -> successFactor(entry, failureField, type, failureFieldRegexp);
+	}
+
+	private static boolean successFactor(LatencyLogEntry entry, String failureField, FailureFieldType type, Pattern failureFieldRegexp) {
+		String value = entry.getField(failureField);
+
+		if (value == null) { return true; }
+
+		switch (type) {
+			case bool: return !Boolean.parseBoolean(value);
+			case http: return isSuccessHttpStatusCode(value);
+			case regexp: return !failureFieldRegexp.matcher(value).find();
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return false if http status code is an known error code, true otherwise, also when text is not a number.
+	 */
+	private static boolean isSuccessHttpStatusCode(String text) {
+		int httpStatusCode;
+		try {
+			httpStatusCode = Integer.parseInt(text);
+		} catch (NumberFormatException e) {
+			return true;
+		}
+		return !HttpUtil.isHttpError(httpStatusCode);
 	}
 
 	@Override

@@ -75,8 +75,11 @@ public final class StringUtils {
 		return semiColonIdx == -1 ? toStrip : toStrip.substring(semiColonIdx + 1).trim();  
 	}
 
+	/**
+	 * @return true when aString is null or empty or has only whitespace.
+	 */
     public static boolean isEmptyString(String aString) {
-        return aString == null || aString.trim().length() == 0;
+        return aString == null || aString.trim().isEmpty();
     }
 
 	public static String recreateCommandLine(String[] args) {

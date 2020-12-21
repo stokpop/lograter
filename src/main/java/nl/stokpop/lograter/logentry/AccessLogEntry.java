@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.logentry;
 
 import nl.stokpop.lograter.counter.HttpMethod;
+import nl.stokpop.lograter.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,12 +171,8 @@ public class  AccessLogEntry extends LogEntry {
 		this.userAgent = userAgent;
 	}
 
-	/**
-	 * Defines error codes for http as 4** and 5** ranges, including 418 (https://www.google.com/teapot).
-	 * @return true if httpStatus is an error code
-	 */
 	public boolean isHttpError() {
-		return httpStatus >= 400 && httpStatus < 600;
+		return HttpUtil.isHttpError(httpStatus);
 	}
 
     @Override

@@ -15,31 +15,6 @@
  */
 package nl.stokpop.lograter.command;
 
-import com.beust.jcommander.Parameters;
-
-@Parameters(separators = "=", commandDescription = "Parse a performance center results database.")
-public class CommandPerformanceCenterResults extends AbstractCommandBasic {
-	
-	private static final String COMMAND_NAME = "pc";
-
-	@Override
-	public String toString() {
-		return "CommandPerformanceCenterResults [toString()=" + super.toString() + "]";
-	}
-
-	@Override
-	public String getCommandName() {
-		return COMMAND_NAME;
-	}
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
+public enum FailureFieldType {
+    http, bool, regexp
 }

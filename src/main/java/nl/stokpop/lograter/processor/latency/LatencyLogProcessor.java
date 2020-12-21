@@ -19,7 +19,6 @@ import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
@@ -28,33 +27,13 @@ public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
 
 	private final LatencyLogData data;
 	private final LatencyLogConfig config;
-	private final String[] counterFields;
-    private final String totalCounterKey;
+	private final List<String> counterFields;
 
 	public LatencyLogProcessor(LatencyLogData data, LatencyLogConfig config) {
 		this.data = data;
 		this.config = config;
-		String counterFields = config.getCounterFields();
-		this.counterFields = counterFieldsToStringArray(counterFields);
-        this.totalCounterKey = createTotalCounterKey(this.counterFields);
+		this.counterFields = config.getCounterFields();
 	}
-
-	public static String[] counterFieldsToStringArray(String counterFields) {
-		return counterFields.replace(" ", "").split(",");
-	}
-
-	/**
-     * For each available counter field, add "TOTAL," to align with columns in text final report.
-     */
-    private String createTotalCounterKey(String[] counterFields) {
-        if (counterFields.length == 0) { return "TOTAL"; }
-
-        List<String> totals = new ArrayList<>();
-        for (int i = 0; i < counterFields.length; i++) {
-            totals.add("TOTAL");
-        }
-        return String.join(",", totals);
-    }
 
     @Override
 	public void processEntry(LatencyLogEntry entry) {
@@ -72,7 +51,12 @@ public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
 		data.updateLogTime(timestamp);
 
 		int durationInMillis = entry.getDurationInMillis();
-		data.getCounterStorePair().addSuccess(counterKey, timestamp, durationInMillis);
+		if (entry.isSuccess()) {
+			data.getCounterStorePair().addSuccess(counterKey, timestamp, durationInMillis);
+		}
+		else {
+			data.getCounterStorePair().addFailure(counterKey, timestamp, durationInMillis);
+		}
 
 	}
 

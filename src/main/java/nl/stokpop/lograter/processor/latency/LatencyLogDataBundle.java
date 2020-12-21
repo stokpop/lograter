@@ -19,7 +19,6 @@ import nl.stokpop.lograter.clickpath.ClickPathCollector;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,15 +28,19 @@ public class LatencyLogDataBundle implements RequestCounterDataBundle {
     private final LatencyLogConfig config;
     private final LatencyLogData data;
     private final ClickPathCollector clickPathCollector;
+	private final List<RequestCounterStorePair> requestCounterStorePairs;
 
-    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, ClickPathCollector clickPathCollector) {
-        this.config = config;
+    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs, ClickPathCollector clickPathCollector) {
+        // TODO: why both data and requestCounterStorePairs?
+		// seems data contains non-mapped and requestCounterStorePairs contain mapped counter fields?
+    	this.config = config;
 	    this.data = data;
         this.clickPathCollector = clickPathCollector;
+        this.requestCounterStorePairs = requestCounterStorePairs;
     }
 
-    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data) {
-       this(config, data, null);
+    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs) {
+       this(config, data, requestCounterStorePairs, null);
     }
 
     public ClickPathCollector getClickPathCollector() {
@@ -51,12 +54,12 @@ public class LatencyLogDataBundle implements RequestCounterDataBundle {
 
 	@Override
 	public List<RequestCounterStorePair> getRequestCounterStorePairs() {
-		return Collections.singletonList(data.getCounterStorePair());
+		return requestCounterStorePairs;
 	}
 
 	@Override
 	public boolean doesSupportFailureRequestCounters() {
-		return false;
+		return config.isFailureAwareAnalysis();
 	}
 
 	public LatencyLogConfig getConfig() {

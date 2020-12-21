@@ -146,19 +146,18 @@ public class LogRater {
         reportCreators.put(commandJMeter, (o, c) -> new JMeterReportCreator().createReport(o, c, commandJMeter));
         reportCreators.put(commandLatency, (o, c) -> new LatencyLogReportCreator().createReport(o, c, commandLatency));
         // not implemented?? reportCreators.put(new CommandSarLog(), new S...);
-        
+
         JCommander jc = new JCommander();
         jc.addObject(cmdMain);
         jc.setProgramName(LogRater.class.getCanonicalName());
         reportCreators.keySet().forEach(k -> jc.addCommand(k.getCommandName(), k));
-
         Set<String> commandNamesSet = jc.getCommands().keySet();
 
         try {
             jc.parse(args);
         } catch (ParameterException e) {
             final String message = "Unknown command: " + e.getMessage();
-            printWriter.println(message);
+            System.out.println(message);
             simpleUsage(commandNamesSet);
             throw new LogRaterException(message, e);
         }
@@ -171,12 +170,13 @@ public class LogRater {
 
         if (parsedCommand == null) {
             simpleUsage(commandNamesSet);
+            if (cmdMain.help) {
+                jc.usage();
+            }
             return;
         }
-
         if (cmdMain.help) {
-            simpleUsage(commandNamesSet);
-            jc.usage();
+            jc.findCommandByAlias(parsedCommand).usage();
             return;
         }
 
@@ -196,9 +196,8 @@ public class LogRater {
         }
 
         Optional<Map.Entry<LogRaterCommand, ReportCreator>> entry = reportCreators.entrySet().stream()
-                .filter(k -> k.getKey().getCommandName().equalsIgnoreCase(parsedCommand))
-                .findFirst();
-
+            .filter(k -> k.getKey().getCommandName().equalsIgnoreCase(parsedCommand))
+            .findFirst();
         if (entry.isPresent()) {
             Map.Entry<LogRaterCommand, ReportCreator> creatorLightEntry = entry.get();
             ReportCreator reportCreatorLight = creatorLightEntry.getValue();
@@ -215,9 +214,10 @@ public class LogRater {
 		for (String commandName :  commands) {
 			commandsToUse.append(commandName).append(", ");
 		}
-		printWriter.println("Use one of the following commands after the [options] below: " + commandsToUse.subSequence(0, commandsToUse.length() - 2) +
-				"\nUse --help [command] for command specific help.");
-		jcSimple.usage();
+		System.out.println("Available commands: " + commandsToUse.subSequence(0, commandsToUse.length() - 2) +
+				"\nUse [options] [command] [command-options]." +
+                "\nUse --help [command] for command specific options." +
+                "\nUse --help for generic options.");
 	}
 
 	public static void populateBasicCounterLogSettings(AbstractCommandBasic commandBasic, BasicCounterLogConfig config) {
@@ -230,7 +230,6 @@ public class LogRater {
         // only override the default values of failure awareness if explicitly set
         if (commandBasic.failureAwareAnalysis != null) { config.setFailureAwareAnalysis(commandBasic.failureAwareAnalysis); }
         if (commandBasic.includeFailedHitsInAnalysis != null) { config.setIncludeFailedHitsInAnalysis(commandBasic.includeFailedHitsInAnalysis); }
-
     }
 
 	public static void writeReport(LogReport report, String outputFilename, File reportDirectory, PrintWriter out, TimePeriod analysisPeriod) throws IOException {

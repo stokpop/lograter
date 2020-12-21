@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.processor.jmeter;
+package nl.stokpop.lograter.processor.latency;
 
+import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -26,9 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
+public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
 
-    private static final Logger log = LoggerFactory.getLogger(JMeterUrlMapperProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(LatencyMapperProcessor.class);
 
 	private static final String NO_MAPPER = "NO_MAPPER";
 
@@ -42,16 +43,16 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
     // needed to report the used regexp for this mapper key
     private final Map<String, LineMap> counterKeyToLineMapMap = new HashMap<>();
 
-    private final JMeterCounterKeyCreator counterKeyCreator;
+    private final LatencyCounterKeyCreator counterKeyCreator;
 
     private final boolean isIgnoreMultiAndNoMatches;
     private final boolean isDoCountMultipleMapperHits;
     private final boolean isDoCountNoMappersAsOne;
 
-    public JMeterUrlMapperProcessor(
+    public LatencyMapperProcessor(
             final RequestCounterStorePair counterStorePair,
             final LineMapperSection lineMapperSection,
-            final JMeterCounterKeyCreator keyCreator,
+            final LatencyCounterKeyCreator keyCreator,
             boolean isDoCountNoMappersAsOne,
             boolean isIgnoreMultiAndNoMatches,
             boolean isDoCountMultipleMapperHits) {
@@ -64,11 +65,11 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
     }
 
 	@Override
-	public void processEntry(final JMeterLogEntry logEntry) {
+	public void processEntry(final LatencyLogEntry logEntry) {
         updateMappers(logEntry);
 	}
 
-	private void updateMappers(final JMeterLogEntry logEntry) {
+	private void updateMappers(final LatencyLogEntry logEntry) {
 		
 		LineMapperCallback callback = new LineMapperCallback() {
 			
@@ -82,7 +83,7 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 				}
 				if (!isIgnoreMultiAndNoMatches) {
 					String mapperCounterKey;
-                    String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
+                    String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getMessage();
                     mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
 					addToCounterStore(mapperCounterKey, logEntry);
 				}
@@ -109,9 +110,8 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
                     counterKeyToLineMapMap.put(mapperCounterKey, mapper);
                 }
 			}
-		};			
-		
-		lineMapperSection.updateMappers(logEntry.getUrl(), isDoCountMultipleMapperHits, callback);
+		};
+		lineMapperSection.updateMappers(logEntry.getMessage(), isDoCountMultipleMapperHits, callback);
 	}
 
     private void logNonMatcher(String line, int nonMatchesCount) {
@@ -125,7 +125,7 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
         }
     }
 
-    private void addToCounterStore(String counterKey, JMeterLogEntry logEntry) {
+    private void addToCounterStore(String counterKey, LatencyLogEntry logEntry) {
 		if (logEntry.isSuccess()) {
 			counterStorePair.addSuccess(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}

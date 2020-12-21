@@ -18,11 +18,11 @@ You can download a pre-build jar here: https://github.com/stokpop/lograter/relea
 
 with curl: 
 
-    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.0/lograter-exec-1.4.0.jar
+    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.1/lograter-exec-1.4.1.jar
 
 use java 8+ to run lograter:
 
-    java -jar lograter-exec-1.4.0.jar
+    java -jar lograter-exec-1.4.1.jar
 
 download an example dataset:
 
@@ -30,7 +30,7 @@ download an example dataset:
   
 process this file:
 
-     java -jar lograter-exec-1.4.0.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
+     java -jar lograter-exec-1.4.1.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
 
 (Note: there are some errors for some lines that contain invalid urls with unexpected quotes. These can be ignored.)
    
@@ -49,16 +49,16 @@ performance information will be revealed.
 
 The available commands:
 
-* `iis`     parse a IIS log file
+* `iis`         parse a IIS log file
 * `access`      parse an access log file
-* `pc`      parse a performance center results database
-* `application`      parse an (Java logback) application log file
-* `latency`      parse a log file that contains latency/duration numbers
-* `alloc`      parse WebSphere application server logs with large allocation 
-* `gc`      parse WebSphere verbose garbage collection log files
-* `accessToCsv`      transform an access log to a csv file
+* `pc`          parse a performance center results database
+* `application` parse an (Java logback) application log file
+* `latency`     parse a log file that contains latency/duration numbers
+* `alloc`       parse WebSphere application server logs with large allocation 
+* `gc`          parse WebSphere verbose garbage collection log files
+* `accessToCsv` transform an access log to a csv file
 * `jmeter`      parse jtl file from a jMeter run
-    
+
 ### Option file
 
 For multiple command line options it is adviced to use a file with options.
@@ -80,7 +80,7 @@ latency
 -fffi
 \[RTR/
 --counter-fields
-http-method,http-code,http-url
+http-url,http-method,http-code
 -session-duration
 -sessionfield
 x_b3_traceid
@@ -100,9 +100,13 @@ The `x_b3_traceid` is used to determine click paths and session duration.
 Response time (or latency) is parsed from the `response_time` field. The `response_time` field contains seconds.
 Put reports in a directory called `my-report-{ts}`, where {ts} is replaced with current timestamp.
 
+The counters are based on unique combinations of the `counter-fields`. The first of the counter-fields 
+(in this example `http-url`) is mapped according to the mapper file, if a mapper file is present.
+
+
 Now call LogRater as:
 
-    java -jar lograter-exec-1.4.0.jar @latency.options cloud-foundry.log  
+    java -jar lograter-exec-1.4.1.jar @latency.options cloud-foundry.log  
 
 ## Uses
 
@@ -113,11 +117,11 @@ For each request see the average response time and the percentiles.
 
 For each type of request, see how many concurrent requests there are.
 
-Lograter can scan following web logs:
-* apache 
-* nginx
-* iis
-* latency: any log file that contains timestamp, url and latency
+Lograter can scan following web or access logs:
+* `apache`: apache web server access logs
+* `nginx`: nginx access logs
+* `iis`:  Microsoft IIS servers access logs
+* `latency`: any log file that contains timestamp, url and latency
 
 Use the log pattern to define your log line structure. LogRater needs at least:
  * a timestamp
@@ -144,7 +148,7 @@ To parse a line like this, you can use this log pattern:
 
 LogRater will use the literals to parse the line (first is "` - `" so all before that character sequence is "read" into `%{one}X`). 
 
-Notice the second timestamp in the log line is used for parsing actual parsing. 
+Notice the second timestamp in the log line is actually being parsing. 
 
 The `%r` is used to get the url (%r is actually the triplet <http command, url, and http version>).
 
@@ -152,16 +156,16 @@ The `%s` is for the http status code to detect errors.
 
 And `%T` is for the response time in seconds.
 
-Note that information in `%{one}X`, `%{two}X` and `%{three}X` is not used and is basically discarded.
+Note that information in `%{one}X`, `%{two}X` and `%{three}X` is not used. 
 
-The default pattern for `%t` is `[dd/MMM/yyyy:HH:mm:ss Z]`. In this example an override is provided
-to match the log file timestamp format.
+The default pattern for `%t` is `[dd/MMM/yyyy:HH:mm:ss Z]`. This example uses an alternate, explicit time format.
      
 Run as follows:
 
     java -jar lograter-exec-X.Y.Z.jar -o report-{ts}.html access -lp "%{one}X - %{[yyyy-MM-dd'T'HH:mm:ss.SSSZ]}t \"%r\" %c %{two}X response_time:%T %{three}X" -gh -gr -gp -gt -sd -fffi "GET" Afterburner-CPU.log
 
-where only lines that contain "`GET`" are included via "`-fffi`" and a report with graphs is created.
+* `-fffi "GET"`: only lines that contain `GET` are included 
+* `-gh -gr -gp -gt` create graphs: histogram, response times, percentiles, transactions per second (tps).
 
 ### Outgoing requests
 
@@ -179,9 +183,44 @@ For automatic tests also automate the analysis of the rest results.
 
 ### Map names
 
-Use mappers to map technical requests (urls) to human readable names. Also use 
-mappers to group urls that are the same actually the same request. 
-For instance because the url contains a unique id that needs to be filtered.
+Use mappers to map technical requests (urls) to human readable names. Use 
+mappers to group urls that are the same actually the same request, but contain a unique id that 
+needs filtering.
+
+A mapper file looks like:
+
+    ^/my/api/customer/.*$###customer request
+    ^/my/api/app/(.*)$###app $1 request
+
+Use the `-mf` options with a path to this mapper file.
+
+The format is a regular expression, then three hashes, and the name to map to.
+
+The second line contains a matching group `(.*)`, which is referred in the name by `$1`.
+For more than one matching group use `$2`, etc.
+
+The `^` matches the beginning of a url, the `$` matches the end of a url.
+
+The customer line contains `.*` which matches anything after the slash till the end.
+So `/my/api/customer/34234` and `/my/api/customer/55453` map to same name: `customer request`.
+
+In this example an url with `/my/api/app/create` maps to `app create request` 
+and `/my/api/app/delete` maps to `app delete request`.
+
+### Failures
+
+Some log parsers are failure aware and count the number of failures. For example, the access
+logs use the http status code to count a log line as a success or a failure. 
+Via the `-include-failed-hits-in-analysis` option you can have the failures included 
+or excluded in the calculated values of the counters, such as min and max response times.
+
+The `latency` report has options to define the fields for success or failure:
+`-failure-field`, `-failure-field-type`, `failure-field-regexp`.
+
+Failure field type can be `bool`, `http` or `regexp`. For instance, if you have a field called `message` and you want it to count as a failure when
+it includes the word `error`, use the options:
+
+    -failure-field message -failure-field-type regexp -failure-field-regexp error 
 
 ### Load test logs
 
@@ -208,10 +247,10 @@ of interest. For example, a very busy period on production, or a certain period 
 Show graphs per request type to easily identify issues or unexpected behaviour.
 The following graphs are available: 
 
-* response times over time
-* load over time
-* histogram of response times
-* percentiles of response times
+* `-gr`: response times over time 
+* `-gt`: load over time in transactions per second (tps) 
+* `-gh`: histogram of response times 
+* `-gr`: percentiles of response times 
 
 Both available as png and as interactive javascript/html graphs with popups. 
 
@@ -242,7 +281,7 @@ To use LogRater from Maven or Gradle. Find the LogRater jar in Maven Central.
 
 ### LogRater command line options
 
-    LogRater version: 1.4.0
+    LogRater version: 1.4.1
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:
@@ -287,121 +326,128 @@ To use LogRater from Maven or Gradle. Find the LogRater jar in Maven Central.
 
 ### Help `latency` command:
 
-        latency      Parse a log file that contains latency numbers.
-          Usage: latency [options] <List of files to parse, or a file prefix to 
-                automatically load a set of files>
-            Options:
-              -ag, --aggregate-duration
-                Aggregate graph values per time period in seconds. Aggregation 
-                kicks in for graphs with more than 10000 points. The graph name 
-                will tell that aggregation took place.
-                Default: 5
-              --clickpath-end-of-session-snippet
-                Url's that contain this snippet are used as end of session marker 
-                (default: logout)
-                Default: logout
-              --clickpath-report-step-duration
-                Report the average duration between clickpath steps in millis.
-                Default: false
-              --clickpath-short-code-length
-                Length of parts between slashes in clickpath urls, to shorten the 
-                path. 
-                Default: 3
-              -cf, --counter-fields
-                Counter fields to use for counting. Comma separated list of field 
-                names. 
-                Default: service,operation
-              -fffe, --filefeederfilter-excludes
-                Regular expression to use in the file feeder. Matches will NOT be 
-                included. Matches are made on complete logline.
-              -fffi, --filefeederfilter-includes
-                Regular expression to use in the file feeder. Matches will be 
-                included. Matches are made on complete logline.
-              -gtps, --graph-with-tps
-                Use true TPS per second in graphs instead of moving avg. (TPS per 
-                minute is default)
-                Default: false
-              -gh, --graphs-histo
-                Create histogram graphs
-                Default: false
-              -ghtml, --graphs-html
-                Output html google charts style graphs
-                Default: false
-              -gp, --graphs-percentile
-                Create percentile graphs
-                Default: false
-              -gr, --graphs-responsetimes
-                Create response times graphs
-                Default: false
-              -gt, --graphs-tps
-                Create TPS graphs
-                Default: false
-              -lp, --log-pattern
-                The logback/httpd LogFormat pattern to use.
-                Default: %d;%X{sessionId};%X{service};%X{operation};%X{latency}%n
-              -mf, --mapper-file
-                Mapper file to use. Also used in clickpath analysis.
-              --max-unique-counters
-                Maximum number of unique counters before an overflow counter is 
-                used that combines all further counters (named OVERFLOW_COUNTER).
-                Default: 512
-              -conc, --report-concurrent-transactions
-                Calculate and report concurrent calls based on log time and 
-                duration. Adds a conc column in the report that shows the max 
-                concurrent requests for that particular url or request mapper.
-                Default: false
-              -sd, --report-standard-dev
-                Calculate and report standard deviation of durations.
-                Default: false
-              -tps, --report-transactions-per-second
-                Calculate and report transactions per second (next to TPM).
-                Default: false
-              -clickpath
-                Determine and report click paths (BETA). Set sessionfield for the 
-                session id to use.
-                Default: false
-              -failure-aware
-                Be failure aware if possible. Report on failed hits in each 
-                analysis line. If not set the module defaults are used.
-              -graphs-histo-simulator
-                If histo graphs are enabled, also merge a simulation of the 
-                histogram based on stub delay generator.
-                Default: false
-              -include-failed-hits-in-analysis
-                Include failed hits in analysis. When false the reported number of 
-                failures and failure percentage are the same for each counter, but 
-                the other calculated values such as min, max, tps, averaqe, 
-                percentiles will not include failed hits. "Default behaviour can 
-                differ for different modules. Most have true, performance center 
-                analysis has false.
-              -latency-field
-                Field used for latency. Also specify the latency unit!
-                Default: latency
-              -latency-unit
-                Unit used for latency: seconds, milliseconds, microseconds, 
-                nanoseconds. Default is milliseconds.
-                Default: milliseconds
-                Possible Values: [seconds, milliseconds, microseconds, nanoseconds]
-              -report-percentiles
-                List of percentiles to report. These are comma separated double 
-                values, for example: 99,99.9,99.995
-                Default: [99.0]
-              -report-stub-delays
-                Add stub delay column settings in report.
-                Default: false
-              -session-duration
-                Determine the average session duration. Set sessionfield for the 
-                session id to use.
-                Default: false
-              -sessionfield
-                Name of the session field to use for clickpath and session 
-                duration analysis, from logpattern.
-              -sessionfield-regexp
-                Regexp to use to get the sessionId from the sessionField. Use a 
-                capture group () to specify the sessionId capture.
-              -single-mapper
-                Use single mapper for all counters. Mapper file is ignored.
-                Default: false
+    Usage: latency [options] <List of files to parse, or a file prefix to 
+          automatically load a set of files>
+      Options:
+        -ag, --aggregate-duration
+          Aggregate graph values per time period in seconds. Aggregation kicks in 
+          for graphs with more than 10000 points. The graph name will tell that 
+          aggregation took place.
+          Default: 5
+        --clickpath-end-of-session-snippet
+          Url's that contain this snippet are used as end of session marker 
+          (default: logout)
+          Default: logout
+        --clickpath-report-step-duration
+          Report the average duration between clickpath steps in millis.
+          Default: false
+        --clickpath-short-code-length
+          Length of parts between slashes in clickpath urls, to shorten the path.
+          Default: 3
+        -cf, --counter-fields
+          Counter fields to use for counting. Comma separated list of field names.
+          Default: service,operation
+        -fffe, --filefeederfilter-excludes
+          Regular expression to use in the file feeder. Matches will NOT be 
+          included. Matches are made on complete logline.
+        -fffi, --filefeederfilter-includes
+          Regular expression to use in the file feeder. Matches will be included. 
+          Matches are made on complete logline.
+        -gtps, --graph-with-tps
+          Use true TPS per second in graphs instead of moving avg. (TPS per minute 
+          is default)
+          Default: false
+        -gh, --graphs-histo
+          Create histogram graphs
+          Default: false
+        -ghtml, --graphs-html
+          Output html google charts style graphs
+          Default: false
+        -gp, --graphs-percentile
+          Create percentile graphs
+          Default: false
+        -gr, --graphs-responsetimes
+          Create response times graphs
+          Default: false
+        -gt, --graphs-tps
+          Create TPS graphs
+          Default: false
+        -lp, --log-pattern
+          The logback/httpd LogFormat pattern to use.
+          Default: %d;%X{sessionId};%X{service};%X{operation};%X{latency}%n
+        -mf, --mapper-file
+          Mapper file to use. Also used in clickpath analysis.
+        --max-unique-counters
+          Maximum number of unique counters before an overflow counter is used 
+          that combines all further counters (named OVERFLOW_COUNTER).
+          Default: 512
+        -conc, --report-concurrent-transactions
+          Calculate and report concurrent calls based on log time and duration. 
+          Adds a conc column in the report that shows the max concurrent requests 
+          for that particular url or request mapper.
+          Default: false
+        -sd, --report-standard-dev
+          Calculate and report standard deviation of durations.
+          Default: false
+        -tps, --report-transactions-per-second
+          Calculate and report transactions per second (next to TPM).
+          Default: false
+        -clickpath
+          Determine and report click paths (BETA). Set sessionfield for the 
+          session id to use.
+          Default: false
+        -failure-aware
+          Be failure aware if possible. Report on failed hits in each analysis 
+          line. If not set the module defaults are used.
+        -failure-field
+          Field used for failure detection. Also specify the failure type. Default 
+          is empty.
+        -failure-field-regexp
+          The regular expression to determine failures. If it matches, it is a 
+          failure, otherwise success.
+          Default: error
+        -failure-field-type
+          Type of the failure field: bool, http, regexp. Default is http.
+          Default: http
+          Possible Values: [http, bool, regexp]
+        -graphs-histo-simulator
+          If histo graphs are enabled, also merge a simulation of the histogram 
+          based on stub delay generator.
+          Default: false
+        -include-failed-hits-in-analysis
+          Include failed hits in analysis. When false the reported number of 
+          failures and failure percentage are the same for each counter, but the 
+          other calculated values such as min, max, tps, averaqe, percentiles will 
+          not include failed hits. "Default behaviour can differ for different 
+          modules. Most have true, performance center analysis has false.
+        -latency-field
+          Field used for latency. Also specify the latency unit!
+          Default: latency
+        -latency-unit
+          Unit used for latency: seconds, milliseconds, microseconds, nanoseconds. 
+          Default is milliseconds.
+          Default: milliseconds
+          Possible Values: [seconds, milliseconds, microseconds, nanoseconds]
+        -report-percentiles
+          List of percentiles to report. These are comma separated double values, 
+          for example: 99,99.9,99.995
+          Default: [99.0]
+        -report-stub-delays
+          Add stub delay column settings in report.
+          Default: false
+        -session-duration
+          Determine the average session duration. Set sessionfield for the session 
+          id to use.
+          Default: false
+        -sessionfield
+          Name of the session field to use for clickpath and session duration 
+          analysis, from logpattern.
+        -sessionfield-regexp
+          Regexp to use to get the sessionId from the sessionField. Use a capture 
+          group () to specify the sessionId capture.
+        -single-mapper
+          Use single mapper for all counters. Mapper file is ignored.
+          Default: false
 
 ## build
 

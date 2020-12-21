@@ -19,9 +19,9 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(separators = "=", commandDescription = "Parse a log file that contains latency numbers.")
-public class CommandLatencyLog extends AbstractCommandBasic {
+public class CommandLatencyLog extends AbstractCommandMapperAndClickPath {
 
-	private static final String COMMANDNAME = "latency";
+	private static final String COMMAND_NAME = "latency";
 
     public CommandLatencyLog() {
         logPattern = "%d;%X{sessionId};%X{service};%X{operation};%X{latency}%n";
@@ -36,18 +36,30 @@ public class CommandLatencyLog extends AbstractCommandBasic {
     @Parameter(names = { "-latency-unit" }, description = "Unit used for latency: seconds, milliseconds, microseconds, nanoseconds. Default is milliseconds.")
     public LatencyUnit latencyUnit = LatencyUnit.milliseconds;
 
+    @Parameter(names = { "-failure-field" }, description = "Field used for failure detection. Also specify the failure type. Default is empty.")
+	public String failureField = null;
+
+    @Parameter(names = { "-failure-field-type" }, description = "Type of the failure field: bool, http, regexp. Default is http.")
+    public FailureFieldType failureFieldType = FailureFieldType.http;
+
+    @Parameter(names = { "-failure-field-regexp" }, description = "The regular expression to determine failures. If it matches, it is a failure, otherwise success.")
+    public String failureFieldRegexp = "error";
+
     @Override
     public String toString() {
         return "CommandLatencyLog{" +
-                ", counterFields='" + counterFields + '\'' +
-                ", latencyField='" + latencyField + '\'' +
-                ", latencyUnit='" + latencyUnit + '\'' +
-                "} " + super.toString();
+            "counterFields='" + counterFields + '\'' +
+            ", latencyField='" + latencyField + '\'' +
+            ", latencyUnit=" + latencyUnit +
+            ", failureField='" + failureField + '\'' +
+            ", failureFieldType=" + failureFieldType +
+            ", failureFieldRegexp='" + failureFieldRegexp + '\'' +
+            '}';
     }
 
-	@Override
+    @Override
 	public String getCommandName() {
-		return COMMANDNAME;
+		return COMMAND_NAME;
 	}
 
     @Override

@@ -22,6 +22,9 @@ import nl.stokpop.lograter.processor.accesslog.AccessLogUrlMapperProcessor;
 import nl.stokpop.lograter.processor.jmeter.JMeterConfig;
 import nl.stokpop.lograter.processor.jmeter.JMeterCounterKeyCreator;
 import nl.stokpop.lograter.processor.jmeter.JMeterUrlMapperProcessor;
+import nl.stokpop.lograter.processor.latency.LatencyCounterKeyCreator;
+import nl.stokpop.lograter.processor.latency.LatencyLogConfig;
+import nl.stokpop.lograter.processor.latency.LatencyMapperProcessor;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -32,7 +35,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LineMapperUtils {
 
@@ -57,6 +62,33 @@ public class LineMapperUtils {
         return processors;
     }
 
+    public static List<LatencyMapperProcessor> createUrlMapperProcessors(
+    		RequestCounterStoreFactory csFactory, LatencyLogConfig config) {
+
+        List<LineMapperSection> lineMappers = config.getLineMappers();
+
+        List<LatencyMapperProcessor> processors = new ArrayList<>();
+
+        // the first item of counter fields is already present as mapper base value
+        List<String> groupByFields = listWithoutFirstElement(config.getCounterFields());
+
+        for (LineMapperSection lineMapper : lineMappers) {
+            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", "Mappers-Total-Success", config.getMaxUniqueRequests());
+            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", "Mappers-Total-Failure", config.getMaxUniqueRequests());
+            LatencyCounterKeyCreator keyCreator = new LatencyCounterKeyCreator(groupByFields);
+            LatencyMapperProcessor processor =
+                    new LatencyMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
+                            config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());
+            processors.add(processor);
+        }
+        return processors;
+    }
+
+    private static List<String> listWithoutFirstElement(List<String> list) {
+        if (list.size() < 1) return Collections.emptyList();
+        return Collections.unmodifiableList(list.stream().skip(1).collect(Collectors.toList()));
+    }
+
     public static List<JMeterUrlMapperProcessor> createUrlMapperProcessors(
             RequestCounterStoreFactory csFactory, JMeterConfig config) {
 
@@ -70,7 +102,7 @@ public class LineMapperUtils {
             JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator(config.groupByHttpStatus(), config.getGroupByFields());
             JMeterUrlMapperProcessor processor =
                     new JMeterUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
-                            config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits(), config.getMaxUniqueRequests());
+                            config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());
             processors.add(processor);
         }
         return processors;

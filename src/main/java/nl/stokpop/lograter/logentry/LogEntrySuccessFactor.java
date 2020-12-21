@@ -13,33 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.command;
+package nl.stokpop.lograter.logentry;
 
-import com.beust.jcommander.Parameters;
-
-@Parameters(separators = "=", commandDescription = "Parse a IIS log file.")
-public class CommandIisLog extends AbstractCommandAccessLog {
-	
-	private static final String COMMAND_NAME = "iis";
-
-	@Override
-	public String toString() {
-		return "CommandIisLog{}";
-	}
-
-	@Override
-	public String getCommandName() {
-		return COMMAND_NAME;
-	}
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
+public interface LogEntrySuccessFactor<T extends LogEntry> {
+    boolean isSuccess(T logEntry);
 }

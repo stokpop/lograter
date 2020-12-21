@@ -24,7 +24,6 @@ import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,15 +43,15 @@ public class LatencyLogClickPathProcessor implements Processor<LatencyLogEntry> 
     private final Set<String> reportedMultiMatchers = new HashSet<>();
 
 
-	public LatencyLogClickPathProcessor(ClickPathAnalyser clickPathAnalyser, LineMapperSection lineMapper, String sessionField, String counterFields) {
+	public LatencyLogClickPathProcessor(ClickPathAnalyser clickPathAnalyser, LineMapperSection lineMapper, String sessionField, List<String> counterFields) {
 		this(clickPathAnalyser, lineMapper, sessionField, counterFields, 3);
 	}
 
-    public LatencyLogClickPathProcessor(ClickPathAnalyser clickPathAnalyser, LineMapperSection lineMapper, String sessionField, String counterFields, int shortCodeLength) {
+    public LatencyLogClickPathProcessor(ClickPathAnalyser clickPathAnalyser, LineMapperSection lineMapper, String sessionField, List<String> counterFields, int shortCodeLength) {
         this.clickPathAnalyser = clickPathAnalyser;
         this.lineMapper = lineMapper;
         this.sessionField = sessionField;
-        this.counterFields = Arrays.asList(LatencyLogProcessor.counterFieldsToStringArray(counterFields));
+        this.counterFields = counterFields;
         this.shortCodeLength = shortCodeLength;
     }
 

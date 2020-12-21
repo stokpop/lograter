@@ -45,6 +45,14 @@ public class AnonymizeLog {
      */
     public static void main(String[] args) {
 
+        if (args.length < 2 || args.length > 3) {
+            System.out.println("Usage: java -jar AnonymizeLog <logtype> <logfile> [list of # separated words]\n" +
+                "logtypes: accesslog, mapperfile, cachelog, logback, iis\n" +
+                "logfile: path to logfile\n" +
+                "words (optional): list of # separated blacklisted words to be replaced");
+            System.exit(1);
+        }
+
         String type = args[0];
         
         String filename = args[1];

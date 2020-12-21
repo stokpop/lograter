@@ -29,6 +29,8 @@ import nl.stokpop.lograter.processor.latency.LatencyLogReader;
 import nl.stokpop.lograter.report.text.LatencyLogTextReport;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.FileUtils;
+import nl.stokpop.lograter.util.linemapper.LineMapperSection;
+import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
@@ -49,6 +51,8 @@ public class LatencyLogReportCreator implements ReportCreatorWithCommand<Command
 
     @Override
     public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandLatencyLog cmdLatency) throws IOException {
+        List<LineMapperSection> lineMappers = LineMapperUtils.createLineMapper(cmdLatency.mapperFile);
+
         LatencyLogConfig config = new LatencyLogConfig();
         config.setRunId(cmdMain.runId);
         config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
@@ -59,12 +63,17 @@ public class LatencyLogReportCreator implements ReportCreatorWithCommand<Command
         config.setLogPattern(cmdLatency.logPattern);
         config.setCounterStorage(cmdMain.storage);
         config.setDetermineClickpaths(cmdLatency.determineClickpaths);
-        config.setMapperFile(cmdLatency.mapperFile);
+        config.setLineMappers(lineMappers);
         config.setSessionField(cmdLatency.sessionField);
         config.setClickPathShortCodeLength(cmdLatency.clickPathShortCodeLength);
         config.setFileFeederFilterExcludes(cmdLatency.fileFeederFilterExcludes);
         config.setFileFeederFilterIncludes(cmdLatency.fileFeederFilterIncludes);
-        config.setFailureAwareAnalysis(true);
+        // if this is not set, then NO_MAPPERS are not present in report, but they are counted in total!!
+        config.setIgnoreMultiAndNoMatches(false);
+        config.setFailureField(cmdLatency.failureField);
+        config.setFailureFieldType(cmdLatency.failureFieldType);
+        config.setFailureFieldRegexp(cmdLatency.failureFieldRegexp);
+        config.setFailureAwareAnalysis(cmdLatency.failureField != null && !cmdLatency.failureField.isEmpty());
         config.setIncludeFailedHitsInAnalysis(true);
 
         List<File> files = FileUtils.findFilesThatMatchFilenames(cmdLatency.files);
@@ -75,8 +84,12 @@ public class LatencyLogReportCreator implements ReportCreatorWithCommand<Command
         TimePeriod analysisPeriod = totalRequestCounter.getTimePeriod().createFilterTimePeriodIfFilterIsSet(config.getFilterPeriod());
 
         LatencyLogTextReport report = new LatencyLogTextReport(dataBundle);
-        LogRater.writeReport(report, cmdMain.outputFilename, new File(cmdMain.reportDirectory), outputStream, analysisPeriod);
-
+        if (analysisPeriod.hasBothTimestampsSet()) {
+            LogRater.writeReport(report, cmdMain.outputFilename, new File(cmdMain.reportDirectory), outputStream, analysisPeriod);
+        }
+        else {
+            log.warn("The analysis period has no timestamps, cannot create report. Check if any log lines are parsed without errors.");
+        }
         ClickPathCollector clickPathCollector = dataBundle.getClickPathCollector();
         if (clickPathCollector != null) {
             File dir = new File(cmdMain.reportDirectory);

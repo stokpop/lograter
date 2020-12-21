@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.util.linemapper;
 
+import nl.stokpop.lograter.LogRaterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,8 @@ public class LineMapperSection {
 		 * @see LineMapperCallback
 		 */
 		public void updateMappers(String line, boolean doCountMultipleMapperHits, LineMapperCallback callback) {
-						
+			if (line == null) throw new LogRaterException("updateMappers cannot map a 'null' line.");
+
 			boolean matchFound = false;
 			int hits = 0;
 	

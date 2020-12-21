@@ -1,0 +1,17 @@
+latency
+-fffi
+\[RTR/.*HTTP
+--counter-fields
+operation
+-session-duration
+-sessionfield
+x_b3_traceid
+-mf
+src/test/resources/latency/latency.mapper
+-clickpath
+-latency-field
+response_time
+-latency-unit
+seconds
+-lp
+%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [RTR/%X{rtr-nr}] OUT %X{host} - [%X{timestamp}] "%X{http-method} %X{operation} %X{http-version}" %X{http-code} %X{http-something} %X{http-bytes} "%X{unknown1}" "%X{http-referer}" "%X{remote-ip}:%X{remote-port}" "%X{local-ip}:%X{local-port}" x_forwarded_for:"%X{x_forwarded_for}" x_forwarded_proto:"%X{x_forwarded_proto}" vcap_request_id:"%X{vcap_request_id}" response_time:%X{response_time} gorouter_time:%X{gorouter_time} app_id:"%X{app_id}" app_index:"%X{app_index}" x_cf_routererror:"%X{x_cf_routererror}" x_client_ip:"%X{x_client_ip}" x_session_id:"%X{x_session_id}" x_b3_traceid:"%X{x_b3_traceid}" x_b3_spanid:"%X{x_b3_spanid}" x_b3_parentspanid:"%X{x_b3_parentspanid}" b3:"%X{b3}"

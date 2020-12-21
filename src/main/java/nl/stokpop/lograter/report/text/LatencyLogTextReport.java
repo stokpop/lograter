@@ -17,6 +17,7 @@ package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
+import nl.stokpop.lograter.analysis.ResponseTimeAnalyserWithFailedHits;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.processor.latency.LatencyLogConfig;
 import nl.stokpop.lograter.processor.latency.LatencyLogDataBundle;
@@ -36,18 +37,19 @@ public class LatencyLogTextReport extends LogCounterTextReport {
     @Override
     public void report(PrintWriter out, TimePeriod analysisPeriod) {
 
-        // latency log does not deal with failures (yet)
-        // if it does, add the ResponseTimeAnalyserWithFailures!
         RequestCounter totalRequestCounter = data.getTotalRequestCounterStorePair().getRequestCounterStoreSuccess().getTotalRequestCounter();
-        RequestCounter analysisRequestCounter = totalRequestCounter.getTimeSlicedCounter(analysisPeriod);
+        RequestCounter analysisTotalRequestCounter = totalRequestCounter.getTimeSlicedCounter(analysisPeriod);
 
         LatencyLogConfig config = data.getConfig();
-        ResponseTimeAnalyser analyserTotal = new ResponseTimeAnalyserFailureUnaware(analysisRequestCounter, analysisPeriod);
+        ResponseTimeAnalyser analyserTotal = config.isFailureAwareAnalysis()
+            ? new ResponseTimeAnalyserWithFailedHits(data.getTotalRequestCounterStorePair().getTotalRequestCounterPair(), analysisPeriod)
+            : new ResponseTimeAnalyserFailureUnaware(analysisTotalRequestCounter, analysisPeriod);
 
         out.println(reportSummaryHeader(analyserTotal, config));
-        out.println(reportCounter(config.getCounterFields(), analyserTotal, analyserTotal, config));
+        String commaSeparatedCounterFields = String.join(",", config.getCounterFields());
+        out.println(reportCounter(commaSeparatedCounterFields, analyserTotal, analyserTotal, config));
         for (RequestCounterStorePair requestCounterStorePair : data.getRequestCounterStorePairs()) {
-            out.println(reportCounters(config.getCounterFields(), requestCounterStorePair, analyserTotal, config));
+            out.println(reportCounters(commaSeparatedCounterFields, requestCounterStorePair, analyserTotal, config));
         }
     }
 
