@@ -54,4 +54,24 @@ public abstract class AbstractCommandMapperAndClickPath extends AbstractCommandB
     @Parameter(names = { "--clickpath-short-code-length" },
         description = "Length of parts between slashes in clickpath urls, to shorten the path.")
     public int clickPathShortCodeLength = 3;
+
+    @Parameter(names = { "-regexp", "--include-mapper-regexp-column" },
+        description = "Include the mapper regexp column in text report.")
+    public boolean includeMapperRegexpColumn = false;
+
+    @Override
+    public String toString() {
+        return "AbstractCommandMapperAndClickPath{" +
+            "determineClickpaths=" + determineClickpaths +
+            ", clickpathReportStepDurations=" + clickpathReportStepDurations +
+            ", clickpathEndOfSessionSnippet='" + clickpathEndOfSessionSnippet + '\'' +
+            ", determineSessionDuration=" + determineSessionDuration +
+            ", sessionField='" + sessionField + '\'' +
+            ", mapperFile='" + mapperFile + '\'' +
+            ", useSingleMapper=" + useSingleMapper +
+            ", sessionFieldRegexp='" + sessionFieldRegexp + '\'' +
+            ", clickPathShortCodeLength=" + clickPathShortCodeLength +
+            ", includeMapperRegexpColumn=" + includeMapperRegexpColumn +
+            "} " + super.toString();
+    }
 }

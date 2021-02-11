@@ -18,8 +18,10 @@ package nl.stokpop.lograter.processor.latency;
 import nl.stokpop.lograter.clickpath.ClickPathCollector;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.linemapper.LineMap;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bundles all latency log data.
@@ -29,19 +31,25 @@ public class LatencyLogDataBundle implements RequestCounterDataBundle {
     private final LatencyLogData data;
     private final ClickPathCollector clickPathCollector;
 	private final List<RequestCounterStorePair> requestCounterStorePairs;
+	private final Map<String, LineMap> counterKeyToLineMapMap;
 
-    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs, ClickPathCollector clickPathCollector) {
+    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs, ClickPathCollector clickPathCollector, Map<String, LineMap> counterKeyToLineMapMap) {
         // TODO: why both data and requestCounterStorePairs?
 		// seems data contains non-mapped and requestCounterStorePairs contain mapped counter fields?
     	this.config = config;
 	    this.data = data;
         this.clickPathCollector = clickPathCollector;
         this.requestCounterStorePairs = requestCounterStorePairs;
+		this.counterKeyToLineMapMap = counterKeyToLineMapMap;
+	}
+
+    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs, Map<String, LineMap> counterKeyToLineMapMap) {
+       this(config, data, requestCounterStorePairs, null, counterKeyToLineMapMap);
     }
 
-    public LatencyLogDataBundle(LatencyLogConfig config, LatencyLogData data, List<RequestCounterStorePair> requestCounterStorePairs) {
-       this(config, data, requestCounterStorePairs, null);
-    }
+	public Map<String, LineMap> getCounterKeyToLineMapMap() {
+		return counterKeyToLineMapMap;
+	}
 
     public ClickPathCollector getClickPathCollector() {
         return clickPathCollector;

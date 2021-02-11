@@ -16,13 +16,7 @@
 package nl.stokpop.lograter.report.text;
 
 import nl.stokpop.lograter.LogRaterException;
-import nl.stokpop.lograter.analysis.ConcurrentCounterResult;
-import nl.stokpop.lograter.analysis.FailureAware;
-import nl.stokpop.lograter.analysis.HistogramData;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
-import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
-import nl.stokpop.lograter.analysis.TransactionCounterResult;
+import nl.stokpop.lograter.analysis.*;
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
@@ -67,7 +61,7 @@ abstract class LogCounterTextReport extends LogTextReport {
             return String.format("No counters found to report in counter store pair [%s]%n", counterStorePair);
         }
 
-        StringBuilder report = new StringBuilder();
+        StringBuilder report = new StringBuilder(256);
 
         report.append(reportHeaderLine(itemName, config, false));
 
@@ -115,7 +109,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 
 	private String reportHeaderLine(String name, BasicCounterLogConfig config, boolean overallHeader) {
 		
-		StringBuilder report = new StringBuilder();
+		StringBuilder report = new StringBuilder(10 * 1024);
 				
 		report.append(name);
 
@@ -195,7 +189,7 @@ abstract class LogCounterTextReport extends LogTextReport {
     }
 
     private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns, Map<String, LineMap> counterKeyToLineMapMap) {
-		StringBuilder report = new StringBuilder();
+		StringBuilder report = new StringBuilder(256);
 
 		String counterKey = analyser.getCounterKey();
 		String counterKeyExcelProof = StringUtils.excelProofText(counterKey);
@@ -204,7 +198,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 
         if (config.isIncludeMapperRegexpColumn()) {
             LineMap lineMap = counterKeyToLineMapMap.get(counterKey);
-            report.append(SEP_CHAR).append(lineMap == null ? "" : lineMap.getRegExpPattern());
+            report.append(SEP_CHAR).append(lineMap == null ? "" : replaceSepChars(lineMap.getRegExpPattern()));
         }
 
 		long hitsCount = analyser.totalHits();
@@ -297,6 +291,10 @@ abstract class LogCounterTextReport extends LogTextReport {
 		
 		return report.toString();
 		
+	}
+
+	private String replaceSepChars(String textWithPossibleSepChars) {
+		return SEP_CHAR_PATTERN.matcher(textWithPossibleSepChars).replaceAll("§");
 	}
 
 }

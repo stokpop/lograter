@@ -29,6 +29,7 @@ import nl.stokpop.lograter.parser.line.LogbackParser;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.linemapper.LineMap;
 import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -108,7 +110,13 @@ public class LatencyLogReader {
         log.info("Read {} Latency log entries for the following time period: {}",
             data.getTotalRequestCounter().getHits(), data.getTotalRequestCounter().getTimePeriod());
 
-        return new LatencyLogDataBundle(config, processor.getData(), requestCounterStoresPairs, clickpathCollector);
+        Map<String, LineMap> allCounterKeysToLineMapMap = new HashMap<>();
+        for (LatencyMapperProcessor urlMapperProcessor : urlMapperProcessors) {
+            Map<String, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getCounterKeyToLineMapMap();
+            allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
+        }
+
+        return new LatencyLogDataBundle(config, processor.getData(), requestCounterStoresPairs, clickpathCollector, allCounterKeysToLineMapMap);
     }
 
     public static LogbackParser<LatencyLogEntry> createLatencyLogEntryLogbackParser(String logPattern, LatencyLogConfig config) {

@@ -54,7 +54,7 @@ public class CommandLatencyLog extends AbstractCommandMapperAndClickPath {
             ", failureField='" + failureField + '\'' +
             ", failureFieldType=" + failureFieldType +
             ", failureFieldRegexp='" + failureFieldRegexp + '\'' +
-            '}';
+            "} " + super.toString();
     }
 
     @Override

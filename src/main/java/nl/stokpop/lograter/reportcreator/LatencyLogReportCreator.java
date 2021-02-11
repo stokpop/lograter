@@ -70,6 +70,7 @@ public class LatencyLogReportCreator implements ReportCreatorWithCommand<Command
         config.setFileFeederFilterIncludes(cmdLatency.fileFeederFilterIncludes);
         // if this is not set, then NO_MAPPERS are not present in report, but they are counted in total!!
         config.setIgnoreMultiAndNoMatches(false);
+        config.setIncludeMapperRegexpColumn(cmdLatency.includeMapperRegexpColumn);
         config.setFailureField(cmdLatency.failureField);
         config.setFailureFieldType(cmdLatency.failureFieldType);
         config.setFailureFieldRegexp(cmdLatency.failureFieldRegexp);

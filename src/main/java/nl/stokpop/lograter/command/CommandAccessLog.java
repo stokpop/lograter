@@ -32,34 +32,8 @@ public class CommandAccessLog extends AbstractCommandAccessLog {
     @Override
     public String toString() {
         return "CommandAccessLog{" +
-                "removeParametersFromUrl=" + removeParametersFromUrl +
-                ", ignoreMultiAndNoMatches=" + ignoreMultiAndNoMatches +
-                ", doCountMultipleMapperHits=" + doCountMultipleMapperHits +
-                ", countNoMappersAsOne=" + countNoMappersAsOne +
-                ", doGroupByHttpStatus=" + doGroupByHttpStatus +
-                ", showUserAgents=" + showUserAgents +
-                ", showBasicUrls=" + showBasicUrls +
-                ", excludeMappers=" + excludeMappers +
-                ", includeMapperRegexpColumn=" + includeMapperRegexpColumn +
-                ", aggregateDurationInSeconds=" + aggregateDurationInSeconds +
-                ", graphWithTrueTPS=" + graphWithTrueTPS +
-                ", logPattern='" + logPattern + '\'' +
-                ", logType='" + logType + '\'' +
-                ", graphsResponseTimes=" + graphsResponseTimes +
-                ", graphsTps=" + graphsTps +
-                ", graphsHisto=" + graphsHisto +
-                ", graphsPercentile=" + graphsPercentile +
-                ", graphsHtml=" + graphsHtml +
-                ", determineClickpaths=" + determineClickpaths +
-                ", clickpathEndOfSessionSnippet=" + clickpathEndOfSessionSnippet +
-                ", clickpathReportStepDurations=" + clickpathReportStepDurations +
-                ", determineSessionDuration=" + determineSessionDuration +
-                ", mapperFile='" + mapperFile + '\'' +
-                ", maxNoMapperCount=" + maxUniqueCounters +
-                ", clickPathShortCodeLength=" + clickPathShortCodeLength +
-                ", reportStubDelays=" + reportStubDelays +
-                ", graphsHistoSimulator=" + graphsHistoSimulator +
-                '}';
+            "logType=" + logType +
+            "} " + super.toString();
     }
 
     @Override

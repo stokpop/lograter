@@ -41,7 +41,7 @@ dependencies {
 }
 
 group = 'nl.stokpop'
-version = '1.4.1'
+version = '1.4.2'
 description = 'LogRater'
 
 sourceCompatibility = 1.8

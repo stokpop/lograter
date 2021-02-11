@@ -55,29 +55,25 @@ public abstract class AbstractCommandAccessLog extends AbstractCommandMapperAndC
 	@Parameter(names = { "-nompr", "--nomappers" },
             description = "Exclude mappers in access logs.")
 	public boolean excludeMappers = false;
-	@Parameter(names = { "-regexp", "--include-mapper-regexp-column" },
-            description = "Include the mapper regexp column in the iis and access log report.")
-	public boolean includeMapperRegexpColumn = false;
 
 	public AbstractCommandAccessLog() {
 		super();
 	}
 
-    @Override
-    public String toString() {
-        return "AbstractCommandAccessLog{" +
-                "removeParametersFromUrl=" + removeParametersFromUrl +
-                ", ignoreMultiAndNoMatches=" + ignoreMultiAndNoMatches +
-                ", doCountMultipleMapperHits=" + doCountMultipleMapperHits +
-                ", countNoMappersAsOne=" + countNoMappersAsOne +
-                ", doGroupByHttpStatus=" + doGroupByHttpStatus +
-                ", doGroupByFields='" + doGroupByFields + '\'' +
-                ", doGroupByHttpMethod=" + doGroupByHttpMethod +
-                ", showReferers=" + showReferers +
-                ", showUserAgents=" + showUserAgents +
-                ", showBasicUrls=" + showBasicUrls +
-                ", excludeMappers=" + excludeMappers +
-                ", includeMapperRegexpColumn=" + includeMapperRegexpColumn +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "AbstractCommandAccessLog{" +
+			"removeParametersFromUrl=" + removeParametersFromUrl +
+			", ignoreMultiAndNoMatches=" + ignoreMultiAndNoMatches +
+			", doCountMultipleMapperHits=" + doCountMultipleMapperHits +
+			", countNoMappersAsOne=" + countNoMappersAsOne +
+			", doGroupByHttpStatus=" + doGroupByHttpStatus +
+			", doGroupByHttpMethod=" + doGroupByHttpMethod +
+			", doGroupByFields=" + doGroupByFields +
+			", showReferers=" + showReferers +
+			", showUserAgents=" + showUserAgents +
+			", showBasicUrls=" + showBasicUrls +
+			", excludeMappers=" + excludeMappers +
+			"} " + super.toString();
+	}
 }

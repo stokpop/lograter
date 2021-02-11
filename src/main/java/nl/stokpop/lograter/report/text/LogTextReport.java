@@ -25,6 +25,7 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public abstract class LogTextReport implements LogReport {
 	
@@ -34,6 +35,7 @@ public abstract class LogTextReport implements LogReport {
 	private static final Locale DEFAULT_LOCALE = Locale.US;
 	
 	protected static final char SEP_CHAR = ',';
+	protected static final Pattern SEP_CHAR_PATTERN = Pattern.compile(String.valueOf(SEP_CHAR));
 
 	protected final DecimalFormat nfTwoDecimals;
 	protected final DecimalFormat nfNoDecimals;
