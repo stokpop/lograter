@@ -50,8 +50,8 @@ public class FileFeeder {
 
     /**
      * Feed files line by line to a Feeder.
-     * @param filterPatternIncludes regular expression to whitelist lines (will be included)
-     * @param filterPatternExcludes regular expression to blacklist lines (will be skipped)
+     * @param filterPatternIncludes regular expression to allowed lines (will be included)
+     * @param filterPatternExcludes regular expression to denied lines (will be skipped)
      * @param skipLines number of lines to skip for each file (e.g. skip a header line)
      */
     public FileFeeder(final Pattern filterPatternIncludes, final Pattern filterPatternExcludes, final int skipLines) {

@@ -15,18 +15,24 @@
  */
 package nl.stokpop.lograter.util;
 
+import nl.stokpop.lograter.LogRaterException;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Read "three-letter-words.txt" from classpath. If it fails the list of three letter words is empty.
+ * Read "three-letter-words.txt" from classpath.
  */
 public class ThreeLetterWords {
 
@@ -34,19 +40,41 @@ public class ThreeLetterWords {
 
     static {
         List<String> words;
+        String filename = "/three-letter-words.txt";
         try {
-            URL resource = ThreeLetterWords.class.getClassLoader().getResource("three-letter-words.txt");
+            URL resource = ThreeLetterWords.class.getResource(filename);
             if (resource ==  null) {
-                words = Collections.emptyList();
+                throw new LogRaterException("Not found on classpath: " + filename);
             }
             else {
-                Path filePath = Paths.get(resource.toURI());
-                words = Files.lines(filePath).map(String::toLowerCase).collect(Collectors.toList());
+                words = loadResource(resource);
             }
         } catch (IOException | URISyntaxException e) {
-            words = Collections.emptyList();
+            throw new LogRaterException("Cannot read: " + filename, e);
         }
         threeLetterWords = Collections.unmodifiableList(words);
+    }
+
+    @NotNull
+    private static List<String> loadResource(URL resource) throws URISyntaxException, IOException {
+        List<String> words;
+        URI uri = resource.toURI();
+        // https://stackoverflow.com/questions/22605666/java-access-files-in-jar-causes-java-nio-file-filesystemnotfoundexception#answer-48298758
+        if("jar".equals(uri.getScheme())){
+            for (FileSystemProvider provider: FileSystemProvider.installedProviders()) {
+                if (provider.getScheme().equalsIgnoreCase("jar")) {
+                    try {
+                        provider.getFileSystem(uri);
+                    } catch (FileSystemNotFoundException e) {
+                        // in this case we need to initialize it first:
+                        provider.newFileSystem(uri, Collections.emptyMap());
+                    }
+                }
+            }
+        }
+        Path filePath = Paths.get(uri);
+        words = Files.lines(filePath).map(String::toLowerCase).collect(Collectors.toList());
+        return words;
     }
 
     public static boolean isInitializedCorrectly() {

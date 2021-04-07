@@ -1,0 +1,8 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect
+1616977368110,911,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,1126,734,1,1,0,145,0
+1616977368245,911,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,1126,734,1,1,907,0,317
+1616977369293,139,cog,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,1140,770,1,1,0,1,0
+1616977369294,139,GET Jaw Kat,200,OK,Stability-Test 1-200,text,true,,1140,770,1,1,139,0,0
+1616992494498,12017,ane,204,,Stability-Test 1-154,,true,,712,745,154,154,0,0,0
+1616992495803,21680,ane,204,,Stability-Test 1-152,,true,,712,745,151,151,0,0,0
+1616992519506,2511,ane,204,,Stability-Test 1-149,,true,,712,745,150,150,0,0,0

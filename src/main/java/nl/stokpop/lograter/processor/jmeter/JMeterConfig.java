@@ -29,6 +29,7 @@ public class JMeterConfig extends BasicCounterLogConfig {
     private boolean countNoMappersAsOne = false;
     private List<String> groupByFields = Collections.emptyList();
     private String logPattern = null;
+    private JMeterLogLineType logLineTypeToReport = JMeterLogLineType.SAMPLE;
 
     /**
      * Sets defaults for PerformanceCenter analysis to:
@@ -105,15 +106,21 @@ public class JMeterConfig extends BasicCounterLogConfig {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("JMeterLogConfig{");
-        sb.append("ignoreMultiAndNoMatches=").append(ignoreMultiAndNoMatches);
-        sb.append(", doCountMultipleMapperHits=").append(doCountMultipleMapperHits);
-        sb.append(", doFilterOnHttpStatus=").append(doFilterOnHttpStatus);
-        sb.append(", mappers=").append(mappers);
-        sb.append(", countNoMappersAsOne=").append(countNoMappersAsOne);
-        sb.append(", groupByFields=").append(groupByFields);
-        sb.append(", logPattern=").append(logPattern);
-        sb.append('}');
-        return sb.toString();
+        return "JMeterLogConfig{" + "ignoreMultiAndNoMatches=" + ignoreMultiAndNoMatches +
+            ", doCountMultipleMapperHits=" + doCountMultipleMapperHits +
+            ", doFilterOnHttpStatus=" + doFilterOnHttpStatus +
+            ", mappers=" + mappers +
+            ", countNoMappersAsOne=" + countNoMappersAsOne +
+            ", groupByFields=" + groupByFields +
+            ", logPattern=" + logPattern +
+            '}';
+    }
+
+    public JMeterLogLineType getLogLineTypeToReport() {
+        return logLineTypeToReport;
+    }
+
+    public void setLogLineTypeToReport(JMeterLogLineType logLineTypeToReport) {
+        this.logLineTypeToReport = logLineTypeToReport;
     }
 }

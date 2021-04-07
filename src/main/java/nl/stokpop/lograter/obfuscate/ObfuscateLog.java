@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.anonymize;
+package nl.stokpop.lograter.obfuscate;
 
 import nl.stokpop.lograter.feeder.FileFeeder;
 import nl.stokpop.lograter.logentry.LogbackLogEntry;
@@ -35,21 +35,21 @@ import java.util.stream.Stream;
 
 import static nl.stokpop.lograter.util.InLineReplacer.*;
 
-public class AnonymizeLog {
+public class ObfuscateLog {
 
-    public enum LogType { accesslog, mapperfile, cachelog, logback, iis }
+    public enum LogType { accesslog, mapperfile, cachelog, logback, iis, any }
 
     /**
-     * Provide a log file to anonymize and possibly a list of blacklisted words.
-     * Blacklisted words will be replaced by a three letter hash.
+     * Provide a log file to obfuscate and possibly a list of to-be-obfuscated words.
+     * Obfuscated words are replaced by a three letter hash/word.
      */
     public static void main(String[] args) {
 
         if (args.length < 2 || args.length > 3) {
-            System.out.println("Usage: java -jar AnonymizeLog <logtype> <logfile> [list of # separated words]\n" +
-                "logtypes: accesslog, mapperfile, cachelog, logback, iis\n" +
+            System.out.println("Usage: java -jar ObfuscateLog <logtype> <logfile> [list of # separated words]\n" +
+                "logtypes: accesslog, mapperfile, cachelog, logback, iis, any\n" +
                 "logfile: path to logfile\n" +
-                "words (optional): list of # separated blacklisted words to be replaced");
+                "words (optional): list of # separated words to be obfuscated");
             System.exit(1);
         }
 
@@ -61,30 +61,34 @@ public class AnonymizeLog {
         PrintStream printStream = System.out;
 
         if (LogType.accesslog.name().equalsIgnoreCase(type)) {
-            List<String> blacklist = args.length > 2 ? Arrays.asList(args[2].split("#")) : Collections.emptyList();
-            new AnonymizeLog().anonymizeAccessLogFile(file, blacklist, printStream);
+            List<String> obfuscateWords = args.length > 2 ? Arrays.asList(args[2].split("#")) : Collections.emptyList();
+            new ObfuscateLog().obfuscateAccessLogFile(file, obfuscateWords, printStream);
         }
         else if (LogType.mapperfile.name().equalsIgnoreCase(type)) {
-            List<String> blacklist = args.length > 2 ? Arrays.asList(args[2].split("#")) : Collections.emptyList();
-            new AnonymizeLog().anonymizeMapperFile(file, blacklist, printStream);
+            List<String> obfuscateWords = args.length > 2 ? Arrays.asList(args[2].split("#")) : Collections.emptyList();
+            new ObfuscateLog().obfuscateMapperFile(file, obfuscateWords, printStream);
         }
         else if (LogType.cachelog.name().equalsIgnoreCase(type)) {
-            new AnonymizeLog().anonymizeCacheLog(file, printStream);
+            new ObfuscateLog().obfuscateCacheLog(file, printStream);
         }
         else if (LogType.logback.name().equalsIgnoreCase(type)) {
             String logpattern = args.length > 2 ? args[2] : "";
-            new AnonymizeLog().anonymizeLogback(file, logpattern, printStream);
+            new ObfuscateLog().obfuscateLogback(file, logpattern, printStream);
         }
         else if (LogType.iis.name().equalsIgnoreCase(type)) {
             String logpattern = args.length > 2 ? args[2] : "";
-            new AnonymizeLog().anonymizeIisLog(file, logpattern, printStream);
+            new ObfuscateLog().obfuscateIisLog(file, logpattern, printStream);
+        }
+        else if (LogType.any.name().equalsIgnoreCase(type)) {
+            List<String> obfuscateWords = args.length > 2 ? Arrays.asList(args[2].split("#")) : Collections.emptyList();
+            new ObfuscateLog().obfuscateAnyLog(file, obfuscateWords, printStream);
         }
     }
 
-    private void anonymizeIisLog(File file, String logpattern, PrintStream printStream) {
+    private void obfuscateIisLog(File file, String logpattern, PrintStream printStream) {
         IisLogFormatParser iisLogFormatParser = IisLogFormatParser.createIisLogFormatParser(logpattern);
 
-        IisLogAnonymizeProcessor processor = new IisLogAnonymizeProcessor(printStream);
+        IisLogObfuscateProcessor processor = new IisLogObfuscateProcessor(printStream);
         
         IisLogParser iisLogParser = new IisLogParser(iisLogFormatParser);
         iisLogParser.addProcessor(processor);
@@ -93,10 +97,10 @@ public class AnonymizeLog {
         feeder.feedFilesAsString(Collections.singletonList(file.getAbsolutePath()), iisLogParser);
     }
 
-    private void anonymizeLogback(File file, String logbackPattern, PrintStream printStream) {
+    private void obfuscateLogback(File file, String logbackPattern, PrintStream printStream) {
         LogbackParser<LogbackLogEntry> logbackParser = LogbackParser.createLogbackParser(logbackPattern);
 
-        LogbackLogAnonymizeProcessor processor = new LogbackLogAnonymizeProcessor(printStream);
+        LogbackLogObfuscateProcessor processor = new LogbackLogObfuscateProcessor(printStream);
 
         ApplicationLogParser appLogParser = new ApplicationLogParser(logbackParser);
         appLogParser.addProcessor(processor);
@@ -105,7 +109,7 @@ public class AnonymizeLog {
         feeder.feedFilesAsString(Collections.singletonList(file.getAbsolutePath()), appLogParser);
     }
 
-    private void anonymizeCacheLog(File file, PrintStream printStream) {
+    private void obfuscateCacheLog(File file, PrintStream printStream) {
         List<String> cacheWhiteList = Arrays.asList("MISS", "HIT", "READ", "STORE", "INVALIDATE");
         try (Stream<String> stream = Files.lines(Paths.get(file.toURI()))) {
             stream
@@ -117,11 +121,11 @@ public class AnonymizeLog {
         }
     }
 
-    public void anonymizeMapperFile(File file, List<String> blacklist, PrintStream printStream) {
+    public void obfuscateMapperFile(File file, List<String> obfuscateWords, PrintStream printStream) {
         try (Stream<String> stream = Files.lines(Paths.get(file.toURI()))) {
             stream
                     .map(line -> line.contains("###") ? replaceWordsMapperLine(line, THREE_LETTER_HASH) : line )
-                    .map(line -> replaceBlacklistedWords(line, blacklist, THREE_LETTER_HASH))
+                    .map(line -> replaceObfuscateWords(line, obfuscateWords, THREE_LETTER_HASH))
                     .forEach(printStream::println);
 
         } catch (IOException e) {
@@ -129,18 +133,32 @@ public class AnonymizeLog {
         }
     }
 
-
-    public void anonymizeAccessLogFile(File file, List<String> blacklist, PrintStream printStream) {
+    public void obfuscateAccessLogFile(File file, List<String> obfuscateWords, PrintStream printStream) {
         try (Stream<String> stream = Files.lines(Paths.get(file.toURI()))) {
             stream
                     .map(line -> replaceIPv4(line,"1.2.3.$1"))
-                    .map(line -> replaceDomains(line, "stokpop.nl", THREE_LETTER_HASH))
+                    .map(line -> replaceDomains(line, "example.org", THREE_LETTER_HASH))
                     .map(s -> InLineReplacer.replaceUrlInRequestTriplet(s, THREE_LETTER_HASH))
                     .map(s -> InLineReplacer.replaceDomainWithUrl(s, THREE_LETTER_HASH))
                     .map(s -> InLineReplacer.replaceEncryptedValue(s, THREE_LETTER_HASH))
-                    .map(line -> replaceBlacklistedWords(line, blacklist, THREE_LETTER_HASH))
+                    .map(line -> replaceObfuscateWords(line, obfuscateWords, THREE_LETTER_HASH))
                     .forEach(printStream::println);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void obfuscateAnyLog(File file, List<String> obfuscateWords, PrintStream printStream) {
+        try (Stream<String> stream = Files.lines(Paths.get(file.toURI()))) {
+            stream
+                    .map(line -> replaceIPv4(line,"1.2.3.$1"))
+                    .map(line -> replaceDomains(line, "example.org", THREE_LETTER_HASH))
+                    .map(s -> InLineReplacer.replaceUrlInRequestTriplet(s, THREE_LETTER_HASH))
+                    .map(s -> InLineReplacer.replaceDomainWithUrl(s, THREE_LETTER_HASH))
+                    .map(s -> InLineReplacer.replaceEncryptedValue(s, THREE_LETTER_HASH))
+                    .map(line -> replaceObfuscateWords(line, obfuscateWords, THREE_LETTER_HASH))
+                    .forEach(printStream::println);
         } catch (IOException e) {
             e.printStackTrace();
         }

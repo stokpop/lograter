@@ -116,6 +116,7 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
         config.setCounterStorageDir(cmdMain.storageDir);
         config.setFileFeederFilterIncludes(cmdJMeter.fileFeederFilterIncludes);
         config.setFileFeederFilterExcludes(cmdJMeter.fileFeederFilterExcludes);
+        config.setLogLineTypeToReport(cmdJMeter.jMeterLogLineTypeToReport);
 
         return config;
     }

@@ -18,6 +18,7 @@ package nl.stokpop.lograter.parser;
 import nl.stokpop.lograter.parser.line.JMeterLogFormatParser;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.processor.jmeter.JMeterLogEntry;
+import nl.stokpop.lograter.processor.jmeter.JMeterLogLineType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,11 @@ public class JMeterParser implements LogFileParser<JMeterLogEntry> {
 
     private final JMeterLogFormatParser parser;
 
-    public JMeterParser(JMeterLogFormatParser formatParser) {
-        parser = formatParser;
+    private final JMeterLogLineType logLineTypeToReport;
+
+    public JMeterParser(JMeterLogFormatParser formatParser, JMeterLogLineType logLineTypeToReport) {
+        this.parser = formatParser;
+        this.logLineTypeToReport = logLineTypeToReport;
     }
 
     @Override
@@ -42,14 +46,12 @@ public class JMeterParser implements LogFileParser<JMeterLogEntry> {
 
         JMeterLogEntry entry = parser.parseLogLine(logLine);
 
-        // skip "transaction/sample" names that are not http hits
-        String responseMessage = entry.getField("responseMessage");
-        if (responseMessage != null && responseMessage.contains("Number of samples in transaction")) {
-            return;
+        // only report requested log line types
+        if (logLineTypeToReport == JMeterLogLineType.ALL || entry.getLogLineType() == logLineTypeToReport) {
+            for (Processor<JMeterLogEntry> processor : processors) {
+                processor.processEntry(entry);
+            }
         }
 
-        for (Processor<JMeterLogEntry> processor : processors) {
-            processor.processEntry(entry);
-        }
     }
 }

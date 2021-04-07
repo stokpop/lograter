@@ -1,0 +1,30 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1616977368110,911,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,1126,734,1,1,null,0,145,0
+1616977368245,911,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,1126,734,1,1,https://sim.example.org/had/kit/fib,907,0,317
+1616977369293,139,cog,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,1140,770,1,1,null,0,1,0
+1616977369294,139,GET Jaw Kat,200,OK,Stability-Test 1-200,text,true,,1140,770,1,1,https://sim.example.org/had/kit/gel/veg,139,0,0
+1616977369508,103,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,535,733,1,1,null,0,886,0
+1616977370393,103,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,535,733,1,1,https://sim.example.org/had/kit/fib,103,0,27
+1616977371088,122,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,1126,733,2,2,null,0,3,0
+1616977371090,122,GET Jaw Yaw,200,OK,Stability-Test 1-199,text,true,,1126,733,2,2,https://sim.example.org/had/kit/fib,122,0,45
+1616977370527,69,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,535,733,2,2,null,0,1279,0
+1616977371805,69,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,535,733,2,2,https://sim.example.org/had/kit/fib,69,0,0
+1616977371226,49,cog,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,1140,770,2,2,null,0,1297,0
+1616977372523,49,GET Jaw Kat,200,OK,Stability-Test 1-199,text,true,,1140,770,2,2,https://sim.example.org/had/kit/gel/cot,49,0,0
+1616977371880,102,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,535,733,2,2,null,0,1299,0
+1616977373179,102,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,535,733,2,2,https://sim.example.org/had/kit/fib,102,0,27
+1616977372574,87,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,535,733,2,2,null,0,1211,0
+1616977373784,87,GET Jaw Yaw,200,OK,Stability-Test 1-199,text,true,,535,733,2,2,https://sim.example.org/had/kit/fib,87,0,27
+1616977374077,93,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-198,,true,,535,733,3,3,null,0,2,0
+1616977374078,93,GET Jaw Yaw,200,OK,Stability-Test 1-198,text,true,,535,733,3,3,https://sim.example.org/had/kit/fib,93,0,26
+1616977373878,70,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,1126,733,3,3,null,0,1208,0
+1616977375086,70,GET Jaw Yaw,200,OK,Stability-Test 1-199,text,true,,1126,733,3,3,https://sim.example.org/had/kit/fib,70,0,0
+1616977374184,73,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-198,,true,,1126,734,3,3,null,0,1676,0
+1616977375860,73,GET Jaw Yaw,200,OK,Stability-Test 1-198,text,true,,1126,734,3,3,https://sim.example.org/had/kit/fib,73,0,0
+1616977375163,82,cog,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,1140,771,3,3,null,0,1563,0
+1616977376726,82,GET Jaw Kat,200,OK,Stability-Test 1-199,text,true,,1140,771,3,3,https://sim.example.org/had/kit/gel/son,82,0,25
+1616977373285,83,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,535,734,3,3,null,0,3442,0
+1616977376726,83,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,535,734,3,3,https://sim.example.org/had/kit/fib,83,0,24
+1616977377069,97,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-197,,true,,535,734,4,4,null,0,1,0
+1616977377070,97,GET Jaw Yaw,200,OK,Stability-Test 1-197,text,true,,535,734,4,4,https://sim.example.org/had/kit/fib,97,0,44
+1616977376809,66,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-199,,true,,535,734,4,4,null,0,977,0

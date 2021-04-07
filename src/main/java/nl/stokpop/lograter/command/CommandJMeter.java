@@ -15,12 +15,18 @@
  */
 package nl.stokpop.lograter.command;
 
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import nl.stokpop.lograter.processor.jmeter.JMeterLogLineType;
 
 @Parameters(separators = "=", commandDescription = "Parse jtl file from a jMeter run.")
 public class CommandJMeter extends AbstractCommandAccessLog {
 	
 	private static final String COMMANDNAME = "jmeter";
+
+	@Parameter(names = {"--report-logline-type" }, description = "The logline type to use in the report. Choose: sample, transaction, all. Default: sample (e.g. http requests)")
+	public JMeterLogLineType jMeterLogLineTypeToReport = JMeterLogLineType.SAMPLE;
+
 
 	@Override
 	public String toString() {

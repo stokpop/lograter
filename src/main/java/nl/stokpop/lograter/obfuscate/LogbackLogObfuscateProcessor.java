@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.stokpop.lograter.anonymize;
+package nl.stokpop.lograter.obfuscate;
 
 import nl.stokpop.lograter.logentry.LogbackLogEntry;
 import nl.stokpop.lograter.processor.Processor;
@@ -26,13 +26,13 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class LogbackLogAnonymizeProcessor implements Processor<LogbackLogEntry> {
+public class LogbackLogObfuscateProcessor implements Processor<LogbackLogEntry> {
 
-	private static final Logger log = LoggerFactory.getLogger(LogbackLogAnonymizeProcessor.class);
+	private static final Logger log = LoggerFactory.getLogger(LogbackLogObfuscateProcessor.class);
 
 	private final PrintStream printStream;
 
-	public LogbackLogAnonymizeProcessor(PrintStream printStream) {
+	public LogbackLogObfuscateProcessor(PrintStream printStream) {
 	    this.printStream = printStream;
     }
 

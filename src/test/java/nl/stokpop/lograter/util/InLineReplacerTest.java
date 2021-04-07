@@ -72,11 +72,11 @@ public class InLineReplacerTest {
     }
 
     @Test
-    public void replaceBlacklistedWords() {
-        List<String> blacklist = Arrays.asList("some", "text");
+    public void replaceObfuscateWords() {
+        List<String> obfuscateList = Arrays.asList("some", "text");
 
         assertEquals("12/12/12 !https://a.b.c/nil/ooh.html?nay=cee&dup! dib law dib other law and textcase",
-                InLineReplacer.replaceBlacklistedWords("12/12/12 !https://a.b.c/nil/ooh.html?nay=cee&dup! some Text some other TEXT and textcase", blacklist, InLineReplacer.THREE_LETTER_HASH));
+                InLineReplacer.replaceObfuscateWords("12/12/12 !https://a.b.c/nil/ooh.html?nay=cee&dup! some Text some other TEXT and textcase", obfuscateList, InLineReplacer.THREE_LETTER_HASH));
     }
 
     @Test

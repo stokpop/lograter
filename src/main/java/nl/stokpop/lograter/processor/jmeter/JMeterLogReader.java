@@ -42,7 +42,7 @@ public class JMeterLogReader {
     private final static Logger log = LoggerFactory.getLogger(JMeterLogReader.class);
 
     public JMeterDataBundle readAndProcessJMeterLogs(JMeterConfig config, List<String> files) {
-        JMeterParser jMeterParser = createJMeterParser(files, config.getLogPattern());
+        JMeterParser jMeterParser = createJMeterParser(files, config.getLogPattern(), config.getLogLineTypeToReport());
 
         RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(config.getCounterStorage(), new File(config.getCounterStorageDir()));
 
@@ -74,7 +74,7 @@ public class JMeterLogReader {
         return new JMeterDataBundle(config, requestCounterStorePairs, totalStorePair);
     }
 
-    private JMeterParser createJMeterParser(List<String> files, String logPattern) {
+    private JMeterParser createJMeterParser(List<String> files, String logPattern, JMeterLogLineType jmeterLogLineTypesToReport) {
         String relativeFilePath = files.get(0);
         String headerLine;
         try {
@@ -93,7 +93,7 @@ public class JMeterLogReader {
         Map<String, LogEntryMapper<JMeterLogEntry>> mappers = JMeterLogFormatParser.initializeMappers();
         JMeterLogFormatParser lineParser = new JMeterLogFormatParser(elements, mappers);
 
-        return new JMeterParser(lineParser);
+        return new JMeterParser(lineParser, jmeterLogLineTypesToReport);
     }
 
     private RequestCounterStorePair addTotalRequestCounterStoreToLogFileParser(RequestCounterStoreFactory csFactory,

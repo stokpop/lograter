@@ -245,11 +245,11 @@ public class InLineReplacer {
     }
 
     /**
-     * @return replaced black listed words with three letter hash word (replaces complete words only).
+     * @return replaced obfuscate words with three letter hash word (replaces complete words only).
      */
-    public static String replaceBlacklistedWords(String text, List<String> blacklist, Function<String, String> replacer) {
+    public static String replaceObfuscateWords(String text, List<String> obfuscateWords, Function<String, String> replacer) {
         String newLine = text;
-        for (String word : blacklist) {
+        for (String word : obfuscateWords) {
             // use word boundaries \\b to match complete words only
             newLine = newLine.replaceAll("(?i)\\b" + word + "\\b", replacer.apply(word));
         }

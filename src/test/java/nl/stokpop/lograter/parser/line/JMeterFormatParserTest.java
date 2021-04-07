@@ -21,8 +21,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class JMeterFormatParserTest {
 
@@ -44,9 +43,71 @@ public class JMeterFormatParserTest {
         assertEquals(525263894417L, entry.getTimestamp());
         assertEquals("525263894417", entry.getField("timeStamp"));
         assertEquals(200, entry.getCode());
+        // note that label is mapped to getUrl for jmeter log lines!
+        // in this older example, the URL field does not exist, unlike the more recent example below
         assertEquals("/delay", entry.getUrl());
-        assertEquals("text", entry.getDataType());
+        assertEquals("text", entry.getField("dataType"));
         assertTrue(entry.isSuccess());
+
+        assertEquals(logline, entry.getLogline());
+    }
+
+    @Test
+    public void parseWithQuotesAndCommas() {
+
+        String pattern = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect";
+
+        List<LogbackElement> elements = JMeterLogFormatParser.parse(pattern);
+        final int expectedElements = 34;
+        assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
+
+        Map<String, LogEntryMapper<JMeterLogEntry>> mappers = JMeterLogFormatParser.initializeMappers();
+        JMeterLogFormatParser parser = new JMeterLogFormatParser(elements, mappers);
+
+        String logline = "\"1616977368110\",911,\"01_getApp\",200,\"Number of samples in transaction : 1, number of failing samples : 0\",\"App-Test 1-200\",,true,,1126,734,1,1,null,0,145,\"5\"";
+        JMeterLogEntry entry = parser.parseLogLine(logline);
+
+        assertEquals(1616977368110L, entry.getTimestamp());
+        assertEquals("1616977368110", entry.getField("timeStamp"));
+        assertEquals(200, entry.getCode());
+        // note that label is mapped to getUrl for jmeter log lines!
+        assertEquals("01_getApp", entry.getUrl());
+        assertEquals("null", entry.getField("URL"));
+        assertEquals("1126", entry.getField("bytes"));
+        assertEquals("145", entry.getField("IdleTime"));
+        assertEquals("5", entry.getField("Connect"));
+        assertTrue(entry.isSuccess());
+
+        assertEquals(logline, entry.getLogline());
+    }
+
+    @Test
+    public void parseWithQuotesAndCommasAndEscapedQuotes() {
+
+        String pattern = "timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,IdleTime,Connect";
+
+        List<LogbackElement> elements = JMeterLogFormatParser.parse(pattern);
+        final int expectedElements = 32;
+        assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
+
+        Map<String, LogEntryMapper<JMeterLogEntry>> mappers = JMeterLogFormatParser.initializeMappers();
+        JMeterLogFormatParser parser = new JMeterLogFormatParser(elements, mappers);
+
+        // is this the exact failureMessage? Looks a bit weird...
+        String logline = "1531213301741,34,stubby3/show,404,Not Found,Customers with Ramp Up and Down 1-159,text,false,\"Test failed: text should contain 'success'\":\\\"\"8917/\",483,194,200,200,34,0,0";
+        JMeterLogEntry entry = parser.parseLogLine(logline);
+
+        assertEquals(1531213301741L, entry.getTimestamp());
+        assertEquals("1531213301741", entry.getField("timeStamp"));
+        assertEquals(404, entry.getCode());
+        // note that label is mapped to getUrl for jmeter log lines!
+        assertEquals("stubby3/show", entry.getUrl());
+        assertNull(entry.getField("URL"));
+        assertEquals("483", entry.getField("bytes"));
+        assertEquals("0", entry.getField("IdleTime"));
+        assertEquals("0", entry.getField("Connect"));
+        assertEquals("Test failed: text should contain 'success'\":\\\"\"8917/", entry.getField("failureMessage"));
+        assertFalse(entry.isSuccess());
 
         assertEquals(logline, entry.getLogline());
     }

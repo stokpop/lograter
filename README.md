@@ -274,10 +274,10 @@ For instance to parse apache access logs:
 To see all options:
 
     java -jar lograter-exec.jar -h
-        
+ 
 ### Dependency
 
-To use LogRater from Maven or Gradle. Find the LogRater jar in Maven Central.
+To use LogRater from Maven or Gradle: find the latest LogRater jar in [Maven Central search](https://search.maven.org/search?q=lograter).
 
 ### LogRater command line options
 
@@ -448,6 +448,46 @@ To use LogRater from Maven or Gradle. Find the LogRater jar in Maven Central.
         -single-mapper
           Use single mapper for all counters. Mapper file is ignored.
           Default: false
+
+## Obfuscate logs
+
+LogRater also has a feature to obfuscate log files.
+
+To see usage help:
+
+    java -cp build/libs/lograter-exec-1.4.2.jar nl.stokpop.lograter.obfuscate.ObfuscateLog -h
+    Usage: java -jar ObfuscateLog <logtype> <logfile> [list of # separated words]
+    logtypes: accesslog, mapperfile, cachelog, logback, iis, any
+    logfile: path to logfile
+    words (optional): list of # separated words to be obfuscated
+
+The "obfuscate" words only match complete words on word boundaries as defined by
+regexp meta character `\b`.
+So underscores are not word boundaries, but spaces, dots and comma's are.
+
+Most replacements are with three letter words. In most cases the same replacement is with the same
+three letter word, so the log file structure stays somewhat intact. E.g. same urls are still the
+same urls. You might have some overlap due to compression to three letter words.
+Example: `https://sim.example.org/had/kit/fib`
+
+Some other rules exist, such as replacement for domain names and IP addresses.
+For example, the last number of four in the IP address is kept the same, so you
+can for instance see that the call is probably a call from the same IP address.
+
+_Warning_: always check the output to see if the output is obfuscated enough for your purpose!
+
+It might not replace all expected cases. Add these to your obfuscate list and run again.
+
+Example for jMeter jtl log file with some obfuscate words, using the `any` log type:
+
+    java -cp lograter-exec.jar nl.stokpop.lograter.obfuscate.ObfuscateLog any result.jtl "01_My_Business_Steps#MyBusiness#Other_Steps#02_getOther_Cases"
+
+Output, notice the obfuscated labels and urls:
+
+    timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+    1616977368110,911,som,200,"Number of samples in transaction : 1, number of failing samples : 0",Stability-Test 1-200,,true,,1126,734,1,1,null,0,145,0
+    1616977368245,911,GET Jaw Yaw,200,OK,Stability-Test 1-200,text,true,,1126,734,1,1,https://men.example.org/tao/win/dan,907,0,317
+    ...
 
 ## build
 

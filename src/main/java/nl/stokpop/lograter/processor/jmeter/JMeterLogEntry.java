@@ -23,7 +23,7 @@ public class JMeterLogEntry extends LogEntry {
     private int code;
     private boolean success;
     private String url;
-    private String dataType;
+    private JMeterLogLineType logLineType;
 
     public String getUrl() {
         return url;
@@ -57,14 +57,6 @@ public class JMeterLogEntry extends LogEntry {
         this.durationInMillis = durationInMillis;
     }
 
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(final String dataType) {
-        this.dataType = dataType;
-    }
-
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
@@ -75,4 +67,11 @@ public class JMeterLogEntry extends LogEntry {
         throw new UnsupportedOperationException();
     }
 
+    public JMeterLogLineType getLogLineType() {
+        return logLineType;
+    }
+
+    public void setLogLineType(JMeterLogLineType logLineType) {
+        this.logLineType = logLineType;
+    }
 }
