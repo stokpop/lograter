@@ -39,7 +39,7 @@ dependencies {
 }
 
 group = 'nl.stokpop'
-version = '1.4.3-SNAPSHOT'
+version = file("VERSION").readLines().first()
 description = 'LogRater'
 
 sourceCompatibility = 1.8
