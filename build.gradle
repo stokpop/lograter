@@ -1,16 +1,15 @@
 import java.time.Year
 
 plugins {
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
     id 'java'
     id 'java-library'
-    id 'maven-publish'
+//    id 'maven-publish'
     id 'signing'
     id 'jacoco'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
-    id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'com.github.ben-manes.versions' version '0.38.0'
     id 'com.github.hierynomus.license' version '0.15.0'
-    id 'io.codearte.nexus-staging' version '0.30.0'
     id 'com.github.spotbugs' version '4.7.0'
 }
 
@@ -19,6 +18,13 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
+group = 'nl.stokpop'
+version = file("VERSION").readLines().first()
+description = 'LogRater'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
     compile 'org.apache.commons:commons-compress:1.20'
@@ -38,16 +44,18 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 }
 
-group = 'nl.stokpop'
-version = file("VERSION").readLines().first()
-description = 'LogRater'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = project.findProperty("ossrhStagingProfileId")
+        }
+    }
+}
 
 compileJava {
     options.encoding = "UTF-8"
 }
+
 javadoc {
     options.encoding = "UTF-8"
     options.addStringOption('Xdoclint:none', '-quiet')
@@ -78,13 +86,13 @@ task customFatJar(type: Jar) {
     with jar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from(components.java)
+//        }
+//    }
+//}
 
 license {
     header = rootProject.file("src/main/resources/META-INF/LICENSE.txt")
@@ -96,12 +104,6 @@ license {
     mapping {
         // the standard java style makes intellij complain about dangling javadoc
         java = "SLASHSTAR_STYLE"
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype()
     }
 }
 
@@ -197,13 +199,7 @@ if (project.hasProperty('release')) {
                 }
             }
         }
-
     }
-}
-
-nexusStaging {
-    username = project.hasProperty("ossrhUser") ?: "nobody"
-    password = project.hasProperty("ossrhPassword") ?: "nopassword"
 }
 
 processResources {
