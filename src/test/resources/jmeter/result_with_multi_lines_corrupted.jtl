@@ -12,7 +12,8 @@ timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success
  transaction : 1, number of failing samples : 0",
 Stability-Test 1-200,,true,,
 1140,770,1,1,null,0,1,0
-1616977369294,139,GET Jaw Kat,200,OK,Stability-Test 1-200,text,true,,1140,770,1,1,https://sim.example.org/had/kit/gel/veg,139,0,0
+1616977369294,139,GET Jaw Kat,200,OK,Stability-Test 1-200,text,true,,
+100000000000000,770,1,1,https://sim.example.org/had/kit/gel/veg,139,0,0
 1616977369394,30002,sample_name,Non HTTP response code: java.net.SocketException,Non HTTP response message: Socket closed,Test-ThreadName 1-44,text,false,"Test failed: code expected to equal /
 
 ****** received : [[[Non HTTP response code: java.net.SocketException]]]
