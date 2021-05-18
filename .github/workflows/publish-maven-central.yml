@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew --info -Prelease uploadArchives
       - name: Close and release repository with Gradle
         if: contains(env.TAG_NAME, 'SNAPSHOT') != true
-        run: ./gradlew --info -Prelease closeAndReleaseRepository
+        run: ./gradlew --info -Prelease closeAndReleaseSonatypeStagingRepository
       - name: Delete secrets
         run: |
           rm ./gradle.properties
