@@ -299,4 +299,59 @@ public class JmeterRunTest {
 		assertTrue("The files contain 4 lines of which 0 failure lines.", result.contains("total-counter-success-total,4,0"));
 	}
 
+	@Test
+	public void testJMeterJtlFileWithMultiLines() throws Exception {
+
+		String[] runArgs = {
+			"--report.dir",
+			temporaryFolder.getRoot().getPath(),
+			"jmeter",
+			"--report-logline-type",
+			"all",
+			"-gt",
+			"-gh",
+			"-gr",
+			"-gp",
+			"-group-by-http-status",
+			"src/test/resources/jmeter/result_with_multi_lines.jtl"
+		};
+
+		String result = LogRaterRunTestUtil.getOutputFromLogRater(runArgs);
+		System.out.printf("[%s]%n", result);
+
+		// Check if the multi-lines are parsed
+		assertTrue("Contains 2 sample_name", result.contains("sample_name,500,2"));
+		assertTrue("Contains 2 GET Jaw Kat", result.contains("GET Jaw Kat,200,2"));
+		assertTrue("Contains 2 GET Jaw Yaw", result.contains("GET Jaw Yaw,200,2"));
+
+		assertTrue("The files contain 6 lines of which 2 failure lines.", result.contains("total-counter-success-total,6,2"));
+	}
+
+	@Test
+	public void testJMeterJtlFileWithMultiLinesCorrupted() throws Exception {
+
+		String[] runArgs = {
+			"--report.dir",
+			temporaryFolder.getRoot().getPath(),
+			"jmeter",
+			"--report-logline-type",
+			"all",
+			"-gt",
+			"-gh",
+			"-gr",
+			"-gp",
+			"-group-by-http-status",
+			"src/test/resources/jmeter/result_with_multi_lines_corrupted.jtl"
+		};
+
+		String result = LogRaterRunTestUtil.getOutputFromLogRater(runArgs);
+		System.out.printf("[%s]%n", result);
+
+		// Check if the multi-lines are parsed, note: one of two is corrupt
+		assertTrue("Contains 1 sample_name", result.contains("sample_name,500,1"));
+		assertTrue("Contains 2 GET Jaw Kat", result.contains("GET Jaw Kat,200,2"));
+		assertTrue("Contains 2 GET Jaw Yaw", result.contains("GET Jaw Yaw,200,2"));
+
+		assertTrue("The files contain 5 lines of which 1 failure lines.", result.contains("total-counter-success-total,5,1"));
+	}
 }
