@@ -107,20 +107,20 @@ public class JMeterParser implements LogFileParser<JMeterLogEntry> {
         if (entry != null) {
             // if no error, clear the incompleteLines
             incompleteLines.clear();
-        }
-        else {
-            log.debug("adding incomplete line: " + logLine);
-            incompleteLines.add(logLine);
-        }
-
-        if (incompleteLines.isEmpty() && entry != null) {
-            // only report requested log line types
-            if (logLineTypeToReport == JMeterLogLineType.ALL || entry.getLogLineType() == logLineTypeToReport) {
+            if (isRequestedLogLineType(entry)) {
                 for (Processor<JMeterLogEntry> processor : processors) {
                     processor.processEntry(entry);
                 }
             }
         }
+        else {
+            log.debug("adding incomplete line: " + logLine);
+            incompleteLines.add(logLine);
+        }
+    }
+
+    private boolean isRequestedLogLineType(JMeterLogEntry entry) {
+        return logLineTypeToReport == JMeterLogLineType.ALL || entry.getLogLineType() == logLineTypeToReport;
     }
 
     /**
