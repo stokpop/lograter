@@ -27,10 +27,11 @@ jobs:
           echo "$SECRETS_PROPERTIES" | base64 -d >> ./gradle.properties
           echo "$SECRING_ASC_GPG" | base64 -d > ./secring.asc.gpg
       - name: Upload archives with Gradle
+        if: contains(env.TAG_NAME, 'SNAPSHOT') == true
         run: ./gradlew --info -Prelease uploadArchives
       - name: Close and release repository with Gradle
         if: contains(env.TAG_NAME, 'SNAPSHOT') != true
-        run: ./gradlew --info -Prelease closeAndReleaseSonatypeStagingRepository
+        run: ./gradlew --info -Prelease publishToSonatype closeAndReleaseSonatypeStagingRepository
       - name: Delete secrets
         run: |
           rm ./gradle.properties
