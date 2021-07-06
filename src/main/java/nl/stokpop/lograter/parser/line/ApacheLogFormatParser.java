@@ -71,7 +71,7 @@ public class ApacheLogFormatParser<T extends LogEntry> implements LogFormatParse
                     // use variable name for i, x, C, o, n, e directives (theoretically can result in name clash)
                     String fieldName = directive;
 					// is x in use? cannot find it on the internet?
-                    if ("i".equals(directive) || "x".equals(directive) || "C".equals(directive) || "o".equals(directive) || "n".equals(directive) || "e".equals(directive) ) {
+                    if ("i".equals(directive) || "x".equals(directive) || "X".equals(directive) || "C".equals(directive) || "o".equals(directive) || "n".equals(directive) || "e".equals(directive) ) {
                         fieldName = var.getVariable();
                     }
                     entry.addField(fieldName, value);
@@ -104,22 +104,31 @@ public class ApacheLogFormatParser<T extends LogEntry> implements LogFormatParse
 		boolean isDirective = false;
 		boolean isVariable = false;
         boolean wasDirective = false;
+        // the abc part of %X{abc} or %{abc}X
 		String variable = null;
+		// the X part of %X{abc} or %{abc}X
+		String directiveLetter = null;
 		StringBuilder currentText = new StringBuilder();
 		char[] lbp = pattern.toCharArray();
 		for (int i = 0; i < lbp.length; i++) {
 			char c = lbp[i];
-			if (wasDirective && Character.isLetter(c)) {
-				String directiveLetter = String.valueOf(c);
+			if (wasDirective && (Character.isLetter(c) || directiveLetter != null)) {
+				if (directiveLetter == null) {
+					directiveLetter = String.valueOf(c);
+				}
+				else {
+					currentText.append(c);
+				}
 				wasDirective = false;
 				// special case for %{msec_frac}t and %{usec_frac}t
 				if ("t".equals(directiveLetter) && ("msec_frac".equals(variable) || "usec_frac".equals(variable))) {
-						elements.add(LogbackDirective.from(variable));
+					elements.add(LogbackDirective.from(variable));
 				}
 				else {
 					elements.add(LogbackDirective.from(directiveLetter, variable));
 				}
 				variable = null;
+				directiveLetter = null;
 				continue;
 			}
 			if (!isDirective && c == '%') {
@@ -137,6 +146,14 @@ public class ApacheLogFormatParser<T extends LogEntry> implements LogFormatParse
 			}
 			if (isDirective && (c == '{' || c == '<' || c == '>')) {
 				if (c == '{') isVariable = true;
+				// save the character between % and {, e.g. X in %X{test}
+				if (currentText.length() == 1) {
+					directiveLetter = currentText.toString();
+					currentText.setLength(0);
+				}
+				else if (currentText.length() > 1) {
+					throw new LogRaterException("Unexpected directive, should be just one letter: " + currentText);
+				}
                 // skip this character in variable
 				continue;
 			}

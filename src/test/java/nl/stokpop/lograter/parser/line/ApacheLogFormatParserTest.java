@@ -491,4 +491,48 @@ public class ApacheLogFormatParserTest {
         assertEquals("2020-01-29T16:45:44.123", epochMillisToAmsterdamDateTime(entry.getTimestamp()));
     }
 
+    @Test
+    public void testDirectivesBeforeVariable() {
+        String pattern = "%X{one} x_f:\"%X{x_f}\"";
+
+        List<LogbackElement> elements = ApacheLogFormatParser.parse(pattern);
+        final int expectedElements = 5;
+        System.out.println(elements);
+        assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
+
+        Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
+
+        String logline = "bob x_f:\"1.2.3.4\"";
+
+        AccessLogEntry entry = parser.parseLogLine(logline);
+
+        assertEquals("bob", entry.getField("one"));
+        assertEquals("1.2.3.4", entry.getField("x_f"));
+        assertEquals(logline, entry.getLogline());
+    }
+
+    @Test
+    public void testDirectivesAfterVariable() {
+        String pattern = "%{one}X x_f:\"%{x_f}X\"";
+
+        List<LogbackElement> elements = ApacheLogFormatParser.parse(pattern);
+        final int expectedElements = 5;
+        System.out.println(elements);
+        assertEquals("Expected every field, plus start and final literals", expectedElements, elements.size());
+
+        Map<String, LogEntryMapper<AccessLogEntry>> mappers = ApacheLogMapperFactory.initializeMappers(elements);
+        ApacheLogFormatParser<AccessLogEntry> parser = new ApacheLogFormatParser<>(elements, mappers, AccessLogEntry::new);
+
+        String logline = "bob x_f:\"1.2.3.4\"";
+
+        AccessLogEntry entry = parser.parseLogLine(logline);
+
+        assertEquals("bob", entry.getField("one"));
+        assertEquals("1.2.3.4", entry.getField("x_f"));
+        assertEquals(logline, entry.getLogline());
+    }
+
+
+
 }

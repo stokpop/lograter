@@ -17,6 +17,7 @@ package nl.stokpop.lograter.feeder;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,30 +29,29 @@ public class FileFeederTest {
 
     @Test
     public void feedFiles() {
-        FileFeeder fileFeeder = new FileFeeder();
+        final List<File> files = new ArrayList<>();
+        files.add(new File("src/test/resources/feeder/feeder-test-file.log"));
 
-        final List<String> files = new ArrayList<>();
-        files.add("src/test/resources/feeder/feeder-test-file.log");
+        FileFeeder fileFeeder = new FileFeeder(files);
 
-        fileFeeder.feedFilesAsString(files, (filename, logLine) -> assertTrue(logLine.contains("header") || logLine.contains("1,2,3") || logLine.contains("4,5,6")));
+        fileFeeder.feed((filename, logLine) -> assertTrue(logLine.contains("header") || logLine.contains("1,2,3") || logLine.contains("4,5,6")));
 
         final AtomicInteger numberOfLines = new AtomicInteger(0);
-        fileFeeder.feedFilesAsString(files, (filename, logLine) -> numberOfLines.incrementAndGet() );
+        fileFeeder.feed((filename, logLine) -> numberOfLines.incrementAndGet() );
 
         assertEquals(3, numberOfLines.intValue());
     }
 
     @Test
     public void feedFilesSkipHeader() {
-        FileFeeder fileFeeder = new FileFeeder(1);
+        final List<File> files = new ArrayList<>();
+        files.add(new File("src/test/resources/feeder/feeder-test-file.log"));
+        FileFeeder fileFeeder = new FileFeeder(files, 1);
 
-        final List<String> files = new ArrayList<>();
-        files.add("src/test/resources/feeder/feeder-test-file.log");
-
-        fileFeeder.feedFilesAsString(files, (filename, logLine) -> assertTrue(!logLine.contains("header") || logLine.contains("1,2,3") || logLine.contains("4,5,6")));
+        fileFeeder.feed((filename, logLine) -> assertTrue(!logLine.contains("header") || logLine.contains("1,2,3") || logLine.contains("4,5,6")));
 
         final AtomicInteger numberOfLines = new AtomicInteger(0);
-        fileFeeder.feedFilesAsString(files, (filename, logLine) -> numberOfLines.incrementAndGet() );
+        fileFeeder.feed((filename, logLine) -> numberOfLines.incrementAndGet() );
 
         assertEquals(2, numberOfLines.intValue());
     }

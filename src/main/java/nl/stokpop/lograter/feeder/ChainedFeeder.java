@@ -27,7 +27,7 @@ public abstract class ChainedFeeder implements Feeder {
     private static final Logger log = LoggerFactory.getLogger(ChainedFeeder.class);
 
     private Feeder next;
-    private String name;
+    private final String name;
 
     public ChainedFeeder(String name) {
         this.name = name;
@@ -79,9 +79,6 @@ public abstract class ChainedFeeder implements Feeder {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ChainedFeeder{");
-        sb.append("name='").append(name).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "ChainedFeeder{" + "name='" + name + '\'' + '}';
     }
 }

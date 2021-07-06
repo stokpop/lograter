@@ -45,7 +45,6 @@ public class LineMapperReader {
     }
 
     public List<LineMapperSection> initializeMappers(File mapperFile) throws IOException {
-
         if (mapperFile == null) {
             throw new NullPointerException("Provide a mapper config file for LineMapper");
         }

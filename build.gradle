@@ -4,7 +4,7 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'java'
     id 'java-library'
-//    id 'maven-publish'
+    id 'maven-publish'
     id 'signing'
     id 'jacoco'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
@@ -86,13 +86,13 @@ task customFatJar(type: Jar) {
     with jar
 }
 
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            from(components.java)
-//        }
-//    }
-//}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
 
 license {
     header = rootProject.file("src/main/resources/META-INF/LICENSE.txt")
@@ -115,6 +115,11 @@ task sourceJar(type: Jar) {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier "javadoc"
     from javadoc.destinationDir
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 artifacts {

@@ -34,6 +34,7 @@ import nl.stokpop.lograter.report.text.AccessLogTextReport;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.LogRaterUtils;
 import nl.stokpop.lograter.util.SessionIdParser;
 import nl.stokpop.lograter.util.StringUtils;
@@ -148,8 +149,9 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 
 		requestCounterStorePairs.addAll(AccessLogReader.createAccessLogCounterProcessors(iisLogParser, config, csFactory));
 
-		FileFeeder feeder = new FileFeeder(cmdIisLog.fileFeederFilterIncludes, cmdIisLog.fileFeederFilterExcludes);
-		feeder.feedFilesAsString(cmdIisLog.files, iisLogParser);
+		List<File> files = FileUtils.findFilesThatMatchFilenames(cmdIisLog.files);
+		FileFeeder feeder = new FileFeeder(files, cmdIisLog.fileFeederFilterIncludes, cmdIisLog.fileFeederFilterExcludes);
+		feeder.feed(iisLogParser);
 
 		if (clickPathProcessor != null) {
 			clickPathProcessor.getClickPathAnalyser().closeAllRemainingSessions();

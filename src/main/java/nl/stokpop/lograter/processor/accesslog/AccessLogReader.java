@@ -21,7 +21,7 @@ import nl.stokpop.lograter.clickpath.ClickPathAnalyserEngine;
 import nl.stokpop.lograter.clickpath.InMemoryClickpathCollector;
 import nl.stokpop.lograter.command.CommandAccessLog;
 import nl.stokpop.lograter.counter.RequestCounter;
-import nl.stokpop.lograter.feeder.FileFeeder;
+import nl.stokpop.lograter.feeder.FeedProcessor;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.logentry.ApacheLogMapperFactory;
 import nl.stokpop.lograter.logentry.NginxLogMapperFactory;
@@ -57,7 +57,7 @@ public class AccessLogReader {
     public static final String COMMON_LOG_PATTERN_APACHE = "%h %l %u %t \"%r\" %>s %b";
     public static final String COMMON_LOG_PATTERN_NGINX = "$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"";
 
-    public AccessLogDataBundle readAndProcessAccessLogs(AccessLogConfig config, List<File> files) {
+    public AccessLogDataBundle readAndProcessAccessLogs(AccessLogConfig config, FeedProcessor feeder) {
 
         RequestCounterStoreFactory csFactory =
 		        new RequestCounterStoreFactory(config.getCounterStorage(), config.getFilterPeriod(), new File(config.getCounterStorageDir()));
@@ -153,8 +153,7 @@ public class AccessLogReader {
 
         requestCounterStoresPairs.addAll(createAccessLogCounterProcessors(accessLogParser, config, csFactory));
 
-        FileFeeder feeder = new FileFeeder(config.getFileFeederFilterIncludes(), config.getFileFeederFilterExcludes());
-        feeder.feedFiles(files, accessLogParser);
+        feeder.feed(accessLogParser);
 
         if (clickPathProcessor != null) {
             clickPathProcessor.getClickPathAnalyser().closeAllRemainingSessions();

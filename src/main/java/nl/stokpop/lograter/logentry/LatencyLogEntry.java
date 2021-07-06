@@ -48,16 +48,29 @@ public class LatencyLogEntry extends LogbackLogEntry {
 	public static Map<String, LogEntryMapper<LatencyLogEntry>> initializeLatencyLogMappers(List<LogbackElement> elements, LatencyLogConfig latencyConfig) {
 		Map<String, LogEntryMapper<LatencyLogEntry>> mappers = new HashMap<>();
 
-        LatencyMappers.initializeMappers(elements, mappers, latencyConfig.getCounterFields().get(0));
+		List<String> counterFields = latencyConfig.getCounterFields();
+		if (counterFields == null || counterFields.isEmpty()) {
+			throw new LogRaterException("Counter fields collection is empty. Provide a field from the logback pattern to be used as counter key.");
+		}
+        LatencyMappers.initializeMappers(elements, mappers, counterFields.get(0));
 
-		final Pattern latencyPattern = findLatencyPattern(elements, latencyConfig.getLatencyField());
+		String latencyField = latencyConfig.getLatencyField();
+		if (latencyField == null || latencyField.trim().length() == 0) {
+			throw new LogRaterException("Latency field definition is empty. Provide a latency field from the logback pattern to use for duration determination.");
+		}
+		final Pattern latencyPattern = findLatencyPattern(elements, latencyField);
+
+		final LatencyUnit latencyUnit = latencyConfig.getLatencyUnit();
+		if (latencyUnit == null) {
+			throw new LogRaterException("Latency unit is not definition. Specifies the time unit to use for the latency field.");
+		}
 
 		StringEntryMapper<LatencyLogEntry> latencyLogEntryMapper = (value, variable, e) -> {
 			String durationAsString = latencyPattern == null ? value : latencyPattern.matcher(value).group(0);
-			e.durationInMillis = parseLatencyToMillis(durationAsString, latencyConfig.getLatencyUnit());
+			e.durationInMillis = parseLatencyToMillis(durationAsString, latencyUnit);
 		};
 
-        mappers.put(latencyConfig.getLatencyField(), latencyLogEntryMapper);
+        mappers.put(latencyField, latencyLogEntryMapper);
 
         return mappers;
 	}

@@ -49,7 +49,9 @@ public class LogbackParser<T extends LogbackLogEntry> {
 		logline = logline.trim();
 		
 		T entry = logEntryFactory.newInstance();
-		
+
+		entry.setLogline(logline);
+
 		int locationInLine = 0;
 		LogbackDirective var = null;
 

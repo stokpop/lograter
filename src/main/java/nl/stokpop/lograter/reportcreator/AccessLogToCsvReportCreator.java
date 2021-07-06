@@ -97,8 +97,9 @@ public class AccessLogToCsvReportCreator implements ReportCreatorWithCommand<Com
 			AccessLogParser parser = new AccessLogParser(lineParser, config.getFilterPeriod());
 			parser.addProcessor(processor);
 
-			FileFeeder feeder = new FileFeeder(cmdAccessLog.fileFeederFilterIncludes, cmdAccessLog.fileFeederFilterExcludes);
-			feeder.feedFilesAsString(cmdAccessLog.files, parser);
+			List<File> files = FileUtils.findFilesThatMatchFilenames(cmdAccessLog.files);
+			FileFeeder feeder = new FileFeeder(files, cmdAccessLog.fileFeederFilterIncludes, cmdAccessLog.fileFeederFilterExcludes);
+			feeder.feed(parser);
 
 		}
 

@@ -26,26 +26,25 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
-public class FileFeeder {
+public class FileFeeder implements FeedProcessor {
 	
 	private static final Logger log = LoggerFactory.getLogger(FileFeeder.class);
 	private final Pattern filterPatternIncludes;
     private final Pattern filterPatternExcludes;
     private final int skipLines;
+	private final List<File> files;
 
 	private Map<String, SimpleCounter> exceptionsCounter = new HashMap<>();
 
-	public FileFeeder() {
-		this(null, (Pattern) null, 0);
+	public FileFeeder(List<File> files) {
+		this(files,null, (Pattern) null, 0);
 	}
 
-	public FileFeeder(int skipLines) {
-		this( null, (Pattern) null, skipLines);
+	public FileFeeder(List<File> files, int skipLines) {
+		this(files, null, (Pattern) null, skipLines);
 	}
 
     /**
@@ -54,18 +53,19 @@ public class FileFeeder {
      * @param filterPatternExcludes regular expression to denied lines (will be skipped)
      * @param skipLines number of lines to skip for each file (e.g. skip a header line)
      */
-    public FileFeeder(final Pattern filterPatternIncludes, final Pattern filterPatternExcludes, final int skipLines) {
+    public FileFeeder(List<File> files, final Pattern filterPatternIncludes, final Pattern filterPatternExcludes, final int skipLines) {
         this.filterPatternIncludes = filterPatternIncludes;
         this.filterPatternExcludes = filterPatternExcludes;
         this.skipLines = skipLines;
+        this.files = Collections.unmodifiableList(new ArrayList<>(files));
     }
 
-    public FileFeeder(final String filterRegexpIncludes, final String filterRegexpExcludes) {
-        this(createPattern(filterRegexpIncludes), createPattern(filterRegexpExcludes), 0);
+    public FileFeeder(List<File> files, final String filterRegexpIncludes, final String filterRegexpExcludes) {
+        this(files, createPattern(filterRegexpIncludes), createPattern(filterRegexpExcludes), 0);
 	}
 
-    public FileFeeder(final String filterRegexpIncludes, final String filterRegexpExcludes, final int skipLines) {
-        this(createPattern(filterRegexpIncludes), createPattern(filterRegexpExcludes), skipLines);
+    public FileFeeder(List<File> files, final String filterRegexpIncludes, final String filterRegexpExcludes, final int skipLines) {
+        this(files, createPattern(filterRegexpIncludes), createPattern(filterRegexpExcludes), skipLines);
 	}
 
     private static Pattern createPattern(final String regularExpression) {
@@ -165,11 +165,11 @@ public class FileFeeder {
 		}
 	}
 
-	public void feedFilesAsString(List<String> files, Feeder feeder) {
-		feedFiles(FileUtils.findFilesThatMatchFilenames(files), feeder);
-	}
+//	public void feedFilesAsString(List<String> files, Feeder feeder) {
+//		feedFiles(FileUtils.findFilesThatMatchFilenames(files), feeder);
+//	}
 
-	public void feedFiles(List<File> files, Feeder feeder) {
+	public void feed(Feeder feeder) {
 
 		if (files == null || files.size() == 0) {
 			throw new LogRaterException("No files given to feeder.");

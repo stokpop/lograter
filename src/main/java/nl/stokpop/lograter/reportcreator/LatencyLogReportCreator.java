@@ -22,6 +22,7 @@ import nl.stokpop.lograter.clickpath.ClickPathReport;
 import nl.stokpop.lograter.command.CommandLatencyLog;
 import nl.stokpop.lograter.command.CommandMain;
 import nl.stokpop.lograter.counter.RequestCounter;
+import nl.stokpop.lograter.feeder.FileFeeder;
 import nl.stokpop.lograter.graphs.LogGraphCreator;
 import nl.stokpop.lograter.processor.latency.LatencyLogConfig;
 import nl.stokpop.lograter.processor.latency.LatencyLogDataBundle;
@@ -79,7 +80,9 @@ public class LatencyLogReportCreator implements ReportCreatorWithCommand<Command
 
         List<File> files = FileUtils.findFilesThatMatchFilenames(cmdLatency.files);
         LatencyLogReader LatencyLogReader = new LatencyLogReader();
-        LatencyLogDataBundle dataBundle = LatencyLogReader.readAndProcessLatencyLogs(config, files);
+
+        FileFeeder feeder = new FileFeeder(files, config.getFileFeederFilterIncludes(), config.getFileFeederFilterExcludes());
+        LatencyLogDataBundle dataBundle = LatencyLogReader.readAndProcessLatencyLogs(config, feeder);
 
         RequestCounter totalRequestCounter = dataBundle.getTotalRequestCounterStorePair().getRequestCounterStoreSuccess().getTotalRequestCounter();
         TimePeriod analysisPeriod = totalRequestCounter.getTimePeriod().createFilterTimePeriodIfFilterIsSet(config.getFilterPeriod());

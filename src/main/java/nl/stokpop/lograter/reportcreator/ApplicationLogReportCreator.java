@@ -29,6 +29,7 @@ import nl.stokpop.lograter.processor.applicationlog.ApplicationLogConfig;
 import nl.stokpop.lograter.processor.applicationlog.ApplicationLogData;
 import nl.stokpop.lograter.processor.applicationlog.ApplicationLogProcessor;
 import nl.stokpop.lograter.report.text.ApplicationLogTextReport;
+import nl.stokpop.lograter.util.FileUtils;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.time.DateUtils;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Create an application log report.
@@ -63,8 +65,9 @@ public class ApplicationLogReportCreator implements ReportCreatorWithCommand<Com
 		ApplicationLogParser appLogParser = new ApplicationLogParser(lineParser);
 		appLogParser.addProcessor(processor);
 
-		FileFeeder feeder = new FileFeeder(cmdApplicationLog.fileFeederFilterIncludes, cmdApplicationLog.fileFeederFilterExcludes);
-		feeder.feedFilesAsString(cmdApplicationLog.files, appLogParser);
+		List<File> files = FileUtils.findFilesThatMatchFilenames(cmdApplicationLog.files);
+		FileFeeder feeder = new FileFeeder(files, cmdApplicationLog.fileFeederFilterIncludes, cmdApplicationLog.fileFeederFilterExcludes);
+		feeder.feed(appLogParser);
 
 		ApplicationLogData data = processor.getData();
 

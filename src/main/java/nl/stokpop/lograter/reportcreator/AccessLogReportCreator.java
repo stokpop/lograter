@@ -21,6 +21,7 @@ import nl.stokpop.lograter.clickpath.ClickPathReport;
 import nl.stokpop.lograter.command.AbstractCommandAccessLog;
 import nl.stokpop.lograter.command.CommandAccessLog;
 import nl.stokpop.lograter.command.CommandMain;
+import nl.stokpop.lograter.feeder.FileFeeder;
 import nl.stokpop.lograter.graphs.LogGraphCreator;
 import nl.stokpop.lograter.processor.accesslog.AccessLogConfig;
 import nl.stokpop.lograter.processor.accesslog.AccessLogDataBundle;
@@ -88,7 +89,7 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 		List<File> files = FileUtils.findFilesThatMatchFilenames(cmdAccessLog.files);
 
 		AccessLogReader accessLogReader = new AccessLogReader();
-		AccessLogDataBundle accessLogDataBundle = accessLogReader.readAndProcessAccessLogs(config, files);
+		AccessLogDataBundle accessLogDataBundle = accessLogReader.readAndProcessAccessLogs(config, new FileFeeder(files));
 
 		AccessLogTextReport report = new AccessLogTextReport(accessLogDataBundle);
 

@@ -62,8 +62,8 @@ public class JMeterLogReader {
             requestCounterStorePairs.add(storePair);
         }
 
-        FileFeeder feeder = new FileFeeder(config.getFileFeederFilterIncludes(), config.getFileFeederFilterExcludes(), 1);
-        feeder.feedFilesAsString(files, jMeterParser);
+        FileFeeder feeder = new FileFeeder(FileUtils.findFilesThatMatchFilenames(files), config.getFileFeederFilterIncludes(), config.getFileFeederFilterExcludes(), 1);
+        feeder.feed(jMeterParser);
 
         RequestCounter totalSuccess = totalStorePair.getRequestCounterStoreSuccess().getTotalRequestCounter();
         RequestCounter totalFailure = totalStorePair.getRequestCounterStoreFailure().getTotalRequestCounter();

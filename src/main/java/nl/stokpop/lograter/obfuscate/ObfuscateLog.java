@@ -93,8 +93,8 @@ public class ObfuscateLog {
         IisLogParser iisLogParser = new IisLogParser(iisLogFormatParser);
         iisLogParser.addProcessor(processor);
 
-        FileFeeder feeder = new FileFeeder();
-        feeder.feedFilesAsString(Collections.singletonList(file.getAbsolutePath()), iisLogParser);
+        FileFeeder feeder = new FileFeeder(Collections.singletonList(file));
+        feeder.feed(iisLogParser);
     }
 
     private void obfuscateLogback(File file, String logbackPattern, PrintStream printStream) {
@@ -105,8 +105,8 @@ public class ObfuscateLog {
         ApplicationLogParser appLogParser = new ApplicationLogParser(logbackParser);
         appLogParser.addProcessor(processor);
 
-        FileFeeder feeder = new FileFeeder();
-        feeder.feedFilesAsString(Collections.singletonList(file.getAbsolutePath()), appLogParser);
+        FileFeeder feeder = new FileFeeder(Collections.singletonList(file));
+        feeder.feed(appLogParser);
     }
 
     private void obfuscateCacheLog(File file, PrintStream printStream) {

@@ -18,7 +18,7 @@ package nl.stokpop.lograter.processor.latency;
 import nl.stokpop.lograter.clickpath.ClickPathAnalyser;
 import nl.stokpop.lograter.clickpath.ClickPathAnalyserEngine;
 import nl.stokpop.lograter.clickpath.InMemoryClickpathCollector;
-import nl.stokpop.lograter.feeder.FileFeeder;
+import nl.stokpop.lograter.feeder.FeedProcessor;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.logentry.LogEntrySuccessFactor;
 import nl.stokpop.lograter.parser.LatencyLogParser;
@@ -35,7 +35,6 @@ import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +48,7 @@ public class LatencyLogReader {
 
     private final static Logger log = LoggerFactory.getLogger(LatencyLogReader.class);
 
-    public LatencyLogDataBundle readAndProcessLatencyLogs(LatencyLogConfig config, List<File> files) {
+    public LatencyLogDataBundle readAndProcessLatencyLogs(LatencyLogConfig config, FeedProcessor feedProcessor) {
 
         String logPattern = config.getLogPattern();
         LogbackParser<LatencyLogEntry> lineParser = createLatencyLogEntryLogbackParser(logPattern, config);
@@ -100,8 +99,7 @@ public class LatencyLogReader {
         //        httpFilter.addFeeder(parser);
         // next pass the httpFilter to the feedLines method below!
 
-        FileFeeder feeder = new FileFeeder(config.getFileFeederFilterIncludes(), config.getFileFeederFilterExcludes());
-        feeder.feedFiles(files, latencyLogParser);
+        feedProcessor.feed(latencyLogParser);
 
         if (clickPathProcessor != null) {
             clickPathProcessor.getClickPathAnalyser().closeAllRemainingSessions();
