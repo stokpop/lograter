@@ -41,6 +41,7 @@ public class LatencyParserTest {
 
         assertEquals(logline, entry.getLogline());
         assertEquals("/whatever/nl/", entry.getField("operation"));
+        assertEquals("304", entry.getField("http-code"));
         assertEquals(18, entry.getDurationInMillis());
     }
 }
