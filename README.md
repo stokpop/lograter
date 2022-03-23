@@ -18,11 +18,11 @@ You can download a pre-build jar here: https://github.com/stokpop/lograter/relea
 
 with curl: 
 
-    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.1/lograter-exec-1.4.1.jar
+    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.4/lograter-exec-1.4.4.jar
 
 use java 8+ to run lograter:
 
-    java -jar lograter-exec-1.4.1.jar
+    java -jar lograter-exec-1.4.4.jar
 
 download an example dataset:
 
@@ -30,7 +30,7 @@ download an example dataset:
   
 process this file:
 
-     java -jar lograter-exec-1.4.1.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
+     java -jar lograter-exec-1.4.4.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
 
 (Note: there are some errors for some lines that contain invalid urls with unexpected quotes. These can be ignored.)
    
@@ -59,15 +59,23 @@ The available commands:
 * `accessToCsv` transform an access log to a csv file
 * `jmeter`      parse jtl file from a jMeter run
 
+### Basic options and command options
+
+The order of the options on the command line is important. There are general options and command specific options.
+
+    java -jar lograter-exec-1.4.4 [general options] [command] [command options] [input file(s)]
+
+When you get errors that input files cannot be found, make sure the order of the general options is correct.
+
 ### Option file
 
-For multiple command line options it is adviced to use a file with options.
+For multiple command line options it is advised to use a file with options.
 
-This also helps when defining a log pattern and you need to escape quotes on the command line.
+This also helps when defining a complex log pattern where you need to escape quotes on the command line.
 
 Put all the options in a file, one option and one parameter per line, with no additional spaces.
 
-For example, create a `latency.options` file like the following to parse log lines like
+For example, create a `latency.options` file like the following to parse log lines such as:
 
     2020-06-14T10:51:32.51-0700 [RTR/1]      OUT www.example.com - [14/06/2020:17:51:32.459 +0000] "GET /user/ HTTP/1.1" 200 0 103455 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.123 Safari/537.30" 192.0.2.132:46359 x_forwarded_for:"198.51.100.120" x_forwarded_proto:"http" vcap_request_id:9365d216-623a-45cb-6ef6-eba495c19fa8 response_time:0.059468637 app_id:79cc58aa-3737-43ae-ac71-39a2843b5178 x_b3_traceid:"39a2843b5178" x_b3_spanid:"39a2843b5179" x_b3_parentspanid:"-" b3:"%X{39a2843b5178-39a2843b5179}"
 
@@ -106,7 +114,7 @@ The counters are based on unique combinations of the `counter-fields`. The first
 
 Now call LogRater as:
 
-    java -jar lograter-exec-1.4.1.jar @latency.options cloud-foundry.log  
+    java -jar lograter-exec-1.4.4.jar @latency.options cloud-foundry.log  
 
 ## Uses
 
@@ -281,7 +289,7 @@ To use LogRater from Maven or Gradle: find the latest LogRater jar in [Maven Cen
 
 ### LogRater command line options
 
-    LogRater version: 1.4.1
+    LogRater version: 1.4.4
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:
