@@ -45,8 +45,11 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 	@Override
 	public void createReport(PrintWriter outputStream, CommandMain cmdMain, CommandPerformanceCenterResults cmdPCResults) throws IOException {
 		List<String> files = cmdPCResults.files;
-		if (files.size() != 1) {
+		if (files.isEmpty()) {
 			throw new LogRaterException("Please supply one results database path (Results.mdb or Results.db) from performance center.");
+		}
+		else if (files.size() > 1) {
+			throw new LogRaterException("Multiple files are present: " + files + ". Make sure the command line order is correct (generic options like '-st' should be before 'pc' command) and supply exactly one results database path (Results.mdb or Results.db) from performance center.");
 		}
 
 		String databasePath = files.get(0);
