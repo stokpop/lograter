@@ -17,6 +17,7 @@ package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -83,18 +84,18 @@ public class RequestCounterStorePair {
 	    return readOnlyStoreFailure;
 	}
 
-	public void addSuccess(String counterKey, long timestamp, int durationInMillis) {
-		storeSuccess.add(counterKey, timestamp, durationInMillis);
-		if (!storeFailure.contains(counterKey)) {
-			storeFailure.addEmptyCounterIfNotExists(counterKey);
+	public void addSuccess(CounterKey key, long timestamp, int durationInMillis) {
+		storeSuccess.add(key, timestamp, durationInMillis);
+		if (!storeFailure.contains(key)) {
+			storeFailure.addEmptyCounterIfNotExists(key);
 			//assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}
 
-	public void addFailure(String counterKey, long timestamp, int durationInMillis) {
-		storeFailure.add(counterKey, timestamp, durationInMillis);
-		if (!storeSuccess.contains(counterKey)) {
-			storeSuccess.addEmptyCounterIfNotExists(counterKey);
+	public void addFailure(CounterKey key, long timestamp, int durationInMillis) {
+		storeFailure.add(key, timestamp, durationInMillis);
+		if (!storeSuccess.contains(key)) {
+			storeSuccess.addEmptyCounterIfNotExists(key);
             //assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}

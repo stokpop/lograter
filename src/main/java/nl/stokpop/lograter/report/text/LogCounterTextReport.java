@@ -18,6 +18,7 @@ package nl.stokpop.lograter.report.text;
 import nl.stokpop.lograter.LogRaterException;
 import nl.stokpop.lograter.analysis.*;
 import nl.stokpop.lograter.command.BaseUnit;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
@@ -51,9 +52,9 @@ abstract class LogCounterTextReport extends LogTextReport {
 		return reportCounters(itemName, requestCounterStorePair, totalAnalyser, config, Collections.emptyMap());
 	}
 
-	public String reportCounters(String itemName, RequestCounterStorePair counterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
+	public String reportCounters(String itemName, RequestCounterStorePair counterStorePair, ResponseTimeAnalyser totalAnalyser, BasicCounterLogConfig config, Map<CounterKey, LineMap> keyToLineMap) {
 
-		if (counterKeyToLineMapMap == null) {
+		if (keyToLineMap == null) {
             throw new NullPointerException("CounterKeyToLineMapMap may not be null");
         }
 
@@ -70,7 +71,7 @@ abstract class LogCounterTextReport extends LogTextReport {
         long overallTotalHits = totalAnalyser.totalHits();
 
 		for (RequestCounter successCounter : counterStorePair.getRequestCounterStoreSuccess()) {
-			String counterKey = successCounter.getCounterKey();
+			CounterKey counterKey = successCounter.getCounterKey();
 			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
             if (failureCounter == null) {
                 throw new LogRaterException("No failure counter found for " + counterKey + " in " + counterStorePair);
@@ -81,7 +82,7 @@ abstract class LogCounterTextReport extends LogTextReport {
 				log.warn("Skipping line because there are no hits and failures at all for the counter in the analysis period [{}].", counterKey);
 			}
 			else {
-				report.append(reportLine(myAnalyser, maxTpmTimestamp, overallTotalHits, config, counterKeyToLineMapMap));
+				report.append(reportLine(myAnalyser, maxTpmTimestamp, overallTotalHits, config, keyToLineMap));
 			}
 		}
 		return report.toString();
@@ -180,19 +181,19 @@ abstract class LogCounterTextReport extends LogTextReport {
         return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, 0, Collections.emptyMap());
     }
 
-	private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, Map<String, LineMap> counterKeyToLineMapMap) {
-		return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, 0, counterKeyToLineMapMap);
+	private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, Map<CounterKey, LineMap> keyToLineMap) {
+		return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, 0, keyToLineMap);
 	}
 
     private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns) {
         return reportLine(analyser, maxTpmStartTimeStamp, totalHits, config, insertColumns, Collections.emptyMap());
     }
 
-    private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns, Map<String, LineMap> counterKeyToLineMapMap) {
+    private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns, Map<CounterKey, LineMap> counterKeyToLineMapMap) {
 		StringBuilder report = new StringBuilder(256);
 
-		String counterKey = analyser.getCounterKey();
-		String counterKeyExcelProof = StringUtils.excelProofText(counterKey);
+		CounterKey counterKey = analyser.getCounterKey();
+		String counterKeyExcelProof = StringUtils.excelProofText(counterKey.getName());
 		String nameWithColumnAlignment = RequestCounter.createCounterNameThatAlignsInTextReport(counterKeyExcelProof, insertColumns);
 		report.append(nameWithColumnAlignment);
 
@@ -248,14 +249,14 @@ abstract class LogCounterTextReport extends LogTextReport {
 	    // max TPM
 	    report.append(SEP_CHAR).append(nfNoDecimals.format(maxHitsPerMinute));
 		// avg TPS max TPM
-		report.append(SEP_CHAR).append(nfTwoDecimals.format((double) maxHitsPerMinute / 60.0d));
+		report.append(SEP_CHAR).append(nfTwoDecimals.format(maxHitsPerMinute / 60.0d));
 		// max TPM ts
 		report.append(SEP_CHAR).append(maxHitsPerMinute > 1 ? DateUtils.formatToStandardDateTimeString(tcr.getMaxHitsPerDurationTimestamp()) : "");
 	    final long hitsInMinuteOverallMaxTPM = analyser.hitsInMinuteWithStartTime(maxTpmStartTimeStamp);
 	    // TPM in overall max TPM
 	    report.append(SEP_CHAR).append(nfNoDecimals.format(hitsInMinuteOverallMaxTPM));
 	    // avg TPS in overall max TPM
-	    report.append(SEP_CHAR).append(nfTwoDecimals.format((double) hitsInMinuteOverallMaxTPM / 60.0d));
+	    report.append(SEP_CHAR).append(nfTwoDecimals.format(hitsInMinuteOverallMaxTPM / 60.0d));
         // % overall
         report.append(SEP_CHAR).append(nfTwoDecimals.format(analyser.percentage(totalHits)));
 

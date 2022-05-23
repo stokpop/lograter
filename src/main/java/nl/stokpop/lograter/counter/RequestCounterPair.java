@@ -19,15 +19,15 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 
 public class RequestCounterPair {
 
-    private final String name;
+    private final CounterKey key;
     private final RequestCounter counterSuccess;
     private final RequestCounter counterFailure;
     private final TimePeriod combinedTimePeriod;
     private final RequestCounter combinedRequestCounter;
     private final boolean includeFailuresInAnalysis;
 
-    public RequestCounterPair(String name, RequestCounter counterSuccess, RequestCounter counterFailure, boolean includeFailuresInAnalysis) {
-        this.name = name;
+    public RequestCounterPair(CounterKey key, RequestCounter counterSuccess, RequestCounter counterFailure, boolean includeFailuresInAnalysis) {
+        this.key = key;
         this.counterSuccess = counterSuccess;
         this.counterFailure = counterFailure;
         this.combinedTimePeriod = TimePeriod.createMaxTimePeriod(counterSuccess.getTimePeriod(), counterFailure.getTimePeriod());
@@ -37,8 +37,8 @@ public class RequestCounterPair {
                 : counterSuccess.getTimeSlicedCounter(combinedTimePeriod);
     }
 
-    public RequestCounterPair(String name, RequestCounter counterSuccess, RequestCounter counterFailure) {
-        this(name, counterSuccess, counterFailure, true);
+    public RequestCounterPair(CounterKey key, RequestCounter counterSuccess, RequestCounter counterFailure) {
+        this(key, counterSuccess, counterFailure, true);
     }
 
     public RequestCounterPair(RequestCounter counterSuccess, RequestCounter counterFailure, boolean includeFailuresInAnalysis) {
@@ -49,8 +49,8 @@ public class RequestCounterPair {
         this(counterSuccess.getUniqueCounterKey(), counterSuccess, counterFailure, true);
     }
 
-    public String getName() {
-        return name;
+    public CounterKey getKey() {
+        return key;
     }
 
     public RequestCounter getCounterSuccess() {
@@ -83,7 +83,7 @@ public class RequestCounterPair {
 
     @Override
     public String toString() {
-        return "RequestCounterPair{" + "name='" + name + '\'' +
+        return "RequestCounterPair{" + "name='" + key + '\'' +
                 ", combinedTimePeriod=" + combinedTimePeriod +
                 ", includeFailuresInAnalysis=" + includeFailuresInAnalysis +
                 '}';

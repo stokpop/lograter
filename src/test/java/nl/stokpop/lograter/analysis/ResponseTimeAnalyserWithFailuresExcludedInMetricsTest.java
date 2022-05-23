@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.analysis;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
@@ -52,14 +53,14 @@ public class ResponseTimeAnalyserWithFailuresExcludedInMetricsTest {
 	}
 
 	private RequestCounter createFailureCounter() {
-		RequestCounter failures = new RequestCounter("failures", new TimeMeasurementStoreInMemory());
+		RequestCounter failures = new RequestCounter(CounterKey.of("failures"), new TimeMeasurementStoreInMemory());
 		failures.incRequests(2500, 1);
 		failures.incRequests(3500, 1);
 		return failures;
 	}
 
 	private RequestCounter createSuccessCounter() {
-		RequestCounter successes = new RequestCounter("successes", new TimeMeasurementStoreInMemory());
+		RequestCounter successes = new RequestCounter(CounterKey.of("successes"), new TimeMeasurementStoreInMemory());
 		successes.incRequests(1000, 20);
 		successes.incRequests(2000, 20);
 		successes.incRequests(3000, 20);

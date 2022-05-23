@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
@@ -52,7 +53,7 @@ public class RequestCounterDbIterator implements Iterator<RequestCounter> {
 	public RequestCounter next() {
 		String nextCounterKey = countersKeys.next();
 		long counterId = fetchCounterIdFromDb(con, dbCounterStoreId, nextCounterKey);
-		return new RequestCounter(nextCounterKey, new TimeMeasurementStoreSqLite(nextCounterKey, counterId, con, timePeriod));
+		return new RequestCounter(CounterKey.of(nextCounterKey), new TimeMeasurementStoreSqLite(nextCounterKey, counterId, con, timePeriod));
 	}
 
 	private static long fetchCounterIdFromDb(Connection con, long dbCounterStoreId, String counterKey) {

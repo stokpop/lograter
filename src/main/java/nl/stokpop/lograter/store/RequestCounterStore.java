@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.store;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 
 import java.util.Set;
@@ -25,12 +26,12 @@ import java.util.Set;
  */
 public interface RequestCounterStore extends Iterable<RequestCounter> {
 	String getName();
-    Set<String> getCounterKeys();
-	RequestCounter get(String counterKey);
+    Set<CounterKey> getCounterKeys();
+	RequestCounter get(CounterKey key);
 	RequestCounter getTotalRequestCounter();
 
-	boolean contains(String counterKey);
-    void add(String counterKey, long timestamp, int duration);
+	boolean contains(CounterKey key);
+    void add(CounterKey counterKey, long timestamp, int duration);
     boolean isEmpty();
 
     /**
@@ -44,5 +45,5 @@ public interface RequestCounterStore extends Iterable<RequestCounter> {
 	 * @param counterKey the name of the RequestCounter
 	 * @return the new or existing request counter.
 	 */
-	RequestCounter addEmptyCounterIfNotExists(String counterKey);
+	RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey);
 }

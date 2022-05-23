@@ -17,6 +17,7 @@ package nl.stokpop.lograter.report;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.processor.accesslog.AccessLogConfig;
@@ -107,15 +108,15 @@ public class RequestCounterJsonReportTest {
 	private void fillStore(RequestCounterStore store, RequestCounterStore total, int numberOfElements) {
 		for (int elements = 0; elements < numberOfElements; elements++) {
 			int timestamp = elements;
-			String counterKey = "counter-key-" + timestamp % 10;
+			CounterKey key = CounterKey.of("counter-key-" + timestamp % 10);
 			int duration = timestamp % 5000;
-			store.add(counterKey, timestamp, duration);
-			total.add(counterKey, timestamp, duration);
+			store.add(key, timestamp, duration);
+			total.add(key, timestamp, duration);
 			// double the load in last part, so the peak minute is in the last part
 			double fivePercentOfElements = numberOfElements * 0.05;
 			if (timestamp >= (numberOfElements - fivePercentOfElements)) {
-				store.add(counterKey, timestamp, duration);
-				store.add(counterKey, timestamp, duration);
+				store.add(key, timestamp, duration);
+				store.add(key, timestamp, duration);
 			}
 		}
 	}
@@ -131,21 +132,24 @@ public class RequestCounterJsonReportTest {
         RequestCounterStore storeSuccess2 = factory.newInstance(storeName2);
         RequestCounterStore storeFailure2 = factory.newInstance(storeName2);
 
-        storeSuccess1.add("counter-key-1", 1000, 1000);
-        storeSuccess1.add("counter-key-1", 2000, 2000);
-        storeSuccess1.add("counter-key-1", 3000, 3000);
-        storeSuccess1.add("counter-key-2", 1001, 100);
-        storeSuccess1.add("counter-key-2", 2001, 200);
-        storeSuccess1.add("counter-key-2", 2950, 300);
-        storeFailure1.add("counter-key-2", 2150, 3);
+		CounterKey key1 = CounterKey.of("counter-key-1");
+		CounterKey key2 = CounterKey.of("counter-key-2");
 
-		storeSuccess2.add("counter-key-1", 1000, 1000);
-		storeSuccess2.add("counter-key-1", 2000, 2000);
-		storeSuccess2.add("counter-key-1", 3000, 3000);
-		storeSuccess2.add("counter-key-2", 1001, 100);
-		storeSuccess2.add("counter-key-2", 2001, 200);
-		storeSuccess2.add("counter-key-2", 2950, 300);
-		storeFailure2.add("counter-key-2", 2100, 2);
+        storeSuccess1.add(key1, 1000, 1000);
+        storeSuccess1.add(key1, 2000, 2000);
+        storeSuccess1.add(key1, 3000, 3000);
+        storeSuccess1.add(key2, 1001, 100);
+        storeSuccess1.add(key2, 2001, 200);
+        storeSuccess1.add(key2, 2950, 300);
+        storeFailure1.add(key2, 2150, 3);
+
+		storeSuccess2.add(key1, 1000, 1000);
+		storeSuccess2.add(key1, 2000, 2000);
+		storeSuccess2.add(key1, 3000, 3000);
+		storeSuccess2.add(key2, 1001, 100);
+		storeSuccess2.add(key2, 2001, 200);
+		storeSuccess2.add(key2, 2950, 300);
+		storeFailure2.add(key2, 2100, 2);
 
 		RequestCounterStorePair requestCounterStorePair1 = new RequestCounterStorePair(storeSuccess1, storeFailure1);
 		RequestCounterStorePair requestCounterStorePair2 = new RequestCounterStorePair(storeSuccess2, storeFailure2);
@@ -177,20 +181,22 @@ public class RequestCounterJsonReportTest {
         RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
 		RequestCounterStore storeFailure = pair.getRequestCounterStoreFailure();
 
+		CounterKey key1 = CounterKey.of("counter-key-1");
+		CounterKey key2 = CounterKey.of("counter-key-2");
 
-		pair.addSuccess("counter-key-1", 1000, 1000);
-		pair.addSuccess("counter-key-1", 2000, 2000);
-		pair.addSuccess("counter-key-1", 3000, 3000);
-		pair.addSuccess("counter-key-2", 1001, 100);
-		pair.addSuccess("counter-key-2", 2001, 200);
-		pair.addSuccess("counter-key-2", 2950, 300);
+		pair.addSuccess(key1, 1000, 1000);
+		pair.addSuccess(key1, 2000, 2000);
+		pair.addSuccess(key1, 3000, 3000);
+		pair.addSuccess(key2, 1001, 100);
+		pair.addSuccess(key2, 2001, 200);
+		pair.addSuccess(key2, 2950, 300);
 
-		pair.addFailure("counter-key-1", 1001, 1009);
-		pair.addFailure("counter-key-1", 2002, 2009);
-		pair.addFailure("counter-key-1", 3003, 3009);
-		pair.addFailure("counter-key-2", 1004, 19);
-		pair.addFailure("counter-key-2", 2005, 29);
-		pair.addFailure("counter-key-2", 2956, 309);
+		pair.addFailure(key1, 1001, 1009);
+		pair.addFailure(key1, 2002, 2009);
+		pair.addFailure(key1, 3003, 3009);
+		pair.addFailure(key2, 1004, 19);
+		pair.addFailure(key2, 2005, 29);
+		pair.addFailure(key2, 2956, 309);
 
 		PerformanceCenterDataBundle performanceCenterDataBundle = new PerformanceCenterDataBundle(config, data);
 
@@ -229,11 +235,15 @@ public class RequestCounterJsonReportTest {
                 new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS));
 
         RequestCounterStorePair counterStorePair = data.getRequestCounterStorePair();
-        counterStorePair.addSuccess("counter-key-success-only", 1001, 100);
-        counterStorePair.addSuccess("counter-key-success-and-failure", 1001, 100);
+		CounterKey successKey = CounterKey.of("counter-key-success-only");
+		CounterKey failureKey = CounterKey.of("counter-key-failure-only");
+		CounterKey successAndFailureKey = CounterKey.of("counter-key-success-and-failure");
 
-        counterStorePair.addFailure("counter-key-failure-only", 1000, 1000);
-        counterStorePair.addFailure("counter-key-success-and-failure", 2950, 300);
+		counterStorePair.addSuccess(successKey, 1001, 100);
+		counterStorePair.addSuccess(successAndFailureKey, 1001, 100);
+
+		counterStorePair.addFailure(failureKey, 1000, 1000);
+        counterStorePair.addFailure(successAndFailureKey, 2950, 300);
 
         PerformanceCenterDataBundle dataBundle = new PerformanceCenterDataBundle(new PerformanceCenterConfig(), data);
 
@@ -248,9 +258,9 @@ public class RequestCounterJsonReportTest {
 	}
 
 	private AccessLogDataBundle createAccessLogDataBundle(
-			List<RequestCounterStorePair> requestCounterStorePairs, RequestCounterStorePair totalRequestCounterPair, Map<String, LineMap> counterKeyToLineMapMap) {
+			List<RequestCounterStorePair> requestCounterStorePairs, RequestCounterStorePair totalRequestCounterPair, Map<CounterKey, LineMap> keyToLIneMap) {
 		AccessLogConfig config = new AccessLogConfig();
-		return new AccessLogDataBundle(config, requestCounterStorePairs, totalRequestCounterPair, counterKeyToLineMapMap);
+		return new AccessLogDataBundle(config, requestCounterStorePairs, totalRequestCounterPair, keyToLIneMap);
 	}
 
     private String createJsonReport(RequestCounterDataBundle bundle) throws IOException {

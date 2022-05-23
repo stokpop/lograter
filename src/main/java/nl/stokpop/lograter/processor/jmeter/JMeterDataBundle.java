@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.jmeter;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -31,19 +32,17 @@ import java.util.Map;
  */
 public class JMeterDataBundle implements RequestCounterDataBundle {
 
-    private final static Logger log = LoggerFactory.getLogger(JMeterDataBundle.class);
-
     private final RequestCounterStorePair totalRequestCounterPair;
     private final List<RequestCounterStorePair> requestCounterStorePairs;
     private final JMeterConfig config;
-    private final Map<String, LineMap> counterKeyToLineMapMap;
+    private final Map<CounterKey, LineMap> keyToLineMap;
 
     public JMeterDataBundle(JMeterConfig config,
                             List<RequestCounterStorePair> requestCounterStorePairs,
                             RequestCounterStorePair totalRequestCounterStorePair,
-                            Map<String, LineMap> counterKeyToLineMapMap) {
+                            Map<CounterKey, LineMap> keyToLineMap) {
 
-        if (counterKeyToLineMapMap == null) {
+        if (keyToLineMap == null) {
             throw new NullPointerException("counterKeyToLineMapMap cannot be null");
         }
         if (requestCounterStorePairs == null) {
@@ -55,7 +54,7 @@ public class JMeterDataBundle implements RequestCounterDataBundle {
 
         this.totalRequestCounterPair = totalRequestCounterStorePair;
         this.requestCounterStorePairs = requestCounterStorePairs;
-        this.counterKeyToLineMapMap = counterKeyToLineMapMap;
+        this.keyToLineMap = keyToLineMap;
 
         this.config = config;
     }
@@ -87,8 +86,8 @@ public class JMeterDataBundle implements RequestCounterDataBundle {
     }
 
 
-    public Map<String, LineMap> getCounterKeyToLineMapMap() {
-        return counterKeyToLineMapMap;
+    public Map<CounterKey, LineMap> getKeyToLineMap() {
+        return keyToLineMap;
     }
 
 	@Override
@@ -97,7 +96,7 @@ public class JMeterDataBundle implements RequestCounterDataBundle {
 		sb.append("totalRequestCounterPair=").append(totalRequestCounterPair);
 		sb.append(", requestCounterStorePairs=").append(requestCounterStorePairs);
 		sb.append(", config=").append(config);
-		sb.append(", counterKeyToLineMapMap=").append(counterKeyToLineMapMap);
+		sb.append(", counterKeyToLineMapMap=").append(keyToLineMap);
 		sb.append('}');
 		return sb.toString();
 	}

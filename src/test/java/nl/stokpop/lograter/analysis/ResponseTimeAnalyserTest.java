@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.analysis;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.time.TPSMeasurement;
@@ -36,7 +37,7 @@ public class ResponseTimeAnalyserTest {
 	
 	@Before
 	public void init() {
-		this.counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+		this.counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 	}
 
 	@Test
@@ -156,7 +157,7 @@ public class ResponseTimeAnalyserTest {
 
 	@Test
     public void emptyCounter() {
-        RequestCounter emptyCounter = new RequestCounter("empty counter", new TimeMeasurementStoreInMemory());
+        RequestCounter emptyCounter = new RequestCounter(CounterKey.of("empty counter"), new TimeMeasurementStoreInMemory());
         try {
             new ResponseTimeAnalyserFailureUnaware(emptyCounter);
         } catch (LogRaterException e) {
@@ -253,7 +254,7 @@ public class ResponseTimeAnalyserTest {
 	}
 
 	private ResponseTimeAnalyser createSubTestAnalyser() {
-		RequestCounter subCounter = new RequestCounter("sub-counter", new TimeMeasurementStoreInMemory(), TimePeriod.createExcludingEndTime(61000, 280010));
+		RequestCounter subCounter = new RequestCounter(CounterKey.of("sub-counter"), new TimeMeasurementStoreInMemory(), TimePeriod.createExcludingEndTime(61000, 280010));
 
 		subCounter.incRequests(119003, 2);
 

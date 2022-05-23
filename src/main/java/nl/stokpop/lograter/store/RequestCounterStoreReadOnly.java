@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.store;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 
 import java.util.Iterator;
@@ -34,23 +35,23 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
         return store.getName();
     }
 
-    public Set<String> getCounterKeys() {
+    public Set<CounterKey> getCounterKeys() {
         return store.getCounterKeys();
     }
 
-    public RequestCounter get(String counterKey) {
-        return store.get(counterKey);
+    public RequestCounter get(CounterKey key) {
+        return store.get(key);
     }
 
     public RequestCounter getTotalRequestCounter() {
         return store.getTotalRequestCounter();
     }
 
-    public boolean contains(String counterKey) {
-        return store.contains(counterKey);
+    public boolean contains(CounterKey key) {
+        return store.contains(key);
     }
 
-    public void add(String counterKey, long timestamp, int duration) {
+    public void add(CounterKey counterKey, long timestamp, int duration) {
         throw new UnsupportedOperationException("This RequestCounterStore is read only.");
     }
 
@@ -58,7 +59,7 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
         return store.isEmpty();
     }
     
-    public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
+    public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
         throw new UnsupportedOperationException("This RequestCounterStore is read only.");
     }
 
@@ -66,10 +67,12 @@ public class RequestCounterStoreReadOnly implements RequestCounterStore {
         return store.iterator();
     }
 
+    @Override
     public void forEach(Consumer<? super RequestCounter> action) {
         store.forEach(action);
     }
 
+    @Override
     public Spliterator<RequestCounter> spliterator() {
         return store.spliterator();
     }

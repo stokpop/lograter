@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.graphs;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -26,11 +27,11 @@ public class HtmlErrorsAndWarnsGraphCreatorTest {
 
     @Test
     public void createGraph() {
-        RequestCounter errorsOverTime = new RequestCounter("Errors", new TimeMeasurementStoreInMemory());
+        RequestCounter errorsOverTime = new RequestCounter(CounterKey.of("Errors"), new TimeMeasurementStoreInMemory());
         errorsOverTime.incRequests(1000, 10);
         errorsOverTime.incRequests(5000, 10);
         errorsOverTime.incRequests(8000, 10);
-        RequestCounter warnsOverTime = new RequestCounter("Warns", new TimeMeasurementStoreInMemory());
+        RequestCounter warnsOverTime = new RequestCounter(CounterKey.of("Warns"), new TimeMeasurementStoreInMemory());
         warnsOverTime.incRequests(1500, 20);
         warnsOverTime.incRequests(4500, 20);
         warnsOverTime.incRequests(9500, 20);

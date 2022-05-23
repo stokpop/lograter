@@ -20,6 +20,7 @@ import nl.stokpop.lograter.clickpath.ClickPathAnalyser;
 import nl.stokpop.lograter.clickpath.ClickPathAnalyserEngine;
 import nl.stokpop.lograter.clickpath.InMemoryClickpathCollector;
 import nl.stokpop.lograter.command.CommandAccessLog;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.feeder.FeedProcessor;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
@@ -53,7 +54,7 @@ import java.util.Map;
  */
 public class AccessLogReader {
 
-    private final static Logger log = LoggerFactory.getLogger(AccessLogReader.class);
+    private static final Logger log = LoggerFactory.getLogger(AccessLogReader.class);
     public static final String COMMON_LOG_PATTERN_APACHE = "%h %l %u %t \"%r\" %>s %b";
     public static final String COMMON_LOG_PATTERN_NGINX = "$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"";
 
@@ -175,15 +176,15 @@ public class AccessLogReader {
         log.info("Read [{}] successful and [{}] failed access log entries for the following time period: [{}]",
 		        totalRequestCounterSuccess.getHits(), totalRequestCounterFailure.getHits(), totalRequestCounterSuccess.getTimePeriod());
 
-        Map<String, LineMap> allCounterKeysToLineMapMap = new HashMap<>();
+        Map<CounterKey, LineMap> allKeysToLineMap = new HashMap<>();
         for (AccessLogUrlMapperProcessor urlMapperProcessor : urlMapperProcessors) {
-            Map<String, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getCounterKeyToLineMapMap();
-            allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
+            Map<CounterKey, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getKeyToLineMap();
+            allKeysToLineMap.putAll(counterKeyToLineMapMap);
         }
 
         return clickPathCollector == null ?
             new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair) :
-            new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
+            new AccessLogDataBundle(config, requestCounterStoresPairs, totalRequestCounterStorePair, clickPathCollector, allKeysToLineMap);
     }
 
     public static List<RequestCounterStorePair> createAccessLogCounterProcessors(

@@ -29,7 +29,7 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 
     private static final Logger log = LoggerFactory.getLogger(RequestCounter.class);
 
-	public static final RequestCounter EMPTY_REQUEST_COUNTER = new RequestCounter("EMPTY", new TimeMeasurementStoreInMemory());
+	public static final RequestCounter EMPTY_REQUEST_COUNTER = new RequestCounter(CounterKey.of("EMPTY"), new TimeMeasurementStoreInMemory());
 
 	private final TimeMeasurementStore timeMeasurements;
 	private final boolean fixedTimePeriod;
@@ -39,12 +39,12 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 	private long firstTimestamp = TimePeriod.NOT_SET;
 	private long lastTimestamp = TimePeriod.NOT_SET;
 
-	public RequestCounter(String counterKey, TimeMeasurementStore timeMeasurementStore) {
-		this(counterKey, timeMeasurementStore, TimePeriod.UNDEFINED_PERIOD);
+	public RequestCounter(CounterKey key, TimeMeasurementStore timeMeasurementStore) {
+		this(key, timeMeasurementStore, TimePeriod.UNDEFINED_PERIOD);
 	}
 
-	public RequestCounter(String counterKey, TimeMeasurementStore timeMeasurementStore, TimePeriod timePeriod) {
-		super(counterKey);
+	public RequestCounter(CounterKey key, TimeMeasurementStore timeMeasurementStore, TimePeriod timePeriod) {
+		super(key);
 //		if (!timePeriod.hasBothTimestampsSet()) {
 //			throw new LogRaterException(String.format("Not allowed to create a RequestCounter with unset TimePeriod [%s]", timePeriod));
 //		}
@@ -58,15 +58,15 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 	 * This is an InMemory request counter.
 	 */
 	public RequestCounter(final RequestCounter one, final RequestCounter two, final TimePeriod timePeriod) {
-		this(String.join("-", one.getUniqueCounterKey(), two.getUniqueCounterKey(), "merged"), one, two, timePeriod);
+		this(CounterKey.merge(one.getUniqueCounterKey(), two.getUniqueCounterKey()), one, two, timePeriod);
 	}
 
 	/**
 	 * Create new request counter based on the two given request counters for the given time period.
 	 * This is an InMemory request counter.
 	 */
-	public RequestCounter(final String counterKey, final RequestCounter one, final RequestCounter two, final TimePeriod timePeriod) {
-		this(counterKey, new TimeMeasurementStoreInMemory(), timePeriod);
+	public RequestCounter(final CounterKey key, final RequestCounter one, final RequestCounter two, final TimePeriod timePeriod) {
+		this(key, new TimeMeasurementStoreInMemory(), timePeriod);
 
 		if (timePeriod.isUndefined()) {
             for (TimeMeasurement timeMeasurement : one) {
@@ -94,8 +94,8 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 	 * of the two given counters.
 	 * This is an InMemory request counter.
 	 */
-	public RequestCounter(final String counterKey, final RequestCounter successCounter, final RequestCounter failureCounter) {
-		this(counterKey, successCounter, failureCounter,
+	public RequestCounter(final CounterKey key, final RequestCounter successCounter, final RequestCounter failureCounter) {
+		this(key, successCounter, failureCounter,
 				TimePeriod.createMaxTimePeriod(successCounter.getTimePeriod(), failureCounter.getTimePeriod()));
 	}
 
@@ -221,7 +221,7 @@ public class RequestCounter extends Counter implements Iterable<TimeMeasurement>
 		return new RequestCounterReadOnly(getCounterKey(), timeSlicedTimeMeasurements, timePeriod);
 	}
 
-	public String getUniqueCounterKey() {
+	public CounterKey getUniqueCounterKey() {
 		return getCounterKey();
 	}
 

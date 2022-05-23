@@ -26,8 +26,8 @@ import java.io.PrintWriter;
 
 public class AccessLogTextReport extends LogCounterTextReport {
 
-	final private AccessLogConfig config;
-    final private AccessLogDataBundle dataBundle;
+    private final AccessLogConfig config;
+    private final AccessLogDataBundle dataBundle;
 
     public
 
@@ -60,7 +60,7 @@ public class AccessLogTextReport extends LogCounterTextReport {
 
         for (RequestCounterStorePair storePair : dataBundle.getRequestCounterStorePairs()) {
 	        String storeSuccessName = storePair.getRequestCounterStoreSuccess().getName();
-	        out.println(reportCounters(storeSuccessName, storePair, analyser, config, dataBundle.getCounterKeyToLineMapMap()));
+	        out.println(reportCounters(storeSuccessName, storePair, analyser, config, dataBundle.getKeyToLineMap()));
         }
 
     }

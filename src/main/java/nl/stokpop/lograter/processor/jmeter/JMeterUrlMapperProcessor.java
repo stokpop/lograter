@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.jmeter;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -40,7 +41,7 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 	private final Set<String> reportedMultiMatchers = new HashSet<>();
 
     // needed to report the used regexp for this mapper key
-    private final Map<String, LineMap> counterKeyToLineMapMap = new HashMap<>();
+    private final Map<CounterKey, LineMap> keyToLineMap = new HashMap<>();
 
     private final JMeterCounterKeyCreator counterKeyCreator;
 
@@ -74,17 +75,14 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 			
 			@Override
 			public void noMatchFound(String line) {
-				if (!reportedNonMatchers.contains(line)) {
-					if (!isIgnoreMultiAndNoMatches) {
-                        reportedNonMatchers.add(line);
-                        logNonMatcher(line, reportedNonMatchers.size());
-                    }
+				if (!reportedNonMatchers.contains(line) && !isIgnoreMultiAndNoMatches) {
+					reportedNonMatchers.add(line);
+					logNonMatcher(line, reportedNonMatchers.size());
 				}
 				if (!isIgnoreMultiAndNoMatches) {
-					String mapperCounterKey;
                     String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
-                    mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
-					addToCounterStore(mapperCounterKey, logEntry);
+                    CounterKey key = counterKeyCreator.createCounterKey(logEntry, baseName);
+					addToCounterStore(key, logEntry);
 				}
 			}
 			
@@ -103,11 +101,9 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 			
 			@Override
 			public void matchFound(LineMap mapper) {
-                String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, mapper);
-				addToCounterStore(mapperCounterKey, logEntry);
-				if (!counterKeyToLineMapMap.containsKey(mapperCounterKey)) {
-                    counterKeyToLineMapMap.put(mapperCounterKey, mapper);
-                }
+                CounterKey key = counterKeyCreator.createCounterKey(logEntry, mapper);
+				addToCounterStore(key, logEntry);
+				keyToLineMap.computeIfAbsent(key, k -> mapper);
 			}
 		};			
 		
@@ -125,12 +121,12 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
         }
     }
 
-    private void addToCounterStore(String counterKey, JMeterLogEntry logEntry) {
+    private void addToCounterStore(CounterKey key, JMeterLogEntry logEntry) {
 		if (logEntry.isSuccess()) {
-			counterStorePair.addSuccess(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
+			counterStorePair.addSuccess(key, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}
 		else {
-			counterStorePair.addFailure(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
+			counterStorePair.addFailure(key, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}
 	}
 
@@ -142,8 +138,8 @@ public class JMeterUrlMapperProcessor implements Processor<JMeterLogEntry> {
 		return counterStorePair.getRequestCounterStoreFailure();
 	}
 
-    public Map<String, LineMap> getCounterKeyToLineMapMap() {
-        return Collections.unmodifiableMap(new HashMap<>(counterKeyToLineMapMap));
+    public Map<CounterKey, LineMap> getKeyToLineMap() {
+        return Collections.unmodifiableMap(new HashMap<>(keyToLineMap));
     }
 
 }

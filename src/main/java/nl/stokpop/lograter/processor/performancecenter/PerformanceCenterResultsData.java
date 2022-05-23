@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.performancecenter;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.util.time.DataTimePeriod;
 
@@ -26,14 +27,14 @@ public class PerformanceCenterResultsData extends PerformanceCenterData {
 		super(csFactory, granularity);
     }
 
-    public void addSuccess(String eventName, long timestamp, int duration) {
+    public void addSuccess(CounterKey key, long timestamp, int duration) {
         dataTimePeriod.updateDataTime(timestamp);
-        getRequestCounterStorePair().addSuccess(eventName, timestamp, duration);
+        getRequestCounterStorePair().addSuccess(key, timestamp, duration);
     }
 
-	public void addFailure(String eventName, long timestamp, int duration) {
+	public void addFailure(CounterKey key, long timestamp, int duration) {
 		dataTimePeriod.updateDataTime(timestamp);
-		getRequestCounterStorePair().addFailure(eventName, timestamp, duration);
+		getRequestCounterStorePair().addFailure(key, timestamp, duration);
 	}
 
     @Override

@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.jmeter;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.processor.CounterKeyCreator;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 
@@ -38,29 +39,29 @@ public class JMeterCounterKeyCreator implements CounterKeyCreator<JMeterLogEntry
     }
 
     @Override
-    public final String createCounterKey(final JMeterLogEntry logEntry) {
+    public final CounterKey createCounterKey(final JMeterLogEntry logEntry) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final JMeterLogEntry logEntry, final LineMap lineMap) {
+    public final CounterKey createCounterKey(final JMeterLogEntry logEntry, final LineMap lineMap) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final JMeterLogEntry logEntry, final String baseName) {
+    public final CounterKey createCounterKey(final JMeterLogEntry logEntry, final String baseName) {
         StringBuilder key = new StringBuilder(baseName);
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     private void addHttpMethodAndStatusAndFields(JMeterLogEntry logEntry, StringBuilder key) {
         if (filterHttpStatus) key.append(SEP_CHAR).append(logEntry.getCode());
-        if (groupByFields.size() > 0) {
+        if (!groupByFields.isEmpty()) {
             for (String groupByField : groupByFields) {
                 String field = logEntry.getField(groupByField);
                 String sanitizedField = field.replace(",", "_");

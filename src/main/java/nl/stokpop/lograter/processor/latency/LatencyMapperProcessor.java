@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.latency;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStore;
@@ -41,7 +42,7 @@ public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
 	private final Set<String> reportedMultiMatchers = new HashSet<>();
 
     // needed to report the used regexp for this mapper key
-    private final Map<String, LineMap> counterKeyToLineMapMap = new HashMap<>();
+    private final Map<CounterKey, LineMap> keyToLineMap = new HashMap<>();
 
     private final LatencyCounterKeyCreator counterKeyCreator;
 
@@ -75,16 +76,13 @@ public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
 			
 			@Override
 			public void noMatchFound(String line) {
-				if (!reportedNonMatchers.contains(line)) {
-					if (!isIgnoreMultiAndNoMatches) {
-                        reportedNonMatchers.add(line);
-                        logNonMatcher(line, reportedNonMatchers.size());
-                    }
+				if (!reportedNonMatchers.contains(line) && !isIgnoreMultiAndNoMatches) {
+					reportedNonMatchers.add(line);
+					logNonMatcher(line, reportedNonMatchers.size());
 				}
 				if (!isIgnoreMultiAndNoMatches) {
-					String mapperCounterKey;
                     String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getMessage();
-                    mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
+                    CounterKey mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
 					addToCounterStore(mapperCounterKey, logEntry);
 				}
 			}
@@ -104,11 +102,9 @@ public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
 			
 			@Override
 			public void matchFound(LineMap mapper) {
-                String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, mapper);
-				addToCounterStore(mapperCounterKey, logEntry);
-				if (!counterKeyToLineMapMap.containsKey(mapperCounterKey)) {
-                    counterKeyToLineMapMap.put(mapperCounterKey, mapper);
-                }
+                CounterKey key = counterKeyCreator.createCounterKey(logEntry, mapper);
+				addToCounterStore(key, logEntry);
+				keyToLineMap.computeIfAbsent(key, k -> mapper);
 			}
 		};
 		lineMapperSection.updateMappers(logEntry.getMessage(), isDoCountMultipleMapperHits, callback);
@@ -125,12 +121,12 @@ public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
         }
     }
 
-    private void addToCounterStore(String counterKey, LatencyLogEntry logEntry) {
+    private void addToCounterStore(CounterKey key, LatencyLogEntry logEntry) {
 		if (logEntry.isSuccess()) {
-			counterStorePair.addSuccess(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
+			counterStorePair.addSuccess(key, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}
 		else {
-			counterStorePair.addFailure(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
+			counterStorePair.addFailure(key, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}
 	}
 
@@ -142,8 +138,8 @@ public class LatencyMapperProcessor implements Processor<LatencyLogEntry> {
 		return counterStorePair.getRequestCounterStoreFailure();
 	}
 
-    public Map<String, LineMap> getCounterKeyToLineMapMap() {
-        return Collections.unmodifiableMap(new HashMap<>(counterKeyToLineMapMap));
+    public Map<CounterKey, LineMap> getKeyToLineMap() {
+        return Collections.unmodifiableMap(new HashMap<>(keyToLineMap));
     }
 
 }

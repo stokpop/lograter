@@ -39,23 +39,23 @@ public class RequestCounterReadOnly extends RequestCounter {
 	 * The returned RequestCounter is read only.
 	 */
 	public RequestCounterReadOnly(
-			final String counterKey,
+			final CounterKey counterKey,
 			final RequestCounter requestCounterOne,
 			final RequestCounter requestCounterTwo,
 			final TimePeriod timePeriod) {
 		super(counterKey, requestCounterOne, requestCounterTwo, timePeriod);
 	}
 
-	public RequestCounterReadOnly(final String counterKey, final TimeMeasurementStore timeMeasurementStore) {
-		super(counterKey, timeMeasurementStore);
+	public RequestCounterReadOnly(final CounterKey key, final TimeMeasurementStore timeMeasurementStore) {
+		super(key, timeMeasurementStore);
 	}
 
-	protected RequestCounterReadOnly(final String counterKey, final TimeMeasurementStore timeSlicedTimeMeasurements, final TimePeriod timePeriod) {
-		super(counterKey, timeSlicedTimeMeasurements, timePeriod);
+	protected RequestCounterReadOnly(final CounterKey key, final TimeMeasurementStore timeSlicedTimeMeasurements, final TimePeriod timePeriod) {
+		super(key, timeSlicedTimeMeasurements, timePeriod);
 	}
 
-	public RequestCounterReadOnly(final String uniqueCounterKey, final RequestCounter successCounter, final RequestCounter failureCounter) {
-		super(uniqueCounterKey, successCounter, failureCounter);
+	public RequestCounterReadOnly(final CounterKey uniqueKey, final RequestCounter successCounter, final RequestCounter failureCounter) {
+		super(uniqueKey, successCounter, failureCounter);
 	}
 
 	@Override

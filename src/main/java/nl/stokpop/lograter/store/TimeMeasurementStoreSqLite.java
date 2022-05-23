@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 
 /**
  * This class is not thread safe. It contains a shared TimeMeasurements cache.
@@ -247,7 +248,7 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 						}
 					}
 					if (!hasNextPrevious) {
-						throw new LogRaterException("No next time measurement element, use hasNext to check!");
+						throw new NoSuchElementException("No next time measurement element, use hasNext to check!");
 					}
 					hasNextCalled = false;
 					long timestamp = resultSetSelect.getLong(1);

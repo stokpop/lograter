@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.accesslog;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.processor.CounterKeyCreator;
 import nl.stokpop.lograter.processor.Processor;
@@ -36,13 +37,13 @@ public class AccessLogCounterProcessor implements Processor<AccessLogEntry> {
 		long timestamp = logEntry.getTimestamp();
 		int durationInMillis = logEntry.getDurationInMillis();
 
-		String counterKey = counterKeyCreator.createCounterKey(logEntry);
+		CounterKey key = counterKeyCreator.createCounterKey(logEntry);
 
 		if (logEntry.isHttpError()) {
-			counterStorePair.addFailure(counterKey, timestamp, durationInMillis);
+			counterStorePair.addFailure(key, timestamp, durationInMillis);
 		}
 		else {
-			counterStorePair.addSuccess(counterKey, timestamp, durationInMillis);
+			counterStorePair.addSuccess(key, timestamp, durationInMillis);
 		}
 
 	}

@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.util.DatabaseBootstrap;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -29,7 +30,7 @@ import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTE
 
 public class RequestCounterStoreFactory {
 
-    private final static Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
+	private static final Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
 
     private CounterStorageType type;
 	private Connection con;
@@ -65,31 +66,31 @@ public class RequestCounterStoreFactory {
         this(type, TimePeriod.MAX_TIME_PERIOD, storageRootDir);
     }
 
-    public RequestCounterStore newInstance(String storeName, String totalRequestsName, int maxUniqueCounters) {
+    public RequestCounterStore newInstance(String storeName, CounterKey totalRequestsKey, int maxUniqueCounters) {
 	    RequestCounterStore store;
 	    switch (type) {
 			case Memory:
-				store = new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod);
+				store = new RequestCounterStoreHashMap(storeName, totalRequestsKey, timePeriod);
 				break;
 			case Database:
-				store = new RequestCounterStoreSqLite(storeName, totalRequestsName, con, timePeriod);
+				store = new RequestCounterStoreSqLite(storeName, totalRequestsKey.getName(), con, timePeriod);
 				break;
 			case ExternalSort:
 			    if (storageRootDir == null) {
 			        throw new LogRaterException("Unable to create an external sort request counter without supplying a storage dir.");
                 }
-				store = new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestsName, timePeriod);
+				store = new RequestCounterStoreExternalSort(storageRootDir, storeName, totalRequestsKey, timePeriod);
 			    break;
 			default:
 				log.warn("No valid measurement store option found: {}, using in memory store.", type);
-				store = new RequestCounterStoreHashMap(storeName, totalRequestsName, timePeriod);
+				store = new RequestCounterStoreHashMap(storeName, totalRequestsKey, timePeriod);
 		}
 		// always limit the max number of requests to avoid memory issues and slow behaviour
 		return new RequestCounterStoreMaxCounters(store, maxUniqueCounters);
 	}
 
 	public RequestCounterStore newInstance(String storeName) {
-		return newInstance(storeName, storeName + "-total", MAX_UNIQUE_COUNTERS);
+		return newInstance(storeName, CounterKey.of(storeName + "-total"), MAX_UNIQUE_COUNTERS);
 	}
 
 }

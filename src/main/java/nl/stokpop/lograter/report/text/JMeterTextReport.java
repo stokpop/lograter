@@ -26,8 +26,8 @@ import java.io.PrintWriter;
 
 public class JMeterTextReport extends LogCounterTextReport {
 
-	final private JMeterConfig config;
-    final private JMeterDataBundle dataBundle;
+    private final JMeterConfig config;
+    private final JMeterDataBundle dataBundle;
 
     public JMeterTextReport(JMeterDataBundle jMeterLogDataBundle) {
         this.dataBundle = jMeterLogDataBundle;
@@ -57,7 +57,7 @@ public class JMeterTextReport extends LogCounterTextReport {
 
         for (RequestCounterStorePair storePair : dataBundle.getRequestCounterStorePairs()) {
 	        String storeSuccessName = storePair.getRequestCounterStoreSuccess().getName();
-	        out.println(reportCounters(storeSuccessName, storePair, analyser, config, dataBundle.getCounterKeyToLineMapMap()));
+	        out.println(reportCounters(storeSuccessName, storePair, analyser, config, dataBundle.getKeyToLineMap()));
         }
 
     }

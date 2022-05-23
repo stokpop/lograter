@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.latency;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.CounterKeyCreator;
 import nl.stokpop.lograter.util.linemapper.LineMap;
@@ -32,28 +33,28 @@ public class LatencyCounterKeyCreator implements CounterKeyCreator<LatencyLogEnt
     }
 
     @Override
-    public final String createCounterKey(final LatencyLogEntry logEntry) {
+    public final CounterKey createCounterKey(final LatencyLogEntry logEntry) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
         addCounterFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final LatencyLogEntry logEntry, final LineMap lineMap) {
+    public final CounterKey createCounterKey(final LatencyLogEntry logEntry, final LineMap lineMap) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
         addCounterFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final LatencyLogEntry logEntry, final String baseName) {
+    public final CounterKey createCounterKey(final LatencyLogEntry logEntry, final String baseName) {
         StringBuilder key = new StringBuilder(baseName);
         addCounterFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     private void addCounterFields(LatencyLogEntry logEntry, StringBuilder key) {
-        if (groupByFields.size() > 0) {
+        if (!groupByFields.isEmpty()) {
             for (String groupByField : groupByFields) {
                 String field = logEntry.getField(groupByField);
                 String sanitizedField = field.replace(",", "_");

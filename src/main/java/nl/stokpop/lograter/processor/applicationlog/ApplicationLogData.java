@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.processor.applicationlog;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.SimpleCounter;
 import nl.stokpop.lograter.processor.BasicLogData;
@@ -41,10 +42,8 @@ public class ApplicationLogData extends BasicLogData {
 	private Map<ApplicationsLogDetailsKey, List<ApplicationLogDetails>> detailsMap = new HashMap<>();
 	private Map<ApplicationLogDetails, SimpleCounter> countPerLogDetails = new HashMap<>();
 
-	private RequestCounter errorsOverTime = new RequestCounter("errorsOverTime", new TimeMeasurementStoreInMemory());
-	private RequestCounter warnsOverTime = new RequestCounter("warnsOverTime", new TimeMeasurementStoreInMemory());
-
-	public ApplicationLogData() {}
+	private RequestCounter errorsOverTime = new RequestCounter(CounterKey.of("errorsOverTime"), new TimeMeasurementStoreInMemory());
+	private RequestCounter warnsOverTime = new RequestCounter(CounterKey.of("warnsOverTime"), new TimeMeasurementStoreInMemory());
 
 	public void addFatal(String key, long timestamp) {
 		errorsOverTime.incRequests(timestamp, 0);
@@ -161,9 +160,7 @@ public class ApplicationLogData extends BasicLogData {
 	}
 
 	public void addDetails(ApplicationsLogDetailsKey key, String message, String[] nonLogLines) {
-		if (!detailsMap.containsKey(key)) {
-			detailsMap.put(key, new ArrayList<>());
-		}
+		detailsMap.computeIfAbsent(key, k -> new ArrayList<>());
 		List<ApplicationLogDetails> detailsList = detailsMap.get(key);
 		if (detailsList.size() <= 20) {
 			ApplicationLogDetails details = new ApplicationLogDetails(message, nonLogLines);

@@ -18,6 +18,7 @@ package nl.stokpop.lograter.processor.latency;
 import nl.stokpop.lograter.clickpath.ClickPathAnalyser;
 import nl.stokpop.lograter.clickpath.ClickPathAnalyserEngine;
 import nl.stokpop.lograter.clickpath.InMemoryClickpathCollector;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.feeder.FeedProcessor;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.logentry.LogEntrySuccessFactor;
@@ -46,7 +47,7 @@ import java.util.regex.Pattern;
  */
 public class LatencyLogReader {
 
-    private final static Logger log = LoggerFactory.getLogger(LatencyLogReader.class);
+    private static final Logger log = LoggerFactory.getLogger(LatencyLogReader.class);
 
     public LatencyLogDataBundle readAndProcessLatencyLogs(LatencyLogConfig config, FeedProcessor feedProcessor) {
 
@@ -60,7 +61,7 @@ public class LatencyLogReader {
         if (lineMappers.size() > 1) {
             log.warn("More than one line mapper section found ({}), only using first one for LatencyLogProcessor mappers.", lineMappers);
         }
-        if (lineMappers.size() == 0) {
+        if (lineMappers.isEmpty()) {
             lineMappers = LineMapperSection.SINGLE_MAPPER;
         }
 
@@ -108,13 +109,13 @@ public class LatencyLogReader {
         log.info("Read {} Latency log entries for the following time period: {}",
             data.getTotalRequestCounter().getHits(), data.getTotalRequestCounter().getTimePeriod());
 
-        Map<String, LineMap> allCounterKeysToLineMapMap = new HashMap<>();
+        Map<CounterKey, LineMap> allKeysToLineMap = new HashMap<>();
         for (LatencyMapperProcessor urlMapperProcessor : urlMapperProcessors) {
-            Map<String, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getCounterKeyToLineMapMap();
-            allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
+            Map<CounterKey, LineMap> keyToLineMap = urlMapperProcessor.getKeyToLineMap();
+            allKeysToLineMap.putAll(keyToLineMap);
         }
 
-        return new LatencyLogDataBundle(config, processor.getData(), requestCounterStoresPairs, clickpathCollector, allCounterKeysToLineMapMap);
+        return new LatencyLogDataBundle(config, processor.getData(), requestCounterStoresPairs, clickpathCollector, allKeysToLineMap);
     }
 
     public static LogbackParser<LatencyLogEntry> createLatencyLogEntryLogbackParser(String logPattern, LatencyLogConfig config) {

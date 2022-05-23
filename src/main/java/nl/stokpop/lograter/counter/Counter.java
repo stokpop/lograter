@@ -18,14 +18,14 @@ package nl.stokpop.lograter.counter;
 
 public abstract class Counter implements Comparable<Counter> {
 
-	private final String counterKey;
+	private final CounterKey counterKey;
 
-	protected Counter(String counterKey) {
+	protected Counter(CounterKey counterKey) {
 		super();
 		this.counterKey = counterKey;
 	}
 
-	public String getCounterKey() {
+	public CounterKey getCounterKey() {
 		return this.counterKey;
 	}
 

@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.util.linemapper;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.processor.accesslog.AccessLogConfig;
 import nl.stokpop.lograter.processor.accesslog.AccessLogCounterKeyCreator;
 import nl.stokpop.lograter.processor.accesslog.AccessLogUrlMapperProcessor;
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
 
 public class LineMapperUtils {
 
+    private LineMapperUtils() {}
+
     private static final Logger log = LoggerFactory.getLogger(LineMapperUtils.class);
 
     public static List<AccessLogUrlMapperProcessor> createUrlMapperProcessors(
@@ -52,8 +55,8 @@ public class LineMapperUtils {
         List<AccessLogUrlMapperProcessor> processors = new ArrayList<>();
 
         for (LineMapperSection lineMapper : lineMappers) {
-            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", "Mappers-Total-Success", config.getMaxUniqueRequests());
-            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", "Mappers-Total-Failure", config.getMaxUniqueRequests());
+            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
+            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
             AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields());
             AccessLogUrlMapperProcessor processor =
                     new AccessLogUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
@@ -74,8 +77,8 @@ public class LineMapperUtils {
         List<String> groupByFields = listWithoutFirstElement(config.getCounterFields());
 
         for (LineMapperSection lineMapper : lineMappers) {
-            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", "Mappers-Total-Success", config.getMaxUniqueRequests());
-            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", "Mappers-Total-Failure", config.getMaxUniqueRequests());
+            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
+            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
             LatencyCounterKeyCreator keyCreator = new LatencyCounterKeyCreator(groupByFields);
             LatencyMapperProcessor processor =
                     new LatencyMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
@@ -86,7 +89,7 @@ public class LineMapperUtils {
     }
 
     private static List<String> listWithoutFirstElement(List<String> list) {
-        if (list.size() < 1) return Collections.emptyList();
+        if (list.isEmpty()) return Collections.emptyList();
         return Collections.unmodifiableList(list.stream().skip(1).collect(Collectors.toList()));
     }
 
@@ -98,8 +101,8 @@ public class LineMapperUtils {
         List<JMeterUrlMapperProcessor> processors = new ArrayList<>();
 
         for (LineMapperSection lineMapper : lineMappers) {
-            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", "Mappers-Total-Success", config.getMaxUniqueRequests());
-            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", "Mappers-Total-Failure", config.getMaxUniqueRequests());
+            RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
+            RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
             JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator(config.groupByHttpStatus(), config.getGroupByFields());
             JMeterUrlMapperProcessor processor =
                     new JMeterUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,

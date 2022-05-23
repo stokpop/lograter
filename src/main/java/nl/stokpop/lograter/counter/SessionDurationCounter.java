@@ -25,7 +25,7 @@ public class SessionDurationCounter extends Counter {
 	private List<Long> hitList = new ArrayList<>();
 	
 	private SessionDurationCounter(String name) {
-		super(name);
+		super(CounterKey.of(name));
 	}
 	
 	private void setStartTimestamp(long startTimestamp) {

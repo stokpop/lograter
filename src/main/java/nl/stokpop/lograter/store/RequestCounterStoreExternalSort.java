@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
@@ -26,20 +27,20 @@ import java.util.*;
 public class RequestCounterStoreExternalSort implements RequestCounterStore {
 
 	private static final int BUFFER_SIZE = 100_000;
-	private final Map<String, RequestCounter> counters = new HashMap<>();
+	private final Map<CounterKey, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
 	private RequestCounter totalRequestCounter;
 	private File rootStorageDir;
 
-	RequestCounterStoreExternalSort(File rootStorageDir, String storeName, String totalRequestCounterName, TimePeriod timePeriod) {
+	RequestCounterStoreExternalSort(File rootStorageDir, String storeName, CounterKey totalRequestKey, TimePeriod timePeriod) {
 		this.name = storeName;
 		this.rootStorageDir = rootStorageDir;
-		this.totalRequestCounter = new RequestCounter(totalRequestCounterName, new TimeMeasurementStoreToFiles(this.rootStorageDir, this.name, totalRequestCounterName, BUFFER_SIZE));
+		this.totalRequestCounter = new RequestCounter(totalRequestKey, new TimeMeasurementStoreToFiles(this.rootStorageDir, this.name, totalRequestKey.getName(), BUFFER_SIZE));
 		this.timePeriod = timePeriod;
 	}
 	
-	public void add(String counterKey, long timestamp, int durationMillis) {
+	public void add(CounterKey counterKey, long timestamp, int durationMillis) {
 		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
 		counter.incRequests(timestamp, durationMillis);
 		totalRequestCounter.incRequests(timestamp, durationMillis);
@@ -65,9 +66,9 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	}
 	
     @Override
-	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
+	public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
 		if (!counters.containsKey(counterKey)) {
-			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreToFiles(rootStorageDir, name, counterKey, BUFFER_SIZE));
+			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreToFiles(rootStorageDir, name, counterKey.getName(), BUFFER_SIZE));
 			counters.put(counterKey, counter);
 			return counter;
 		}
@@ -77,13 +78,13 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	}
 
 	@Override
-	public RequestCounter get(String counterKey) {
-		return counters.get(counterKey);
+	public RequestCounter get(CounterKey key) {
+		return counters.get(key);
 	}
 
 	@Override
-	public boolean contains(String counterKey) {
-		return counters.containsKey(counterKey);
+	public boolean contains(CounterKey key) {
+		return counters.containsKey(key);
 	}
 
 	@Override
@@ -92,7 +93,7 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	}
 
     @Override
-    public Set<String> getCounterKeys() {
+    public Set<CounterKey> getCounterKeys() {
         return Collections.unmodifiableSet(counters.keySet());
     }
 

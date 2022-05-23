@@ -17,6 +17,7 @@ package nl.stokpop.lograter.processor.accesslog;
 
 import nl.stokpop.lograter.clickpath.ClickPath;
 import nl.stokpop.lograter.clickpath.ClickPathCollector;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounterDataBundle;
 import nl.stokpop.lograter.counter.SimpleCounter;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -33,9 +34,9 @@ import java.util.Map;
  */
 public class AccessLogDataBundle implements RequestCounterDataBundle {
 
-    private final static Logger log = LoggerFactory.getLogger(AccessLogDataBundle.class);
+    private static final Logger log = LoggerFactory.getLogger(AccessLogDataBundle.class);
 
-    public final static ClickPathCollector NOOP_CLICK_PATH_COLLECTOR = new ClickPathCollector() {
+    public static final ClickPathCollector NOOP_CLICK_PATH_COLLECTOR = new ClickPathCollector() {
         @Override
         public void addClickPath(ClickPath clickPath) {
             log.debug("Add clickpath called op NOOP click path collector for {}", clickPath);
@@ -71,15 +72,15 @@ public class AccessLogDataBundle implements RequestCounterDataBundle {
     private final List<RequestCounterStorePair> requestCounterStorePairs;
     private final ClickPathCollector clickPathCollector;
     private final AccessLogConfig config;
-    private final Map<String, LineMap> counterKeyToLineMapMap;
+    private final Map<CounterKey, LineMap> counterKeyToLineMapMap;
 
     public AccessLogDataBundle(AccessLogConfig config,
                                List<RequestCounterStorePair> requestCounterStorePairs,
                                RequestCounterStorePair totalRequestCounterStorePair,
                                ClickPathCollector clickPathCollector,
-                               Map<String, LineMap> counterKeyToLineMapMap) {
+                               Map<CounterKey, LineMap> keyToLineMap) {
 
-        if (counterKeyToLineMapMap == null) {
+        if (keyToLineMap == null) {
             throw new NullPointerException("counterKeyToLineMapMap cannot be null");
         }
         if (requestCounterStorePairs == null) {
@@ -92,7 +93,7 @@ public class AccessLogDataBundle implements RequestCounterDataBundle {
         this.totalRequestCounterPair = totalRequestCounterStorePair;
         this.requestCounterStorePairs = requestCounterStorePairs;
         this.clickPathCollector = clickPathCollector;
-        this.counterKeyToLineMapMap = counterKeyToLineMapMap;
+        this.counterKeyToLineMapMap = keyToLineMap;
 
         this.config = config;
     }
@@ -105,10 +106,10 @@ public class AccessLogDataBundle implements RequestCounterDataBundle {
 
     public AccessLogDataBundle(AccessLogConfig config,
                                List<RequestCounterStorePair> requestCounterStorePairs, RequestCounterStorePair totalRequestCounterPair,
-                               Map<String, LineMap> counterKeyToLineMapMap) {
+                               Map<CounterKey, LineMap> keyToLineMap) {
         this(config,
 		        requestCounterStorePairs, totalRequestCounterPair,
-		        NOOP_CLICK_PATH_COLLECTOR, counterKeyToLineMapMap);
+		        NOOP_CLICK_PATH_COLLECTOR, keyToLineMap);
     }
 
 	@Override
@@ -138,7 +139,7 @@ public class AccessLogDataBundle implements RequestCounterDataBundle {
         return config;
     }
 
-    public Map<String, LineMap> getCounterKeyToLineMapMap() {
+    public Map<CounterKey, LineMap> getKeyToLineMap() {
         return counterKeyToLineMapMap;
     }
 

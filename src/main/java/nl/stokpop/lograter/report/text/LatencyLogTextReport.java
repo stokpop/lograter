@@ -49,7 +49,7 @@ public class LatencyLogTextReport extends LogCounterTextReport {
         String commaSeparatedCounterFields = String.join(",", config.getCounterFields());
         out.println(reportCounter(commaSeparatedCounterFields, analyserTotal, analyserTotal, config));
         for (RequestCounterStorePair requestCounterStorePair : data.getRequestCounterStorePairs()) {
-            out.println(reportCounters(commaSeparatedCounterFields, requestCounterStorePair, analyserTotal, config, data.getCounterKeyToLineMapMap()));
+            out.println(reportCounters(commaSeparatedCounterFields, requestCounterStorePair, analyserTotal, config, data.getKeyToLineMap()));
         }
     }
 

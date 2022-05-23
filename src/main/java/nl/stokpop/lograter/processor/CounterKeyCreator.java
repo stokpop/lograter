@@ -15,14 +15,15 @@
  */
 package nl.stokpop.lograter.processor;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.LogEntry;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 
 public interface CounterKeyCreator<T extends LogEntry> {
 
-    String createCounterKey(T logEntry);
+    CounterKey createCounterKey(T logEntry);
 
-    String createCounterKey(T logEntry, LineMap name);
+    CounterKey createCounterKey(T logEntry, LineMap name);
 
-    String createCounterKey(T logEntry, String baseName);
+    CounterKey createCounterKey(T logEntry, String baseName);
 }

@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.analysis;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.metric.MetricPoint;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -22,7 +23,7 @@ import nl.stokpop.lograter.util.time.TimePeriod;
 import java.util.List;
 
 public interface ResponseTimeAnalyser {
-    String getCounterKey();
+    CounterKey getCounterKey();
 
     RequestCounter getCounter();
 

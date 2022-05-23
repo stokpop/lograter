@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.report;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.metric.MetricPoint;
@@ -120,7 +121,7 @@ public class MetricsWindowTest {
     }
 
     private RequestCounter createTimeMeasurementsTestSet(final int size, final boolean shuffle) {
-        final RequestCounter requestCounter = new RequestCounter("Test", new TimeMeasurementStoreInMemory());
+        final RequestCounter requestCounter = new RequestCounter(CounterKey.of("Test"), new TimeMeasurementStoreInMemory());
 
 	    final List<Integer> durations = new ArrayList<>(size);
 
@@ -139,7 +140,7 @@ public class MetricsWindowTest {
     }
 
     private RequestCounter createTimeMeasurementsHalfTestSet(int size) {
-        final RequestCounter requestCounter = new RequestCounter("Test", new TimeMeasurementStoreInMemory());
+        final RequestCounter requestCounter = new RequestCounter(CounterKey.of("Test"), new TimeMeasurementStoreInMemory());
         for (int i = size / 2; i < size; i++) {
             requestCounter.incRequests(i, i);
         }

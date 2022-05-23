@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.latency;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.util.time.TimePeriod;
@@ -38,7 +39,7 @@ public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
     @Override
 	public void processEntry(LatencyLogEntry entry) {
 		
-		String counterKey = createCounterKey(entry);
+		CounterKey key = createCounterKey(entry);
 
 		TimePeriod filterPeriod = config.getFilterPeriod();
 		if (!filterPeriod.isWithinTimePeriod(entry.getTimestamp())) {
@@ -52,20 +53,20 @@ public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
 
 		int durationInMillis = entry.getDurationInMillis();
 		if (entry.isSuccess()) {
-			data.getCounterStorePair().addSuccess(counterKey, timestamp, durationInMillis);
+			data.getCounterStorePair().addSuccess(key, timestamp, durationInMillis);
 		}
 		else {
-			data.getCounterStorePair().addFailure(counterKey, timestamp, durationInMillis);
+			data.getCounterStorePair().addFailure(key, timestamp, durationInMillis);
 		}
 
 	}
 
-    private String createCounterKey(LatencyLogEntry entry) {
+    private CounterKey createCounterKey(LatencyLogEntry entry) {
 		StringBuilder perfCounterName = new StringBuilder();
 		for (String field : counterFields) {
 			perfCounterName.append(entry.getField(field)).append(SEP_CHAR);
 		}
-		return perfCounterName.substring(0, perfCounterName.length() - 1);
+		return CounterKey.of(perfCounterName.substring(0, perfCounterName.length() - 1));
 	}
 
 	public LatencyLogData getData() {

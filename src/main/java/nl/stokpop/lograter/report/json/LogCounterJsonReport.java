@@ -110,7 +110,8 @@ class LogCounterJsonReport {
 	}
 
     void createCounterNode(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, Double [] reportPercentiles) {
-		node.put("name", analyser.getCounterKey());
+		node.put("name", analyser.getCounterKey().getName());
+
         long hits = analyser.totalHits();
         node.put("hits", nfNoDecimals.format(hits));
         if (analyser instanceof FailureAware) {
@@ -140,12 +141,12 @@ class LogCounterJsonReport {
 		node.put("avgHitsPerSecondWholePeriod", nfTwoDecimals.format(analyser.avgTps()));
 		TransactionCounterResult tpm = analyser.maxHitsPerMinute();
 		node.put("maxHitsPerMinute", nfNoDecimals.format(tpm.getMaxHitsPerDuration()));
-		node.put("maxHitsPerMinuteHitsPerSecond", nfTwoDecimals.format((double) tpm.getMaxHitsPerDuration() / 60.0d));
+		node.put("maxHitsPerMinuteHitsPerSecond", nfTwoDecimals.format(tpm.getMaxHitsPerDuration() / 60.0d));
 		node.put("maxHitsPerMinuteTimestamp", tpm.getMaxHitsPerDuration() > 1 ? DateUtils.formatToStandardDateTimeString(tpm.getMaxHitsPerDurationTimestamp()) : "");
 
 	    long hitsInOverallMaxMinute = analyser.hitsInMinuteWithStartTime(maxTpmStartTimeStamp);
 	    node.put("hitsInOverallMaxHitsPerMinute", nfTwoDecimals.format(hitsInOverallMaxMinute));
-		node.put("hitsPerSecondInOverallMaxHitsPerMinute", nfTwoDecimals.format((double) hitsInOverallMaxMinute / 60.0d));
+		node.put("hitsPerSecondInOverallMaxHitsPerMinute", nfTwoDecimals.format(hitsInOverallMaxMinute / 60.0d));
         node.put("percentageInOverallMaxHitsPerMinute", nfTwoDecimals.format(analyser.percentage(totalHits)));
 
         ConcurrentCounterResult ccr = analyser.maxConcurrentRequests();

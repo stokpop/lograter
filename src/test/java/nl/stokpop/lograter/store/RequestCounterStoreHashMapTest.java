@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.store;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import org.junit.Test;
 
 import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
@@ -24,17 +25,18 @@ public class RequestCounterStoreHashMapTest {
 
     @Test
     public void addWithMaxUniqueCounters() {
-        RequestCounterStore store = new RequestCounterStoreHashMap("testStore", "totalRequests");
+        RequestCounterStore store = new RequestCounterStoreHashMap("testStore", CounterKey.of("totalRequests"));
         RequestCounterStore storeMax = new RequestCounterStoreMaxCounters(store, 1);
 
-        storeMax.add("key1", 1, 1);
-        storeMax.add("key2", 2, 2);
-        storeMax.add("key3", 2, 2);
-        storeMax.add("key4", 2, 2);
-        storeMax.add("key1", 2, 2);
+
+        storeMax.add(CounterKey.of("key1"), 1, 1);
+        storeMax.add(CounterKey.of("key2"), 2, 2);
+        storeMax.add(CounterKey.of("key3"), 2, 2);
+        storeMax.add(CounterKey.of("key4"), 2, 2);
+        storeMax.add(CounterKey.of("key1"), 2, 2);
 
         assertEquals("key1 and overflow counter expected", 2, storeMax.getCounterKeys().size());
-        assertEquals("two hits on key1 expected", 2, storeMax.get("key1").getHits());
+        assertEquals("two hits on key1 expected", 2, storeMax.get(CounterKey.of("key1")).getHits());
         assertEquals("overflow should have 3 hits", 3, storeMax.get(OVERFLOW_COUNTER).getHits());
     }
 }

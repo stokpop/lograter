@@ -17,6 +17,7 @@ package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.slf4j.Logger;
@@ -33,8 +34,8 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
     private final String name;
 	private final Connection con;
 	private final long dbCounterStoreId;
-	private final Map<String, Long> counterNameToDbCounterIdMapper;
-	private final Map<String, RequestCounter> cachedCounters;
+	private final Map<CounterKey, Long> counterKeyToDbCounterIdMapper;
+	private final Map<CounterKey, RequestCounter> cachedCounters;
 	private final RequestCounter totalRequestCounter;
 	private final TimePeriod timePeriod;
 
@@ -47,7 +48,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		this.con = con;
 		try {
 			this.dbCounterStoreId = fetchCounterStoreIdOrCreateNewOne();
-			this.counterNameToDbCounterIdMapper = fillCounterNameToDbCounterIdMapper(con, dbCounterStoreId);
+			this.counterKeyToDbCounterIdMapper = fillCounterKeyToDbCounterIdMapper(con, dbCounterStoreId);
 			this.cachedCounters = fetchCountersForCounterStoreFromDb(con, dbCounterStoreId, timePeriod);
 			this.totalRequestCounter = fetchTotalRequestCounterOrCreateNewOne(con, totalCounterName, dbCounterStoreId, timePeriod);
 		} catch (SQLException e) {
@@ -79,12 +80,12 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		}
 
 		TimeMeasurementStore tmStore =  new TimeMeasurementStoreSqLite(totalCounterName, totalCounterId, con, timePeriod);
-		return new RequestCounter(totalCounterName, tmStore);
+		return new RequestCounter(CounterKey.of(totalCounterName), tmStore);
 
 	}
 
-	private static Map<String, RequestCounter> fetchCountersForCounterStoreFromDb(Connection con, long dbCounterStoreId, TimePeriod timePeriod) {
-		Map<String, RequestCounter> counters = new HashMap<>();
+	private static Map<CounterKey, RequestCounter> fetchCountersForCounterStoreFromDb(Connection con, long dbCounterStoreId, TimePeriod timePeriod) {
+		Map<CounterKey, RequestCounter> counters = new HashMap<>();
 		try {
 			try {
                 try (PreparedStatement query = con.prepareStatement("select name, id from counter where counter_store_id = ? and is_total_counter = ?")) {
@@ -92,11 +93,11 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
                     query.setBoolean(2, false);
                     try (ResultSet resultSet = query.executeQuery()) {
                         while (resultSet.next()) {
-                            String counterKey = resultSet.getString(1);
+                            String name = resultSet.getString(1);
                             long counterId = resultSet.getLong(2);
-                            log.debug("Found id {} for counter: {}", counterId, counterKey);
-                            TimeMeasurementStore tmStore = new TimeMeasurementStoreSqLite(counterKey, counterId, con, timePeriod);
-                            counters.put(counterKey, new RequestCounter(counterKey, tmStore));
+                            log.debug("Found id {} for counter: {}", counterId, name);
+                            TimeMeasurementStore tmStore = new TimeMeasurementStoreSqLite(name, counterId, con, timePeriod);
+                            counters.put(CounterKey.of(name), new RequestCounter(CounterKey.of(name), tmStore));
                         }
                     }
                 }
@@ -109,8 +110,8 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		return counters;
 	}
 
-	private static Map<String, Long> fillCounterNameToDbCounterIdMapper(Connection con, long counterStoreId) throws SQLException {
-		Map<String, Long> mapper = new HashMap<>();
+	private static Map<CounterKey, Long> fillCounterKeyToDbCounterIdMapper(Connection con, long counterStoreId) throws SQLException {
+		Map<CounterKey, Long> mapper = new HashMap<>();
 		try {
             try (PreparedStatement query = con.prepareStatement("select name, id from counter where counter_store_id = ?")) {
                 query.setLong(1, counterStoreId);
@@ -119,7 +120,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
                         String name = resultSet.getString(1);
                         long counterId = resultSet.getLong(2);
                         log.debug("Found id {} for counter: {}", counterId, name);
-                        mapper.put(name, counterId);
+                        mapper.put(CounterKey.of(name), counterId);
                     }
                 }
             }
@@ -177,37 +178,37 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 		return id;
 	}
 
-	public void add(String counterKey, long logTimestamp, int durationMillis) {
+	public void add(CounterKey counterKey, long logTimestamp, int durationMillis) {
 		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
 		counter.incRequests(logTimestamp, durationMillis);
 		totalRequestCounter.incRequests(logTimestamp, durationMillis);
 	}
 
-	private long insertCounter(Connection con, long dbCounterStoreId, String counterKey) throws SQLException {
-		return insertCounter(con, dbCounterStoreId, counterKey, false);
+	private long insertCounter(Connection con, long dbCounterStoreId, String counterName) throws SQLException {
+		return insertCounter(con, dbCounterStoreId, counterName, false);
 	}
 
-	private long insertTotalCounter(Connection con, long dbCounterStoreId, String counterKey) throws SQLException {
-		return insertCounter(con, dbCounterStoreId, counterKey, true);
+	private long insertTotalCounter(Connection con, long dbCounterStoreId, String counterName) throws SQLException {
+		return insertCounter(con, dbCounterStoreId, counterName, true);
 	}
 
-	private long insertCounter(Connection con, long dbCounterStoreId, String counterKey, boolean isTotalCounter) throws SQLException {
+	private long insertCounter(Connection con, long dbCounterStoreId, String counterName, boolean isTotalCounter) throws SQLException {
 
-		log.info("Creating counter name {} in db for counter store {}", counterKey, name);
+		log.info("Creating counter name {} in db for counter store {}", counterName, name);
 		
 		long id;
 
 		try {
 			String sql = "insert into counter(name, counter_store_id, is_total_counter) values (?, ?, ?)";
             try (PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                statement.setString(1, counterKey);
+                statement.setString(1, counterName);
                 statement.setLong(2, dbCounterStoreId);
                 statement.setBoolean(3, isTotalCounter);
 
                 int result = statement.executeUpdate();
 
                 if (result != 1) {
-                    throw new LogRaterException("Insert failed:" + sql + " for name: " + counterKey);
+                    throw new LogRaterException("Insert failed:" + sql + " for name: " + counterName);
                 }
 
                 try (ResultSet resultSet = statement.getGeneratedKeys()) {
@@ -238,31 +239,32 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	}
 
     @Override
-	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
+	public RequestCounter addEmptyCounterIfNotExists(CounterKey key) {
 		try {
-			if (!counterNameToDbCounterIdMapper.containsKey(counterKey)) {
-				long dbCounterId = insertCounter(con, dbCounterStoreId, counterKey);
-				counterNameToDbCounterIdMapper.put(counterKey, dbCounterId);
-				RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreSqLite(counterKey, dbCounterId, con, timePeriod));
-				cachedCounters.put(counterKey, counter);
+			if (!counterKeyToDbCounterIdMapper.containsKey(key)) {
+				String counterName = key.getName();
+				long dbCounterId = insertCounter(con, dbCounterStoreId, counterName);
+				counterKeyToDbCounterIdMapper.put(key, dbCounterId);
+				RequestCounter counter = new RequestCounter(key, new TimeMeasurementStoreSqLite(counterName, dbCounterId, con, timePeriod));
+				cachedCounters.put(key, counter);
 				return counter;
 			}
 			else {
-				return cachedCounters.get(counterKey);
+				return cachedCounters.get(key);
 			}
 		} catch (SQLException e) {
-			throw new LogRaterException(String.format("Failed to insert new counter [%s]", counterKey), e);
+			throw new LogRaterException(String.format("Failed to insert new counter [%s]", key), e);
 		}
 	}
 
 	@Override
-	public RequestCounter get(String counterKey) {
-		return cachedCounters.get(counterKey);
+	public RequestCounter get(CounterKey key) {
+		return cachedCounters.get(key);
 	}
 
 	@Override
-	public boolean contains(String counterKey) {
-		return counterNameToDbCounterIdMapper.containsKey(counterKey);
+	public boolean contains(CounterKey key) {
+		return counterKeyToDbCounterIdMapper.containsKey(key);
 	}
 
 	@Override
@@ -271,7 +273,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	}
 
     @Override
-    public Set<String> getCounterKeys() {
+    public Set<CounterKey> getCounterKeys() {
         return Collections.unmodifiableSet(cachedCounters.keySet());
     }
 

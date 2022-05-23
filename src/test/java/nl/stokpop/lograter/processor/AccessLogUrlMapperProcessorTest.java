@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
@@ -58,7 +59,7 @@ public class AccessLogUrlMapperProcessorTest {
 	    accessLogUrlMapperProcessor.processEntry(logEntryFailed);
 
 	    RequestCounterStore mappersRequestCounterStore = accessLogUrlMapperProcessor.getMappersRequestCounterStoreSuccess();
-        RequestCounter requestCounter = mappersRequestCounterStore.get("one two test");
+        RequestCounter requestCounter = mappersRequestCounterStore.get(CounterKey.of("one two test"));
 
         assertNotNull("request counter expected, it is null", requestCounter);
         assertEquals("one counter expected", 1, mappersSuccess.getCounterKeys().size());

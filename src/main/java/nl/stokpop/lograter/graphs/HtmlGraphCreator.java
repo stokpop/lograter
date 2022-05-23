@@ -142,7 +142,7 @@ public class HtmlGraphCreator {
 
     public static ChartFile writeHtmlGoogleGraphFile(File dir, ResponseTimeAnalyser analyser, BaseUnit baseUnit) {
 
-        String title = analyser.getCounterKey();
+        String title = analyser.getCounterKey().getName();
         List<MetricPoint> points = analyser.metricPoints();
 
         String template = CHART_HTML_TEMPLATE;
@@ -269,9 +269,9 @@ public class HtmlGraphCreator {
         File chartFile = new File(dir, filename);
 
         try {
-            PrintWriter writer = new PrintWriter(chartFile, "UTF-8");
-            writer.println(html);
-            writer.close();
+            try (PrintWriter writer = new PrintWriter(chartFile, "UTF-8")) {
+                writer.println(html);
+            }
         } catch (Exception ex) {
             log.error("Could not write chart to file: " + filename, ex);
         }

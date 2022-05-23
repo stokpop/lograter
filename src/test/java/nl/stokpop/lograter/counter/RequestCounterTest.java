@@ -31,7 +31,7 @@ public class RequestCounterTest {
 
 	@Test
 	public void testBasicCalculations() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		for (int i = 0; i < 100; i++) {
 			counter.incRequests(100_000_000 + i, i + 1);
@@ -47,7 +47,7 @@ public class RequestCounterTest {
 
 	@Test
 	public void testBasicCalculationsBig() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		final int loops = 10_000;
 		
@@ -66,7 +66,7 @@ public class RequestCounterTest {
 	@Test 
 	public void testSd() {
 
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		// http://www.mathsisfun.com/data/standard-deviation.html
 		counter.incRequests(1, 600);
@@ -84,7 +84,7 @@ public class RequestCounterTest {
 	@Test 
 	public void testPercentileSmallNumber() {
 
-	    RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+	    RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		counter.incRequests(1, 600);
 
@@ -96,7 +96,7 @@ public class RequestCounterTest {
 	@Test 
 	public void testTimeSlice() {
 
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		counter.incRequests(0, 100);
 		counter.incRequests(1, 100);
@@ -113,7 +113,7 @@ public class RequestCounterTest {
 
 	@Test
 	public void testFillReducedCounter() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		counter.incRequests(10, 100);
 		counter.incRequests(20, 50);
@@ -121,7 +121,7 @@ public class RequestCounterTest {
 		counter.incRequests(120, 50);
 		counter.incRequests(170, 20);
 
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory());
 		RequestCounter.fillReducedCounter(counter, toCounter, 40, false);
 
 		assertEquals(3, toCounter.getHits());
@@ -130,11 +130,11 @@ public class RequestCounterTest {
 
 	@Test
 	public void testFillReducedCounterCount() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
 
 		IntStream.rangeClosed(1, 8).forEach(i -> counter.incRequests(i, 1));
 
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory());
 		RequestCounter.fillReducedCounter(counter, toCounter, 4, true);
 
 		assertEquals(2, toCounter.getHits());
@@ -142,8 +142,8 @@ public class RequestCounterTest {
 
 	@Test
 	public void testFillReducedCounterEmpty() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory(), counter.getTimePeriod());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory(), counter.getTimePeriod());
 
 		RequestCounter.fillReducedCounter(counter, toCounter, 40);
 
@@ -153,8 +153,8 @@ public class RequestCounterTest {
 	@Test
 	public void testReducedCounterFirstPartEmpty() {
         TimePeriod timePeriod = TimePeriod.createIncludingEndTime(0, 20);
-        RequestCounter fromCounter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory(), timePeriod);
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory(), timePeriod);
+        RequestCounter fromCounter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory(), timePeriod);
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory(), timePeriod);
 
 	    // test where there are several buckets without load, then with load, then without load
         IntStream.rangeClosed(10, 16).forEach(i -> fromCounter.incRequests(i, 100));
@@ -176,8 +176,8 @@ public class RequestCounterTest {
 	@Test
 	public void testReducedCounterIntermediatePartEmpty() {
         TimePeriod timePeriod = TimePeriod.createIncludingEndTime(0, 20);
-        RequestCounter fromCounter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory(), timePeriod);
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory(), timePeriod);
+        RequestCounter fromCounter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory(), timePeriod);
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory(), timePeriod);
 
 	    // test where there are several buckets without load, then with load, then without load
         IntStream.rangeClosed(4, 8).forEach(i -> fromCounter.incRequests(i, 100));
@@ -201,8 +201,8 @@ public class RequestCounterTest {
 
 	@Test(expected = LogRaterException.class)
 	public void testFillReducedCounterZeroAggregationPeriod() {
-        RequestCounter counter = new RequestCounter("TestCounter", new TimeMeasurementStoreInMemory());
-        RequestCounter toCounter = new RequestCounter("toCounter", new TimeMeasurementStoreInMemory());
+        RequestCounter counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
+        RequestCounter toCounter = new RequestCounter(CounterKey.of("toCounter"), new TimeMeasurementStoreInMemory());
 		RequestCounter.fillReducedCounter(counter, toCounter, 0, false);
 	}
 

@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.time.TimePeriod;
 import org.jetbrains.annotations.NotNull;
@@ -25,22 +26,22 @@ import java.util.*;
 @NotThreadSafe
 public class RequestCounterStoreHashMap implements RequestCounterStore {
 
-    private final Map<String, RequestCounter> counters = new HashMap<>();
+    private final Map<CounterKey, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
     private RequestCounter totalRequestCounter;
 
-	RequestCounterStoreHashMap(String storeName, String totalRequestName, TimePeriod timePeriod) {
+	RequestCounterStoreHashMap(String storeName, CounterKey totalRequestName, TimePeriod timePeriod) {
 		this.name = storeName;
 		this.totalRequestCounter = new RequestCounter(totalRequestName, new TimeMeasurementStoreInMemory());
 		this.timePeriod = timePeriod;
 	}
 
-	RequestCounterStoreHashMap(String storeName, String totalRequestsName) {
+	RequestCounterStoreHashMap(String storeName, CounterKey totalRequestsName) {
 		this(storeName, totalRequestsName, TimePeriod.MAX_TIME_PERIOD);
 	}
 
-    public void add(String counterKey, long logTimestamp, int durationMillis) {
+    public void add(CounterKey counterKey, long logTimestamp, int durationMillis) {
         RequestCounter requestCounter = addEmptyCounterIfNotExists(counterKey);
         requestCounter.incRequests(logTimestamp, durationMillis);
         totalRequestCounter.incRequests(logTimestamp, durationMillis);
@@ -67,25 +68,25 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
 	@Override
-	public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
-		if (!counters.containsKey(counterKey)) {
-			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreInMemory());
-			counters.put(counterKey, counter);
+	public RequestCounter addEmptyCounterIfNotExists(CounterKey key) {
+		if (!counters.containsKey(key)) {
+			RequestCounter counter = new RequestCounter(key, new TimeMeasurementStoreInMemory());
+			counters.put(key, counter);
 			return counter;
 		}
 		else {
-			return counters.get(counterKey);
+			return counters.get(key);
 		}
 	}
 
 	@Override
-	public RequestCounter get(String counterKey) {
-		return counters.get(counterKey);
+	public RequestCounter get(CounterKey key) {
+		return counters.get(key);
 	}
 
 	@Override
-	public boolean contains(String counterKey) {
-		return counters.containsKey(counterKey);
+	public boolean contains(CounterKey key) {
+		return counters.containsKey(key);
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
     @Override
-    public Set<String> getCounterKeys() {
+    public Set<CounterKey> getCounterKeys() {
         return Collections.unmodifiableSet(counters.keySet());
     }
 

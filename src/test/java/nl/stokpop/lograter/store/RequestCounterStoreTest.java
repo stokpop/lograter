@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.store;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.util.DatabaseBootstrap;
@@ -36,13 +37,13 @@ public class RequestCounterStoreTest {
     public void testGet() {
 
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(0, 2000);
-        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", "MyCounterStoreTotalRequestCounter", timePeriod);
+        RequestCounterStore counterStore = new RequestCounterStoreHashMap("MyCounterStore", CounterKey.of("MyCounterStoreTotalRequestCounter"), timePeriod);
 
-        String myTestCounterKey = "MyTestCounter";
+        CounterKey myTestCounterKey = CounterKey.of("MyTestCounter");
         counterStore.add(myTestCounterKey, 1000, 2000);
         RequestCounter myRequestCounter = counterStore.get(myTestCounterKey);
 
-        String myTestCounterKey2 = "MyTestCounter2";
+        CounterKey myTestCounterKey2 = CounterKey.of("MyTestCounter2");
         counterStore.add(myTestCounterKey2, 2000, 4000);
         RequestCounter myRequestCounter2 = counterStore.get(myTestCounterKey2);
 
@@ -65,10 +66,10 @@ public class RequestCounterStoreTest {
 
         RequestCounterStore counterStore = new RequestCounterStoreFactory(CounterStorageType.Database).newInstance("MyDbRequestStore");
 
-        String myTestCounterKey = "MyTestCounter";
+        CounterKey myTestCounterKey = CounterKey.of("MyTestCounter");
         counterStore.add(myTestCounterKey, 1000, 2000);
 
-        String myTestCounterKey2 = "MyTestCounter2";
+        CounterKey myTestCounterKey2 = CounterKey.of("MyTestCounter2");
         counterStore.add(myTestCounterKey2, 2000, 4000);
 
         RequestCounter myRequestCounter = counterStore.get(myTestCounterKey);
@@ -92,11 +93,11 @@ public class RequestCounterStoreTest {
 
 	    // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
         RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
-                .newInstance("mappers-success", "myTestStore", cap);
+                .newInstance("mappers-success", CounterKey.of("myTestStore"), cap);
 
         final int max = cap + 13;
 
-        IntStream.range(0, max).forEach(i -> store.add("my-counter-" + i, i, i));
+        IntStream.range(0, max).forEach(i -> store.add(CounterKey.of("my-counter-" + i), i, i));
 
         // 10 unique keys and one overflow key with 13 entries
         assertEquals(cap + 1, store.getCounterKeys().size());
@@ -111,12 +112,12 @@ public class RequestCounterStoreTest {
 
         // in order to avoid memory issues, there should be a cap on the number of request counters per counter store
         RequestCounterStore store =  new RequestCounterStoreFactory(CounterStorageType.Memory)
-                .newInstance("mappers-success", "myTestStore", cap);
+                .newInstance("mappers-success", CounterKey.of("myTestStore"), cap);
 
 
-        store.add("my-counter-" + 1, 0, 0);
-        store.add("my-counter-" + 2, 2, 2);
-        store.add("my-counter-" + 3, 3, 3);
+        store.add(CounterKey.of("my-counter-" + 1), 0, 0);
+        store.add(CounterKey.of("my-counter-" + 2), 2, 2);
+        store.add(CounterKey.of("my-counter-" + 3), 3, 3);
 
         // 1 unique keys and one overflow key with 2 entries
         assertEquals(2, store.getCounterKeys().size());

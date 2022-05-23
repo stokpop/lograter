@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.store;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.Set;
  */
 public class RequestCounterStoreMaxCounters implements RequestCounterStore {
 
-    public static final String OVERFLOW_COUNTER = "OVERFLOW-COUNTER";
+    public static final CounterKey OVERFLOW_COUNTER = new CounterKey("OVERFLOW-COUNTER", Collections.emptyMap());
 
     private final RequestCounterStore store;
 
@@ -43,13 +44,13 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     }
 
     @Override
-    public Set<String> getCounterKeys() {
+    public Set<CounterKey> getCounterKeys() {
         return Collections.unmodifiableSet(store.getCounterKeys());
     }
 
     @Override
-    public RequestCounter get(String counterKey) {
-        return store.get(counterKey);
+    public RequestCounter get(CounterKey key) {
+        return store.get(key);
     }
 
     @Override
@@ -58,12 +59,12 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     }
 
     @Override
-    public boolean contains(String counterKey) {
+    public boolean contains(CounterKey key) {
         return false;
     }
 
     @Override
-    public void add(String counterKey, long timestamp, int durationMillis) {
+    public void add(CounterKey counterKey, long timestamp, int durationMillis) {
         RequestCounter currentCounter;
         if (isOverflowing()) {
             currentCounter = findCounterWhenOverflown(counterKey);
@@ -75,7 +76,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
         store.getTotalRequestCounter().incRequests(timestamp, durationMillis);
     }
 
-    private RequestCounter findCounterWhenOverflown(String counterKey) {
+    private RequestCounter findCounterWhenOverflown(CounterKey counterKey) {
         RequestCounter currentCounter;
         if (store.getCounterKeys().contains(counterKey)) {
             currentCounter = store.get(counterKey);
@@ -85,7 +86,8 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
         }
         return currentCounter;
     }
-    
+
+    @Override
     public boolean isOverflowing() {
         return store.getCounterKeys().size() >= maxUniqueCounters;
     }
@@ -96,7 +98,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     }
 
     @Override
-    public RequestCounter addEmptyCounterIfNotExists(String counterKey) {
+    public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
         if (isOverflowing()) {
             return store.addEmptyCounterIfNotExists(OVERFLOW_COUNTER);
         }

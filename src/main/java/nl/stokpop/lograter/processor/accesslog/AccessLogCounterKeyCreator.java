@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.accesslog;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.processor.CounterKeyCreator;
 import nl.stokpop.lograter.util.linemapper.LineMap;
@@ -41,30 +42,30 @@ public class AccessLogCounterKeyCreator implements CounterKeyCreator<AccessLogEn
     }
 
     @Override
-    public final String createCounterKey(final AccessLogEntry logEntry) {
+    public final CounterKey createCounterKey(final AccessLogEntry logEntry) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final AccessLogEntry logEntry, final LineMap lineMap) {
+    public final CounterKey createCounterKey(final AccessLogEntry logEntry, final LineMap lineMap) {
         StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     @Override
-    public final String createCounterKey(final AccessLogEntry logEntry, final String baseName) {
+    public final CounterKey createCounterKey(final AccessLogEntry logEntry, final String baseName) {
         StringBuilder key = new StringBuilder(baseName);
         addHttpMethodAndStatusAndFields(logEntry, key);
-        return key.toString();
+        return CounterKey.of(key.toString());
     }
 
     private void addHttpMethodAndStatusAndFields(AccessLogEntry logEntry, StringBuilder key) {
         if (filterHttpMethod) key.append(SEP_CHAR).append(logEntry.getHttpMethod());
         if (filterHttpStatus) key.append(SEP_CHAR).append(logEntry.getHttpStatus());
-        if (groupByFields.size() > 0) {
+        if (!groupByFields.isEmpty()) {
             for (String groupByField : groupByFields) {
                 String field = logEntry.getField(groupByField);
                 String sanitizedField = field.replace(",", "_");

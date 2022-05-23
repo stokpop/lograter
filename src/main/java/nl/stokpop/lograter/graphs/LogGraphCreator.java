@@ -29,6 +29,7 @@ import nl.stokpop.lograter.analysis.HistogramData;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFactory;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.*;
 import nl.stokpop.lograter.util.FileUtils;
@@ -98,10 +99,8 @@ public class LogGraphCreator extends AbstractGraphCreator {
             }
         }
         File subDirJsGraphs = new File(dir, "log-rater-jsgraphs-" + dateStr);
-	    if (!subDirJsGraphs.exists()) {
-		    if (!subDirJsGraphs.mkdirs()) {
-			    throw new LogRaterException(String.format("Cannot create directories: %s", subDirJsGraphs));
-		    }
+	    if (!subDirJsGraphs.exists() && !subDirJsGraphs.mkdirs()) {
+            throw new LogRaterException(String.format("Cannot create directories: %s", subDirJsGraphs));
 	    }
 
         List<ChartFile> chartFiles = new ArrayList<>();
@@ -203,7 +202,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
         }
 
         if (graphConfig.isGraphsHistoSimulatorEnabled()) {
-            RequestCounter simulatedCounter = new RequestCounter("simulatedResponseTimeCounter", new TimeMeasurementStoreInMemory());
+            RequestCounter simulatedCounter = new RequestCounter(CounterKey.of("simulatedResponseTimeCounter"), new TimeMeasurementStoreInMemory());
 
             int numberOfValues = (int) timeSlicedCounter.getHits();
             double[] simulatedValues = new RandomGenerator().generateNormalDistributionSet(numberOfValues, analyser.stdDevHitDuration(), analyser.avgHitDuration(), analyser.min(), analyser.max());
@@ -237,7 +236,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
         RequestCounter reducedCounter = null;
         if (timeSlicedCounter.getHits() > GRAPH_AGGREGATION_CUTOFF_NR_HITS) {
             final String reducedCounterName = String.format("%s-%s-duration.avgPerSec(%d)", counterType, timeSlicedCounter.getCounterKey(), graphConfig.getAggregateDurationInSeconds());
-            reducedCounter = new RequestCounter(reducedCounterName, new TimeMeasurementStoreInMemory());
+            reducedCounter = new RequestCounter(CounterKey.of(reducedCounterName), new TimeMeasurementStoreInMemory());
             RequestCounter.fillReducedCounter(timeSlicedCounter, reducedCounter, graphConfig.getAggregateDurationInSeconds());
         }
 
@@ -249,10 +248,11 @@ public class LogGraphCreator extends AbstractGraphCreator {
             File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, timeSlicedCounter, timePeriodFilter, maxDurationGraphView);
             return new ChartFile(counterNameDuration, file);
         } else {
-            String counterNameDuration = reducedCounter.getCounterKey();
-            log.debug("Starting graph: {}", counterNameDuration);
-            File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, reducedCounter, timePeriodFilter, maxDurationGraphView);
-            return new ChartFile(counterNameDuration, file);
+            CounterKey key = reducedCounter.getCounterKey();
+            String graphName = key.getName();
+            log.debug("Starting graph: {}", graphName);
+            File file = writeResponseGraphFile(subDirGraphs, graphName, reducedCounter, timePeriodFilter, maxDurationGraphView);
+            return new ChartFile(graphName, file);
         }
     }
 

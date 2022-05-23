@@ -17,6 +17,7 @@ package nl.stokpop.lograter.analysis;
 
 import net.jcip.annotations.NotThreadSafe;
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurement;
 import nl.stokpop.lograter.util.ConcurrentSoftCache;
@@ -73,11 +74,11 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
     	this.tcrCache = new ConcurrentSoftCache<>();
     	RequestCounter slicedCounter = RequestCounter.safeSlicedCounter(counter, timePeriod);
 	    this.requestCounter = slicedCounter;
-	    this.timeWindowCalculator = new TimeWindowCalculator(requestCounter.getUniqueCounterKey(), slicedCounter, timePeriod);
+	    this.timeWindowCalculator = new TimeWindowCalculator(requestCounter.getUniqueCounterKey().getName(), slicedCounter, timePeriod);
     }
 
 	@Override
-    public String getCounterKey() {
+    public CounterKey getCounterKey() {
 		return requestCounter.getCounterKey();
 	}
 	
@@ -266,7 +267,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
 
     @Override
     public double durationInHours() {
-        return ((double)timeWindowCalculator.getTimeWindowPeriod().getDurationInMillis()) / (60d * 60d * 1000d);
+        return (timeWindowCalculator.getTimeWindowPeriod().getDurationInMillis()) / (60d * 60d * 1000d);
     }
 
 	/**
@@ -284,7 +285,7 @@ public class ResponseTimeAnalyserFailureUnaware implements ResponseTimeAnalyser 
         long pointDistance = Math.max(1000, timeWindowCalculator.getTimeWindowPeriod().getDurationInMillis() / 200);
 
         final List<MetricPoint> metricPoints = new ArrayList<>();
-        String name = requestCounter.getUniqueCounterKey();
+        String name = requestCounter.getUniqueCounterKey().getName();
 
         // keep window size equal to pointDistance so no overlap in windows exists
         MetricsWindow metricsWindow = new MetricsWindow(name, pointDistance);

@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.jmeter;
 
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.processor.CounterKeyCreator;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -35,13 +36,13 @@ public class JMeterLogCounterProcessor implements Processor<JMeterLogEntry> {
 		long timestamp = logEntry.getTimestamp();
 		int durationInMillis = logEntry.getDurationInMillis();
 
-		String counterKey = counterKeyCreator.createCounterKey(logEntry);
+		CounterKey key = counterKeyCreator.createCounterKey(logEntry);
 
 		if (logEntry.isSuccess()) {
-            counterStorePair.addSuccess(counterKey, timestamp, durationInMillis);
+            counterStorePair.addSuccess(key, timestamp, durationInMillis);
 		}
 		else {
-            counterStorePair.addFailure(counterKey, timestamp, durationInMillis);
+            counterStorePair.addFailure(key, timestamp, durationInMillis);
 		}
 	}
 

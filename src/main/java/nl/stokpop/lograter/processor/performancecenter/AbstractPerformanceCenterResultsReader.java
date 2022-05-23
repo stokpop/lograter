@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.processor.performancecenter;
 
 import nl.stokpop.lograter.LogRaterException;
+import nl.stokpop.lograter.counter.CounterKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public abstract class AbstractPerformanceCenterResultsReader implements Performa
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractPerformanceCenterResultsReader.class);
 
-	private final static int MINUS_ONE = -1;
+	private static final int MINUS_ONE = -1;
     private static final int MAX_WARNINGS = 60;
 
     private AtomicInteger warningThinkTimeCount = new AtomicInteger(0);
@@ -78,6 +79,8 @@ public abstract class AbstractPerformanceCenterResultsReader implements Performa
 			return;
 		}
 
+		CounterKey key = CounterKey.of(eventName);
+
 		long timestampMs = (testStartTimeSecEpoch + (long)eventMeter.getEndTime()) * 1000;
 		// wasted time is already substracted from this value by performance center analysis
 		// think time (inside the transaction) needs to be substracted
@@ -96,10 +99,10 @@ public abstract class AbstractPerformanceCenterResultsReader implements Performa
 		if (count == 1) {
 			// assume that value == valueMin == valueMax
 			if (eventMeter.isSuccess()) {
-				data.addSuccess(eventName, timestampMs, durationMsWithoutThinkTime);
+				data.addSuccess(key, timestampMs, durationMsWithoutThinkTime);
 			}
 			else {
-				data.addFailure(eventName, timestampMs, durationMsWithoutThinkTime);
+				data.addFailure(key, timestampMs, durationMsWithoutThinkTime);
 			}
 		}
 		else if (count == 2) {
@@ -107,11 +110,11 @@ public abstract class AbstractPerformanceCenterResultsReader implements Performa
 			final int durationMinWithoutThinkTimeMs = (int) (valueMinSecWithoutThinkTime * 1000);
 			final int durationMaxWithoutThinkTimeMs = (int) (valueMaxSecWithoutThinkTime * 1000);
 			if (eventMeter.isSuccess()) {
-				data.addSuccess(eventName, timestampMs, durationMinWithoutThinkTimeMs);
-				data.addSuccess(eventName, timestampMs + timePeriodBetweenEventsMs, durationMaxWithoutThinkTimeMs);
+				data.addSuccess(key, timestampMs, durationMinWithoutThinkTimeMs);
+				data.addSuccess(key, timestampMs + timePeriodBetweenEventsMs, durationMaxWithoutThinkTimeMs);
 			} else {
-				data.addFailure(eventName, timestampMs, durationMinWithoutThinkTimeMs);
-				data.addFailure(eventName, timestampMs + timePeriodBetweenEventsMs, durationMaxWithoutThinkTimeMs);
+				data.addFailure(key, timestampMs, durationMinWithoutThinkTimeMs);
+				data.addFailure(key, timestampMs + timePeriodBetweenEventsMs, durationMaxWithoutThinkTimeMs);
 			}
 		}
 		else if (count > 2) {
@@ -128,11 +131,11 @@ public abstract class AbstractPerformanceCenterResultsReader implements Performa
 
                 if (eventMeter.isSuccess()) {
                     // note: for successes the think time is substracted
-                    data.addSuccess(eventName, eventTimeStamp, localDurationMsWithoutThinktime);
+                    data.addSuccess(key, eventTimeStamp, localDurationMsWithoutThinktime);
 				}
 				else {
                 	// note: for failures the think time is not substracted
-					data.addFailure(eventName, eventTimeStamp, localDurationMsWithoutThinktime);
+					data.addFailure(key, eventTimeStamp, localDurationMsWithoutThinktime);
 				}
 			}
 		}

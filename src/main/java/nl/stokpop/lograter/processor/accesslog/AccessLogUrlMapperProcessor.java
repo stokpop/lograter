@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.processor.accesslog;
 
 import net.jcip.annotations.NotThreadSafe;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.logentry.AccessLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.store.RequestCounterStore;
@@ -49,7 +50,7 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 	private final Set<String> reportedMultiMatchers = new HashSet<>();
 
     // needed to report the used regexp for this mapper key
-    private final Map<String, LineMap> counterKeyToLineMapMap = new HashMap<>();
+    private final Map<CounterKey, LineMap> keyToLineMap = new HashMap<>();
 
     private final AccessLogCounterKeyCreator counterKeyCreator;
 
@@ -82,15 +83,13 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 		LineMapperCallback callback = new LineMapperCallback() {
 			@Override
 			public void noMatchFound(String line) {
-				if (!reportedNonMatchers.contains(line)) {
-					if (!isIgnoreMultiAndNoMatches && !counterStorePair.isOverflowing()) {
-                        reportedNonMatchers.add(line);
-                        logNonMatcher(line, nonMatchersCount.incrementAndGet());
-                    }
+				if (!reportedNonMatchers.contains(line) && !isIgnoreMultiAndNoMatches && !counterStorePair.isOverflowing()) {
+					reportedNonMatchers.add(line);
+					logNonMatcher(line, nonMatchersCount.incrementAndGet());
 				}
 				if (!isIgnoreMultiAndNoMatches) {
                     String baseName = isDoCountNoMappersAsOne ? NO_MAPPER + "-total" : NO_MAPPER + "-" + logEntry.getUrl();
-                    String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
+                    CounterKey mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, baseName);
 					addToCounterStore(mapperCounterKey, logEntry);
 				}
 			}
@@ -110,11 +109,9 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 
 			@Override
 			public void matchFound(LineMap mapper) {
-                String mapperCounterKey = counterKeyCreator.createCounterKey(logEntry, mapper);
-				addToCounterStore(mapperCounterKey, logEntry);
-				if (!counterKeyToLineMapMap.containsKey(mapperCounterKey)) {
-                    counterKeyToLineMapMap.put(mapperCounterKey, mapper);
-                }
+                CounterKey key = counterKeyCreator.createCounterKey(logEntry, mapper);
+				addToCounterStore(key, logEntry);
+				keyToLineMap.computeIfAbsent(key, k -> mapper);
 			}
 		};
 
@@ -135,7 +132,7 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
         }
     }
 
-    private void addToCounterStore(String counterKey, AccessLogEntry logEntry) {
+    private void addToCounterStore(CounterKey counterKey, AccessLogEntry logEntry) {
 		if (logEntry.isHttpError()) {
 			counterStorePair.addFailure(counterKey, logEntry.getTimestamp(), logEntry.getDurationInMillis());
 		}
@@ -153,8 +150,8 @@ public class AccessLogUrlMapperProcessor implements Processor<AccessLogEntry> {
 		return counterStorePair.getRequestCounterStoreFailure();
 	}
 
-    public Map<String, LineMap> getCounterKeyToLineMapMap() {
-        return Collections.unmodifiableMap(new HashMap<>(counterKeyToLineMapMap));
+    public Map<CounterKey, LineMap> getKeyToLineMap() {
+        return Collections.unmodifiableMap(new HashMap<>(keyToLineMap));
     }
 
     @Override

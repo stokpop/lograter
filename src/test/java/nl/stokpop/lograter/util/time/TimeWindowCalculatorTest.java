@@ -16,6 +16,7 @@
 package nl.stokpop.lograter.util.time;
 
 import nl.stokpop.lograter.analysis.HistogramData;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class TimeWindowCalculatorTest {
 
     @Test
     public void testPercentileWithHighNumbers() {
-        RequestCounter requestCounter = new RequestCounter("TestMe", new TimeMeasurementStoreInMemory());
+        RequestCounter requestCounter = new RequestCounter(CounterKey.of("TestMe"), new TimeMeasurementStoreInMemory());
 
         // loop 10 times adding 100_000 range of numbers
         IntStream.rangeClosed(1, 10).forEach($ -> IntStream.rangeClosed(1, 100_000).forEach(i -> requestCounter.incRequests(i, i)));
@@ -48,7 +49,7 @@ public class TimeWindowCalculatorTest {
     @Test
     public void testGetAverageDuration() {
 
-	    RequestCounter requestCounter = new RequestCounter("TestMe", new TimeMeasurementStoreInMemory());
+	    RequestCounter requestCounter = new RequestCounter(CounterKey.of("TestMe"), new TimeMeasurementStoreInMemory());
 
 	    int items = 10_000;
         IntStream.rangeClosed(1, items).forEach(i -> requestCounter.incRequests(i, i % 101));
@@ -75,7 +76,7 @@ public class TimeWindowCalculatorTest {
 	@Test
 	public void testGetHistogram100() {
 
-		RequestCounter requestCounter = new RequestCounter("TestMe", new TimeMeasurementStoreInMemory());
+		RequestCounter requestCounter = new RequestCounter(CounterKey.of("TestMe"), new TimeMeasurementStoreInMemory());
 		int items = 100;
 		IntStream.range(0, items).forEach(i -> requestCounter.incRequests(i, i));
 

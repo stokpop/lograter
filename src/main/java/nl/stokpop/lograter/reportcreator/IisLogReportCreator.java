@@ -24,6 +24,7 @@ import nl.stokpop.lograter.clickpath.ClickPathReport;
 import nl.stokpop.lograter.clickpath.InMemoryClickpathCollector;
 import nl.stokpop.lograter.command.CommandIisLog;
 import nl.stokpop.lograter.command.CommandMain;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.feeder.FileFeeder;
 import nl.stokpop.lograter.graphs.LogGraphCreator;
@@ -173,15 +174,15 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 			throw new LogRaterException("No lines (success or failure) processed in file feeder. Please check input parameters.");
 		}
 
-		Map<String, LineMap> allCounterKeysToLineMapMap = new HashMap<>();
+		Map<CounterKey, LineMap> allKeysToLineMap = new HashMap<>();
 		for (AccessLogUrlMapperProcessor urlMapperProcessor : urlMapperProcessors) {
-			Map<String, LineMap> counterKeyToLineMapMap = urlMapperProcessor.getCounterKeyToLineMapMap();
-			allCounterKeysToLineMapMap.putAll(counterKeyToLineMapMap);
+			Map<CounterKey, LineMap> keyToLineMap = urlMapperProcessor.getKeyToLineMap();
+			allKeysToLineMap.putAll(keyToLineMap);
 		}
 		
 		AccessLogDataBundle dataBundle = clickPathCollector == null ?
 				new AccessLogDataBundle(config, requestCounterStorePairs, totalRequestCounterStorePair) :
-				new AccessLogDataBundle(config, requestCounterStorePairs, totalRequestCounterStorePair, clickPathCollector, allCounterKeysToLineMapMap);
+				new AccessLogDataBundle(config, requestCounterStorePairs, totalRequestCounterStorePair, clickPathCollector, allKeysToLineMap);
 
 		AccessLogTextReport report = new AccessLogTextReport(dataBundle);
 
@@ -202,10 +203,8 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		graphConfig.setGraphWithTrueTPSEnabled(cmdIisLog.graphWithTrueTPS);
 		graphConfig.setBaseUnit(cmdMain.baseUnit);
 
-		if (!reportDir.exists()) {
-			if (!reportDir.mkdirs()) {
-				throw new LogRaterException(String.format("Cannot create directories: %s", reportDir));
-			}
+		if (!reportDir.exists() && !reportDir.mkdirs()) {
+			throw new LogRaterException(String.format("Cannot create directories: %s", reportDir));
 		}
 
 		if (graphConfig.isGraphRequested()) {
