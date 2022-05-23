@@ -18,6 +18,7 @@ package nl.stokpop.lograter.report.json;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.*;
+import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
@@ -53,7 +54,7 @@ class LogCounterJsonReport {
         nfNoDecimals = (DecimalFormat) NumberFormat.getInstance(DEFAULT_LOCALE);
         nfNoDecimals.applyPattern("0");
 
-        nfDoNotShowDecimalSepAlways = (DecimalFormat) DecimalFormat.getInstance(DEFAULT_LOCALE);
+        nfDoNotShowDecimalSepAlways = (DecimalFormat) NumberFormat.getInstance(DEFAULT_LOCALE);
         nfDoNotShowDecimalSepAlways.setDecimalSeparatorAlwaysShown(false);
 
         this.addStubDelays = addStubDelays;
@@ -110,7 +111,12 @@ class LogCounterJsonReport {
 	}
 
     void createCounterNode(ObjectNode node, ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, Double [] reportPercentiles) {
-		node.put("name", analyser.getCounterKey().getName());
+        CounterKey key = analyser.getCounterKey();
+
+        node.put("name", key.getName());
+
+        // add additional nodes
+        key.getFields().forEach(node::put);
 
         long hits = analyser.totalHits();
         node.put("hits", nfNoDecimals.format(hits));

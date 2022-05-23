@@ -39,7 +39,7 @@ public class AccessLogUrlMapperProcessorTest {
         RequestCounterStore mappersFailure = type.newInstance("mappers");
         LineMapperSection lineMapperSection = new LineMapperSection("linemappertable");
         lineMapperSection.addMapperRule("(.*)bar(.*)", "$1 $2 test");
-        AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(false, false);
+        AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator();
         RequestCounterStorePair counterStorePair = new RequestCounterStorePair(mappersSuccess, mappersFailure);
         AccessLogUrlMapperProcessor accessLogUrlMapperProcessor = new AccessLogUrlMapperProcessor(
                 counterStorePair,

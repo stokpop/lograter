@@ -20,6 +20,9 @@ import java.util.Map;
 
 public class LogEntry {
 
+	public static final String HTTP_STATUS = "httpStatus";
+	public static final String HTTP_METHOD = "httpMethod";
+
 	// timestamp in millis since epoch
 	private long timestamp = 0L;
 	private String logline;

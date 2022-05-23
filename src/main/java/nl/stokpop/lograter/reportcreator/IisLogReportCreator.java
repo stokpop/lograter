@@ -51,10 +51,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_METHOD;
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_STATUS;
 
 /**
  * Generate Iis report.
@@ -74,8 +74,15 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		config.setRunId(cmdMain.runId);
 		config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
 		config.setDoCountMultipleMapperHits(cmdIisLog.doCountMultipleMapperHits);
-		config.setDoFilterOnHttpMethod(cmdIisLog.doGroupByHttpMethod);
-		config.setDoFilterOnHttpStatus(cmdIisLog.doGroupByHttpStatus);
+		// insert order is important
+		Set<String> groupByFields = new LinkedHashSet<>();
+		if (cmdIisLog.doGroupByHttpMethod) {
+			groupByFields.add(HTTP_METHOD);
+		}
+		if (cmdIisLog.doGroupByHttpStatus) {
+			groupByFields.add(HTTP_STATUS);
+		}
+		config.setGroupByFields(Collections.unmodifiableList(new ArrayList<>(groupByFields)));
 		config.setExcludeMappersInIisAndAccessLogs(cmdIisLog.excludeMappers);
 		config.setIgnoreMultiAndNoMatches(cmdIisLog.ignoreMultiAndNoMatches);
 		config.setLineMappers(lineMappers);

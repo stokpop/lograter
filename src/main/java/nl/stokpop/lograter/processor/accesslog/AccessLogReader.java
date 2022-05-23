@@ -44,10 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Read access and nginx logs.
@@ -144,9 +141,8 @@ public class AccessLogReader {
         }
 
         int additionalColumns = 0;
-        if (config.groupByHttpMethod()) { additionalColumns++; }
-        if (config.groupByHttpStatus()) { additionalColumns++; }
-        if (config.getGroupByFields() != null) { additionalColumns = additionalColumns + config.getGroupByFields().size(); }
+        additionalColumns = additionalColumns + config.getGroupByFields().size();
+
         final String totalCounterName = RequestCounter.createCounterNameThatAlignsInTextReport("TOTAL", additionalColumns);
 
         RequestCounterStorePair totalRequestCounterStorePair =
@@ -200,7 +196,7 @@ public class AccessLogReader {
 
             RequestCounterStorePair urlStorePair = new RequestCounterStorePair(urlCounterStoreSuccess, urlCounterStoreFailure);
 
-            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields()) {
+            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.getGroupByFields()) {
                 @Override public String counterKeyBaseName(AccessLogEntry entry) { return entry.getUrl(); }
             };
             accessLogParser.addProcessor(new AccessLogCounterProcessor(urlStorePair, keyCreator));
@@ -212,7 +208,7 @@ public class AccessLogReader {
 
             RequestCounterStorePair userAgentStorePair = new RequestCounterStorePair(userAgentCounterStoreSuccess, userAgentCounterStoreFailure);
 
-            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields()) {
+            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.getGroupByFields()) {
                 @Override public String counterKeyBaseName(AccessLogEntry entry) { return entry.getUserAgent(); }
             };
             accessLogParser.addProcessor(new AccessLogCounterProcessor(userAgentStorePair, keyCreator));
@@ -224,7 +220,7 @@ public class AccessLogReader {
 
             RequestCounterStorePair referersStorePair = new RequestCounterStorePair(referersCounterStoreSuccess, referersCounterStoreFailure);
 
-            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields()) {
+            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.getGroupByFields()) {
                 @Override public String counterKeyBaseName(AccessLogEntry entry) { return entry.getReferrer(); }
             };
             accessLogParser.addProcessor(new AccessLogCounterProcessor(referersStorePair, keyCreator));
@@ -239,7 +235,7 @@ public class AccessLogReader {
 
         RequestCounterStorePair totalStorePair = new RequestCounterStorePair(totalCounterStoreSuccess, totalCounterStoreFailure);
 
-        AccessLogCounterKeyCreator overallKeyCreator = new AccessLogCounterKeyCreator(false, false) {
+        AccessLogCounterKeyCreator overallKeyCreator = new AccessLogCounterKeyCreator() {
             @Override
             public String counterKeyBaseName(AccessLogEntry entry) { return totalCounterName; }
         };

@@ -1,17 +1,27 @@
 package nl.stokpop.lograter.counter;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-@Value
 public class CounterKey implements Comparable<CounterKey> {
-    String name;
-    @EqualsAndHashCode.Exclude
-    Map<String, String> fields;
+
+    private final String name;
+    private final Map<String, String> fields;
+
+    private CounterKey(String name, Map<String, String> fields) {
+        this.name = name;
+        this.fields = Collections.unmodifiableMap(new HashMap<>(fields));
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, String> getFields() {
+        return fields;
+    }
 
     @Override
     public int compareTo(CounterKey other) {
@@ -28,4 +38,20 @@ public class CounterKey implements Comparable<CounterKey> {
         return new CounterKey(name, Collections.emptyMap());
     }
 
+    public static CounterKey of(String name, Map<String, String> fields) {
+        return new CounterKey(name, fields);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CounterKey that = (CounterKey) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

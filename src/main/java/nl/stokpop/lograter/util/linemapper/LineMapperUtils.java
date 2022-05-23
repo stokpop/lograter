@@ -37,9 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LineMapperUtils {
 
@@ -57,7 +55,7 @@ public class LineMapperUtils {
         for (LineMapperSection lineMapper : lineMappers) {
             RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
             RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
-            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.groupByHttpMethod(), config.groupByHttpStatus(), config.getGroupByFields());
+            AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator(config.getGroupByFields());
             AccessLogUrlMapperProcessor processor =
                     new AccessLogUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
                             config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());
@@ -67,30 +65,22 @@ public class LineMapperUtils {
     }
 
     public static List<LatencyMapperProcessor> createUrlMapperProcessors(
-    		RequestCounterStoreFactory csFactory, LatencyLogConfig config) {
+    		RequestCounterStoreFactory csFactory, LatencyLogConfig config, LatencyCounterKeyCreator keyCreator) {
 
         List<LineMapperSection> lineMappers = config.getLineMappers();
 
         List<LatencyMapperProcessor> processors = new ArrayList<>();
 
-        // the first item of counter fields is already present as mapper base value
-        List<String> groupByFields = listWithoutFirstElement(config.getCounterFields());
-
         for (LineMapperSection lineMapper : lineMappers) {
             RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
             RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
-            LatencyCounterKeyCreator keyCreator = new LatencyCounterKeyCreator(groupByFields);
+
             LatencyMapperProcessor processor =
                     new LatencyMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
                             config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());
             processors.add(processor);
         }
         return processors;
-    }
-
-    private static List<String> listWithoutFirstElement(List<String> list) {
-        if (list.isEmpty()) return Collections.emptyList();
-        return Collections.unmodifiableList(list.stream().skip(1).collect(Collectors.toList()));
     }
 
     public static List<JMeterUrlMapperProcessor> createUrlMapperProcessors(
@@ -103,7 +93,7 @@ public class LineMapperUtils {
         for (LineMapperSection lineMapper : lineMappers) {
             RequestCounterStore mappersSuccess = csFactory.newInstance(lineMapper.getName() + "-mappers-success", CounterKey.of("Mappers-Total-Success"), config.getMaxUniqueRequests());
             RequestCounterStore mappersFailure = csFactory.newInstance(lineMapper.getName() + "-mappers-failure", CounterKey.of("Mappers-Total-Failure"), config.getMaxUniqueRequests());
-            JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator(config.groupByHttpStatus(), config.getGroupByFields());
+            JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator(config.getGroupByFields());
             JMeterUrlMapperProcessor processor =
                     new JMeterUrlMapperProcessor(new RequestCounterStorePair(mappersSuccess, mappersFailure), lineMapper, keyCreator,
                             config.countNoMappersAsOne(), config.ignoreMultiAndNoMatches(), config.countMultipleMapperHits());

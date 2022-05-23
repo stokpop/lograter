@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.util.stream.IntStream;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -48,14 +48,14 @@ public class RequestCounterStoreTest {
         RequestCounter myRequestCounter2 = counterStore.get(myTestCounterKey2);
 
         assertNotNull(myRequestCounter);
-        assertEquals(myRequestCounter.getHits(), 1);
+        assertEquals(1, myRequestCounter.getHits());
 
         assertNotNull(myRequestCounter2);
-        assertEquals(myRequestCounter2.getHits(), 1);
+        assertEquals(1, myRequestCounter2.getHits());
 
         RequestCounter myTotalRequestCounter = counterStore.getTotalRequestCounter();
         assertNotNull(myTotalRequestCounter);
-        assertEquals(myTotalRequestCounter.getHits(), 2);
+        assertEquals(2, myTotalRequestCounter.getHits());
     }
 
 	@Test
@@ -102,7 +102,7 @@ public class RequestCounterStoreTest {
         // 10 unique keys and one overflow key with 13 entries
         assertEquals(cap + 1, store.getCounterKeys().size());
         assertEquals(max, store.getTotalRequestCounter().getHits());
-        assertEquals(13, store.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(13, store.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
     }
 
     @Test
@@ -122,6 +122,6 @@ public class RequestCounterStoreTest {
         // 1 unique keys and one overflow key with 2 entries
         assertEquals(2, store.getCounterKeys().size());
         assertEquals(3, store.getTotalRequestCounter().getHits());
-        assertEquals(2, store.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(2, store.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
     }
 }

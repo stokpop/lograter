@@ -24,50 +24,29 @@ import java.util.List;
 
 public class JMeterCounterKeyCreator implements CounterKeyCreator<JMeterLogEntry> {
 
-    private static final char SEP_CHAR = ',';
-
-    private final boolean filterHttpStatus;
     private final List<String> groupByFields;
 
-    public JMeterCounterKeyCreator(boolean filterHttpStatus) {
-        this(filterHttpStatus, Collections.emptyList());
+    public JMeterCounterKeyCreator() {
+        this(Collections.emptyList());
     }
 
-    public JMeterCounterKeyCreator(final boolean filterHttpStatus, final List<String> groupByFields) {
-        this.filterHttpStatus = filterHttpStatus;
+    public JMeterCounterKeyCreator(final List<String> groupByFields) {
         this.groupByFields = groupByFields;
     }
 
     @Override
-    public final CounterKey createCounterKey(final JMeterLogEntry logEntry) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final JMeterLogEntry entry) {
+        return createCounterKey(entry, counterKeyBaseName(entry));
     }
 
     @Override
-    public final CounterKey createCounterKey(final JMeterLogEntry logEntry, final LineMap lineMap) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final JMeterLogEntry entry, final LineMap lineMap) {
+        return createCounterKey(entry, counterKeyBaseName(entry, lineMap));
     }
 
     @Override
-    public final CounterKey createCounterKey(final JMeterLogEntry logEntry, final String baseName) {
-        StringBuilder key = new StringBuilder(baseName);
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
-    }
-
-    private void addHttpMethodAndStatusAndFields(JMeterLogEntry logEntry, StringBuilder key) {
-        if (filterHttpStatus) key.append(SEP_CHAR).append(logEntry.getCode());
-        if (!groupByFields.isEmpty()) {
-            for (String groupByField : groupByFields) {
-                String field = logEntry.getField(groupByField);
-                String sanitizedField = field.replace(",", "_");
-                key.append(SEP_CHAR).append(sanitizedField);
-            }
-        }
+    public final CounterKey createCounterKey(final JMeterLogEntry entry, final String baseName) {
+        return constructCounterKey(entry, baseName, groupByFields);
     }
 
     public String counterKeyBaseName(JMeterLogEntry entry) {

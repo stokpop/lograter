@@ -20,29 +20,29 @@ import nl.stokpop.lograter.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class  AccessLogEntry extends LogEntry {
+public class AccessLogEntry extends LogEntry {
 
 	private static final Logger log = LoggerFactory.getLogger(AccessLogEntry.class);
 
     /**
      * null is also allowed for the same behaviour: no splitting is done, all is root url
      */
-    public static final UrlSplitter URL_SPLITTER_NOOP = url -> new RootUrlAndParameters(url, "");
+    public static final UrlSplitter URL_SPLITTER_NOOP = urlNoop -> new RootUrlAndParameters(urlNoop, "");
 
     /**
      * a splitter for question mark splitting
      */
-    public static final UrlSplitter URL_SPLITTER_DEFAULT = url -> {
+    public static final UrlSplitter URL_SPLITTER_DEFAULT = urlDefault -> {
         String urlPostFixRoot;
         String urlPostFixParams;
-        int questionMarkIndex = url.indexOf('?');
+        int questionMarkIndex = urlDefault.indexOf('?');
 
         if (questionMarkIndex != -1) {
-            urlPostFixRoot =  url.substring(0, questionMarkIndex);
-            urlPostFixParams = url.substring(questionMarkIndex - 1);
+            urlPostFixRoot =  urlDefault.substring(0, questionMarkIndex);
+            urlPostFixParams = urlDefault.substring(questionMarkIndex - 1);
         }
         else {
-            urlPostFixRoot = url;
+            urlPostFixRoot = urlDefault;
             urlPostFixParams = "";
         }
         return new RootUrlAndParameters(urlPostFixRoot, urlPostFixParams);
@@ -153,10 +153,12 @@ public class  AccessLogEntry extends LogEntry {
 
 	public final void setHttpStatus(int httpStatus) {
 		this.httpStatus = httpStatus;
+		this.addField(HTTP_STATUS, String.valueOf(httpStatus));
 	}
 
 	public final void setHttpMethod(HttpMethod httpMethod) {
 		this.httpMethod = httpMethod;
+		this.addField(HTTP_METHOD, httpMethod.name());
 	}
 
 	public final void setDurationInMillis(int durationInMillis) {

@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public class RequestCounterStoreMaxCounters implements RequestCounterStore {
 
-    public static final CounterKey OVERFLOW_COUNTER = new CounterKey("OVERFLOW-COUNTER", Collections.emptyMap());
+    public static final String OVERFLOW_COUNTER_NAME = "OVERFLOW-COUNTER";
 
     private final RequestCounterStore store;
 
@@ -82,7 +82,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
             currentCounter = store.get(counterKey);
         }
         else {
-            currentCounter = addEmptyCounterIfNotExists(OVERFLOW_COUNTER);
+            currentCounter = addEmptyCounterIfNotExists(CounterKey.of(OVERFLOW_COUNTER_NAME, counterKey.getFields()));
         }
         return currentCounter;
     }
@@ -100,7 +100,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     @Override
     public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
         if (isOverflowing()) {
-            return store.addEmptyCounterIfNotExists(OVERFLOW_COUNTER);
+            return store.addEmptyCounterIfNotExists(CounterKey.of(OVERFLOW_COUNTER_NAME, counterKey.getFields()));
         }
         else {
             return store.addEmptyCounterIfNotExists(counterKey);

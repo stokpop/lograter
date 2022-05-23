@@ -32,6 +32,10 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LogCounterJsonReportTest {
 
@@ -45,7 +49,8 @@ public class LogCounterJsonReportTest {
 
     @Before
     public void init() {
-        this.counter = new RequestCounter(CounterKey.of("TestCounter"), new TimeMeasurementStoreInMemory());
+        Map<String, String> fields = Collections.singletonMap("isThisInReport", "boo");
+        this.counter = new RequestCounter(CounterKey.of("TestCounter", fields), new TimeMeasurementStoreInMemory());
         this.reportRootNode = factory.objectNode();
     }
 
@@ -59,6 +64,7 @@ public class LogCounterJsonReportTest {
         String percentile99 = "\"percentile99HitDurationMillis\":\"99\"";
         Assert.assertTrue(percentile95, data.contains(percentile95));
         Assert.assertTrue(percentile99, data.contains(percentile99));
+        Assert.assertTrue("Counter key fields in report?", data.contains("isThisInReport"));
     }
 
     @Test

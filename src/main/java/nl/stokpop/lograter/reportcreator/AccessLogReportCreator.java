@@ -38,7 +38,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.*;
+
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_METHOD;
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_STATUS;
 
 /**
  * Process access logs.
@@ -55,9 +58,16 @@ public class AccessLogReportCreator implements ReportCreatorWithCommand<Abstract
 		config.setRunId(cmdMain.runId);
 		config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
 		config.setDoCountMultipleMapperHits(cmdAccessLog.doCountMultipleMapperHits);
-		config.setDoFilterOnHttpMethod(cmdAccessLog.doGroupByHttpMethod);
-		config.setDoFilterOnHttpStatus(cmdAccessLog.doGroupByHttpStatus);
-		config.setGroupByFields(cmdAccessLog.doGroupByFields);
+		// insert order is important
+		Set<String> groupByFields = new LinkedHashSet<>();
+		if(cmdAccessLog.doGroupByHttpMethod) {
+			groupByFields.add(HTTP_METHOD);
+		}
+		if(cmdAccessLog.doGroupByHttpStatus) {
+			groupByFields.add(HTTP_STATUS);
+		}
+		groupByFields.addAll(cmdAccessLog.groupByFields);
+		config.setGroupByFields(Collections.unmodifiableList(new ArrayList<>(groupByFields)));
 		config.setExcludeMappersInIisAndAccessLogs(cmdAccessLog.excludeMappers);
 		config.setIgnoreMultiAndNoMatches(cmdAccessLog.ignoreMultiAndNoMatches);
 		config.setCountNoMappersAsOne(cmdAccessLog.countNoMappersAsOne);

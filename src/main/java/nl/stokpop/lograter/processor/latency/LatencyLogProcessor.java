@@ -20,26 +20,23 @@ import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.Processor;
 import nl.stokpop.lograter.util.time.TimePeriod;
 
-import java.util.List;
-
 public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
-
-	private static final char SEP_CHAR = ',';
 
 	private final LatencyLogData data;
 	private final LatencyLogConfig config;
-	private final List<String> counterFields;
 
-	public LatencyLogProcessor(LatencyLogData data, LatencyLogConfig config) {
+	private final LatencyCounterKeyCreator keyCreator;
+
+	public LatencyLogProcessor(LatencyLogData data, LatencyLogConfig config, LatencyCounterKeyCreator keyCreator) {
 		this.data = data;
 		this.config = config;
-		this.counterFields = config.getCounterFields();
+		this.keyCreator = keyCreator;
 	}
 
     @Override
 	public void processEntry(LatencyLogEntry entry) {
-		
-		CounterKey key = createCounterKey(entry);
+
+		CounterKey key = keyCreator.createCounterKey(entry);
 
 		TimePeriod filterPeriod = config.getFilterPeriod();
 		if (!filterPeriod.isWithinTimePeriod(entry.getTimestamp())) {
@@ -59,14 +56,6 @@ public class LatencyLogProcessor implements Processor<LatencyLogEntry> {
 			data.getCounterStorePair().addFailure(key, timestamp, durationInMillis);
 		}
 
-	}
-
-    private CounterKey createCounterKey(LatencyLogEntry entry) {
-		StringBuilder perfCounterName = new StringBuilder();
-		for (String field : counterFields) {
-			perfCounterName.append(entry.getField(field)).append(SEP_CHAR);
-		}
-		return CounterKey.of(perfCounterName.substring(0, perfCounterName.length() - 1));
 	}
 
 	public LatencyLogData getData() {

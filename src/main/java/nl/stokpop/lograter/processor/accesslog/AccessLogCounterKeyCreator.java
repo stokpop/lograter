@@ -25,54 +25,32 @@ import java.util.List;
 
 public class AccessLogCounterKeyCreator implements CounterKeyCreator<AccessLogEntry> {
 
-    private static final char SEP_CHAR = ',';
-
-    private final boolean filterHttpMethod;
-    private final boolean filterHttpStatus;
     private final List<String> groupByFields;
 
-    public AccessLogCounterKeyCreator(boolean filterHttpMethod, boolean filterHttpStatus) {
-        this(filterHttpMethod, filterHttpStatus, Collections.emptyList());
+    public AccessLogCounterKeyCreator() {
+        this.groupByFields = Collections.emptyList();
     }
 
-    public AccessLogCounterKeyCreator(final boolean filterHttpMethod, final boolean filterHttpStatus, final List<String> groupByFields) {
-        this.filterHttpStatus = filterHttpStatus;
-        this.filterHttpMethod = filterHttpMethod;
+    public AccessLogCounterKeyCreator(final List<String> groupByFields) {
         this.groupByFields = groupByFields;
     }
 
     @Override
-    public final CounterKey createCounterKey(final AccessLogEntry logEntry) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final AccessLogEntry entry) {
+        return createCounterKey(entry, counterKeyBaseName(entry));
     }
 
     @Override
-    public final CounterKey createCounterKey(final AccessLogEntry logEntry, final LineMap lineMap) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final AccessLogEntry entry, final LineMap lineMap) {
+        return createCounterKey(entry, counterKeyBaseName(entry, lineMap));
     }
 
     @Override
-    public final CounterKey createCounterKey(final AccessLogEntry logEntry, final String baseName) {
-        StringBuilder key = new StringBuilder(baseName);
-        addHttpMethodAndStatusAndFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final AccessLogEntry entry, final String baseName) {
+        return constructCounterKey(entry, baseName, groupByFields);
     }
 
-    private void addHttpMethodAndStatusAndFields(AccessLogEntry logEntry, StringBuilder key) {
-        if (filterHttpMethod) key.append(SEP_CHAR).append(logEntry.getHttpMethod());
-        if (filterHttpStatus) key.append(SEP_CHAR).append(logEntry.getHttpStatus());
-        if (!groupByFields.isEmpty()) {
-            for (String groupByField : groupByFields) {
-                String field = logEntry.getField(groupByField);
-                String sanitizedField = field.replace(",", "_");
-                key.append(SEP_CHAR).append(sanitizedField);
-            }
-        }
-    }
+
 
     public String counterKeyBaseName(AccessLogEntry entry) {
         return entry.getUrl();

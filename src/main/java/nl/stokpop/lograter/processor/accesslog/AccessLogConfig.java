@@ -26,8 +26,6 @@ public class AccessLogConfig extends MapperAndClickPathConfig {
 	private boolean showUserAgents = false;
 	private boolean showReferers = false;
 	private boolean excludeMappersInIisAndAccessLogs = false;
-	private boolean doFilterOnHttpMethod = false;
-	private boolean doFilterOnHttpStatus = false;
 	private boolean removeParametersFromUrl = false;
 	private String logPattern = null;
 	protected List<String> groupByFields = Collections.emptyList();
@@ -89,22 +87,6 @@ public class AccessLogConfig extends MapperAndClickPathConfig {
 		this.excludeMappersInIisAndAccessLogs = excludeMappersInIisAndAccessLogs;
 	}
 
-	public boolean groupByHttpMethod() {
-		return doFilterOnHttpMethod;
-	}
-
-	public void setDoFilterOnHttpMethod(boolean doFilterOnHttpMethod) {
-		this.doFilterOnHttpMethod = doFilterOnHttpMethod;
-	}
-
-	public boolean groupByHttpStatus() {
-		return doFilterOnHttpStatus;
-	}
-
-	public void setDoFilterOnHttpStatus(boolean doFilterOnHttpStatus) {
-		this.doFilterOnHttpStatus = doFilterOnHttpStatus;
-	}
-
 	public void setRemoveParametersFromUrl(boolean removeParametersFromUrl) {
 		this.removeParametersFromUrl = removeParametersFromUrl;
 	}
@@ -136,8 +118,6 @@ public class AccessLogConfig extends MapperAndClickPathConfig {
 			", showUserAgents=" + showUserAgents +
 			", showReferers=" + showReferers +
 			", excludeMappersInIisAndAccessLogs=" + excludeMappersInIisAndAccessLogs +
-			", doFilterOnHttpMethod=" + doFilterOnHttpMethod +
-			", doFilterOnHttpStatus=" + doFilterOnHttpStatus +
 			", removeParametersFromUrl=" + removeParametersFromUrl +
 			", logPattern='" + logPattern + '\'' +
 			", logType=" + logType +

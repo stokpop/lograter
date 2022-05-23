@@ -24,8 +24,6 @@ import java.util.List;
 
 public class LatencyCounterKeyCreator implements CounterKeyCreator<LatencyLogEntry> {
 
-    private static final char SEP_CHAR = ',';
-
     private final List<String> groupByFields;
 
     public LatencyCounterKeyCreator(final List<String> groupByFields) {
@@ -33,34 +31,18 @@ public class LatencyCounterKeyCreator implements CounterKeyCreator<LatencyLogEnt
     }
 
     @Override
-    public final CounterKey createCounterKey(final LatencyLogEntry logEntry) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry));
-        addCounterFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final LatencyLogEntry entry) {
+        return createCounterKey(entry, counterKeyBaseName(entry));
     }
 
     @Override
-    public final CounterKey createCounterKey(final LatencyLogEntry logEntry, final LineMap lineMap) {
-        StringBuilder key = new StringBuilder(counterKeyBaseName(logEntry, lineMap));
-        addCounterFields(logEntry, key);
-        return CounterKey.of(key.toString());
+    public final CounterKey createCounterKey(final LatencyLogEntry entry, final LineMap lineMap) {
+        return createCounterKey(entry, counterKeyBaseName(entry, lineMap));
     }
 
     @Override
-    public final CounterKey createCounterKey(final LatencyLogEntry logEntry, final String baseName) {
-        StringBuilder key = new StringBuilder(baseName);
-        addCounterFields(logEntry, key);
-        return CounterKey.of(key.toString());
-    }
-
-    private void addCounterFields(LatencyLogEntry logEntry, StringBuilder key) {
-        if (!groupByFields.isEmpty()) {
-            for (String groupByField : groupByFields) {
-                String field = logEntry.getField(groupByField);
-                String sanitizedField = field.replace(",", "_");
-                key.append(SEP_CHAR).append(sanitizedField);
-            }
-        }
+    public final CounterKey createCounterKey(final LatencyLogEntry entry, final String baseName) {
+        return constructCounterKey(entry, baseName, groupByFields);
     }
 
     public String counterKeyBaseName(LatencyLogEntry entry) {

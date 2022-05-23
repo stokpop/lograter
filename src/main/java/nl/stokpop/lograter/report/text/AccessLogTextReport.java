@@ -38,8 +38,6 @@ public class AccessLogTextReport extends LogCounterTextReport {
 
     @Override
     protected void reportHeaderCounterDetails(StringBuilder report) {
-		if (config.groupByHttpMethod()) report.append(SEP_CHAR).append("http-method");
-		if (config.groupByHttpStatus()) report.append(SEP_CHAR).append("http-status");
 		for (String field : config.getGroupByFields()) {
             report.append(SEP_CHAR).append(field);
         }

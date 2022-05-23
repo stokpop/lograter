@@ -36,11 +36,9 @@ import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Read Latency logs.
@@ -57,6 +55,10 @@ public class LatencyLogReader {
         RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(config.getCounterStorage());
         LatencyLogData data = new LatencyLogData(csFactory);
 
+        // the first element is used in the mapper, should not be a ('random') field in the key
+        List<String> groupByFieldsWithoutFirstElement = listWithoutFirstElement(config.getCounterFields());
+        LatencyCounterKeyCreator keyCreator = new LatencyCounterKeyCreator(groupByFieldsWithoutFirstElement);
+
         List<LineMapperSection> lineMappers = config.getLineMappers();
         if (lineMappers.size() > 1) {
             log.warn("More than one line mapper section found ({}), only using first one for LatencyLogProcessor mappers.", lineMappers);
@@ -66,11 +68,11 @@ public class LatencyLogReader {
         }
 
         LineMapperSection firstLineMapperSection = lineMappers.get(0);
-        LatencyLogProcessor processor = new LatencyLogProcessor(data, config);
+        LatencyLogProcessor processor = new LatencyLogProcessor(data, config, keyCreator);
         LatencyLogParser latencyLogParser = new LatencyLogParser(lineParser);
         latencyLogParser.addProcessor(processor);
 
-        List<LatencyMapperProcessor> urlMapperProcessors = LineMapperUtils.createUrlMapperProcessors(csFactory, config);
+        List<LatencyMapperProcessor> urlMapperProcessors = LineMapperUtils.createUrlMapperProcessors(csFactory, config, keyCreator);
         List<RequestCounterStorePair> requestCounterStoresPairs = new ArrayList<>();
         for (LatencyMapperProcessor urlMapperProcessor : urlMapperProcessors) {
             latencyLogParser.addProcessor(urlMapperProcessor);
@@ -116,6 +118,11 @@ public class LatencyLogReader {
         }
 
         return new LatencyLogDataBundle(config, processor.getData(), requestCounterStoresPairs, clickpathCollector, allKeysToLineMap);
+    }
+
+    private static List<String> listWithoutFirstElement(List<String> list) {
+        if (list.isEmpty()) return Collections.emptyList();
+        return Collections.unmodifiableList(list.stream().skip(1).collect(Collectors.toList()));
     }
 
     public static LogbackParser<LatencyLogEntry> createLatencyLogEntryLogbackParser(String logPattern, LatencyLogConfig config) {

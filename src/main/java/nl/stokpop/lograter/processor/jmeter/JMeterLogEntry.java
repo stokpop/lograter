@@ -47,6 +47,7 @@ public class JMeterLogEntry extends LogEntry {
 
     public void setCode(final int code) {
         this.code = code;
+        this.addField(HTTP_STATUS, String.valueOf(code));
     }
 
     public int getDurationInMillis() {

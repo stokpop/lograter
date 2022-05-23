@@ -20,7 +20,7 @@ import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import org.junit.Test;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -47,13 +47,13 @@ public class RequestCounterStorePairTest {
         RequestCounterStore successFromPair = pair.getRequestCounterStoreSuccess();
         assertEquals(3, successFromPair.getTotalRequestCounter().getHits());
         assertEquals(2, successFromPair.getCounterKeys().size());
-        assertEquals(2, successFromPair.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(2, successFromPair.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
         assertEquals(1, successFromPair.get(CounterKey.of("key1")).getHits());
         assertTrue("successes should overflow", successFromPair.isOverflowing());
 
         RequestCounterStore failureFromPair = pair.getRequestCounterStoreFailure();
         assertEquals(2, failureFromPair.getTotalRequestCounter().getHits());
-        assertEquals(1, failureFromPair.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(1, failureFromPair.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
         assertEquals(1, failureFromPair.get(CounterKey.of("key1")).getHits());
         assertNull("should not contain key4 after overflow", failureFromPair.get(CounterKey.of("key4")));
         assertTrue("failures should overflow", failureFromPair.isOverflowing());
@@ -77,14 +77,14 @@ public class RequestCounterStorePairTest {
         RequestCounterStore successFromPair = pair.getRequestCounterStoreSuccess();
         assertEquals(3, successFromPair.getTotalRequestCounter().getHits());
         assertEquals(2, successFromPair.getCounterKeys().size());
-        assertEquals(2, successFromPair.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(2, successFromPair.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
         assertEquals(1, successFromPair.get(CounterKey.of("key1")).getHits());
         assertTrue("successes should overflow", successFromPair.isOverflowing());
 
         RequestCounterStore failureFromPair = pair.getRequestCounterStoreFailure();
         assertEquals(0, failureFromPair.getTotalRequestCounter().getHits());
-        assertNotNull("empty overflow expected (all successes should have matching failure counter)", failureFromPair.get(OVERFLOW_COUNTER));
-        assertEquals(0, failureFromPair.get(OVERFLOW_COUNTER).getHits());
+        assertNotNull("empty overflow expected (all successes should have matching failure counter)", failureFromPair.get(CounterKey.of(OVERFLOW_COUNTER_NAME)));
+        assertEquals(0, failureFromPair.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
         assertNotNull("should contain key1", failureFromPair.get(CounterKey.of("key1")));
         assertNull("should not contain key2", failureFromPair.get(CounterKey.of("key2")));
         assertTrue("failures should overflow", failureFromPair.isOverflowing());

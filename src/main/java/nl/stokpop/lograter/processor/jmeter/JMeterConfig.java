@@ -24,7 +24,6 @@ import java.util.List;
 public class JMeterConfig extends BasicCounterLogConfig {
 	private boolean ignoreMultiAndNoMatches = true;
 	private boolean doCountMultipleMapperHits = false;
-	private boolean doFilterOnHttpStatus = false;
 	private List<LineMapperSection> mappers = Collections.emptyList();
     private boolean countNoMappersAsOne = false;
     private List<String> groupByFields = Collections.emptyList();
@@ -64,14 +63,6 @@ public class JMeterConfig extends BasicCounterLogConfig {
 		this.doCountMultipleMapperHits = doCountMultipleMapperHits;
 	}
 
-	public boolean groupByHttpStatus() {
-		return doFilterOnHttpStatus;
-	}
-
-	public void setDoFilterOnHttpStatus(boolean doFilterOnHttpStatus) {
-		this.doFilterOnHttpStatus = doFilterOnHttpStatus;
-	}
-
     public boolean countNoMappersAsOne() {
         return this.countNoMappersAsOne;
     }
@@ -108,7 +99,6 @@ public class JMeterConfig extends BasicCounterLogConfig {
     public String toString() {
         return "JMeterLogConfig{" + "ignoreMultiAndNoMatches=" + ignoreMultiAndNoMatches +
             ", doCountMultipleMapperHits=" + doCountMultipleMapperHits +
-            ", doFilterOnHttpStatus=" + doFilterOnHttpStatus +
             ", mappers=" + mappers +
             ", countNoMappersAsOne=" + countNoMappersAsOne +
             ", groupByFields=" + groupByFields +

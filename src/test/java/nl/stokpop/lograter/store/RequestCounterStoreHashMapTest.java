@@ -18,7 +18,7 @@ package nl.stokpop.lograter.store;
 import nl.stokpop.lograter.counter.CounterKey;
 import org.junit.Test;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class RequestCounterStoreHashMapTest {
@@ -37,6 +37,6 @@ public class RequestCounterStoreHashMapTest {
 
         assertEquals("key1 and overflow counter expected", 2, storeMax.getCounterKeys().size());
         assertEquals("two hits on key1 expected", 2, storeMax.get(CounterKey.of("key1")).getHits());
-        assertEquals("overflow should have 3 hits", 3, storeMax.get(OVERFLOW_COUNTER).getHits());
+        assertEquals("overflow should have 3 hits", 3, storeMax.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
     }
 }

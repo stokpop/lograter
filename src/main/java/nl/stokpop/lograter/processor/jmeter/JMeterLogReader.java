@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JMeterLogReader {
-    private final static Logger log = LoggerFactory.getLogger(JMeterLogReader.class);
+    private static final Logger log = LoggerFactory.getLogger(JMeterLogReader.class);
 
     public JMeterDataBundle readAndProcessJMeterLogs(JMeterConfig config, List<String> files) {
         JMeterParser jMeterParser = createJMeterParser(files, config.getLogPattern(), config.getLogLineTypeToReport());
@@ -104,7 +104,7 @@ public class JMeterLogReader {
 
         RequestCounterStorePair totalStorePair = new RequestCounterStorePair(totalCounterStoreSuccess, totalCounterStoreFailure);
 
-        JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator(false) {
+        JMeterCounterKeyCreator keyCreator = new JMeterCounterKeyCreator() {
             @Override
             public String counterKeyBaseName(JMeterLogEntry entry) { return "total-counter"; }
         };

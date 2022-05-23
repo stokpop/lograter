@@ -42,7 +42,7 @@ public abstract class AbstractCommandAccessLog extends AbstractCommandMapperAndC
     public boolean doGroupByHttpMethod = false;
     @Parameter(names = { "-group-by-fields" },
             description = "Group by the given comma separated fields as specified in the used logformat. Url will be the mapped url.")
-    public List<String> doGroupByFields = Collections.emptyList();
+    public List<String> groupByFields = Collections.emptyList();
 	@Parameter(names = { "-ref", "--referers" },
             description = "Include referers in iis and access logs.")
 	public boolean showReferers = false;
@@ -69,7 +69,7 @@ public abstract class AbstractCommandAccessLog extends AbstractCommandMapperAndC
 			", countNoMappersAsOne=" + countNoMappersAsOne +
 			", doGroupByHttpStatus=" + doGroupByHttpStatus +
 			", doGroupByHttpMethod=" + doGroupByHttpMethod +
-			", doGroupByFields=" + doGroupByFields +
+			", doGroupByFields=" + groupByFields +
 			", showReferers=" + showReferers +
 			", showUserAgents=" + showUserAgents +
 			", showBasicUrls=" + showBasicUrls +

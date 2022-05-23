@@ -24,7 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class RequestCounterStoreSqLiteTest {
@@ -46,7 +46,7 @@ public class RequestCounterStoreSqLiteTest {
 
         assertEquals("expect key1 and OVERFLOW_COUNTER (and not all-requests)", 2, testStore.getCounterKeys().size());
         assertEquals("expect 2 hits on key1", 2, testStore.get(CounterKey.of("key1")).getHits());
-        assertEquals("expect 3 hits on OVERFLOW_COUNTER", 3, testStore.get(OVERFLOW_COUNTER).getHits());
+        assertEquals("expect 3 hits on OVERFLOW_COUNTER", 3, testStore.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
         assertEquals("expect 5 hits in total", 5, testStore.getTotalRequestCounter().getHits());
     }
 }

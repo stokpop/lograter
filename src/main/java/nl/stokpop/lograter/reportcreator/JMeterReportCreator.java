@@ -35,7 +35,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.*;
+
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_METHOD;
+import static nl.stokpop.lograter.logentry.LogEntry.HTTP_STATUS;
 
 /**
  * Create reports for jMeter jtl files.
@@ -107,7 +110,16 @@ public class JMeterReportCreator implements ReportCreatorWithCommand<CommandJMet
         config.setRunId(cmdMain.runId);
         config.setFilterPeriod(DateUtils.createFilterPeriod(cmdMain.startTimeStr, cmdMain.endTimeStr));
         config.setDoCountMultipleMapperHits(cmdJMeter.doCountMultipleMapperHits);
-        config.setDoFilterOnHttpStatus(cmdJMeter.doGroupByHttpStatus);
+        // insert order is important
+        Set<String> groupByFields = new LinkedHashSet<>();
+        if (cmdJMeter.doGroupByHttpMethod) {
+            groupByFields.add(HTTP_METHOD);
+        }
+        if (cmdJMeter.doGroupByHttpStatus) {
+            groupByFields.add(HTTP_STATUS);
+        }
+        groupByFields.addAll(cmdJMeter.groupByFields);
+        config.setGroupByFields(Collections.unmodifiableList(new ArrayList<>(groupByFields)));
         config.setIgnoreMultiAndNoMatches(cmdJMeter.ignoreMultiAndNoMatches);
         config.setLineMappers(lineMapper);
         config.setIncludeMapperRegexpColumn(cmdJMeter.includeMapperRegexpColumn);

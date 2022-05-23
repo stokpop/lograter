@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER;
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class RequestCounterStoreExternalSortTest {
@@ -46,7 +46,7 @@ public class RequestCounterStoreExternalSortTest {
         // 1 unique keys and one overflow key with 2 entries
         assertEquals(2, store.getCounterKeys().size());
         assertEquals(3, store.getTotalRequestCounter().getHits());
-        assertEquals(2, store.get(OVERFLOW_COUNTER).getHits());
+        assertEquals(2, store.get(CounterKey.of(OVERFLOW_COUNTER_NAME)).getHits());
     }
 
 }
