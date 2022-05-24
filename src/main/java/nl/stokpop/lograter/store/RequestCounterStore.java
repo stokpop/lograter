@@ -45,5 +45,5 @@ public interface RequestCounterStore extends Iterable<RequestCounter> {
 	 * @param counterKey the name of the RequestCounter
 	 * @return the new or existing request counter.
 	 */
-	RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey);
+	RequestCounter addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(CounterKey counterKey);
 }

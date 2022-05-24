@@ -70,7 +70,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
             currentCounter = findCounterWhenOverflown(counterKey);
         }
         else {
-            currentCounter = addEmptyCounterIfNotExists(counterKey);
+            currentCounter = addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
         }
         currentCounter.incRequests(timestamp, durationMillis);
         store.getTotalRequestCounter().incRequests(timestamp, durationMillis);
@@ -82,7 +82,7 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
             currentCounter = store.get(counterKey);
         }
         else {
-            currentCounter = addEmptyCounterIfNotExists(CounterKey.of(OVERFLOW_COUNTER_NAME, counterKey.getFields()));
+            currentCounter = addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
         }
         return currentCounter;
     }
@@ -98,12 +98,13 @@ public class RequestCounterStoreMaxCounters implements RequestCounterStore {
     }
 
     @Override
-    public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
+    public RequestCounter addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(CounterKey counterKey) {
         if (isOverflowing()) {
-            return store.addEmptyCounterIfNotExists(CounterKey.of(OVERFLOW_COUNTER_NAME, counterKey.getFields()));
+            CounterKey counterKeyWithFieldsInName = CounterKey.createCounterKeyWithFieldsInName(OVERFLOW_COUNTER_NAME, counterKey.getMetaData());
+            return store.addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKeyWithFieldsInName);
         }
         else {
-            return store.addEmptyCounterIfNotExists(counterKey);
+            return store.addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
         }
     }
 

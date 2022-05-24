@@ -29,7 +29,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
     private final Map<CounterKey, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
-    private RequestCounter totalRequestCounter;
+    private final RequestCounter totalRequestCounter;
 
 	RequestCounterStoreHashMap(String storeName, CounterKey totalRequestName, TimePeriod timePeriod) {
 		this.name = storeName;
@@ -42,7 +42,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
     public void add(CounterKey counterKey, long logTimestamp, int durationMillis) {
-        RequestCounter requestCounter = addEmptyCounterIfNotExists(counterKey);
+        RequestCounter requestCounter = addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
         requestCounter.incRequests(logTimestamp, durationMillis);
         totalRequestCounter.incRequests(logTimestamp, durationMillis);
     }
@@ -68,7 +68,7 @@ public class RequestCounterStoreHashMap implements RequestCounterStore {
 	}
 
 	@Override
-	public RequestCounter addEmptyCounterIfNotExists(CounterKey key) {
+	public RequestCounter addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(CounterKey key) {
 		if (!counters.containsKey(key)) {
 			RequestCounter counter = new RequestCounter(key, new TimeMeasurementStoreInMemory());
 			counters.put(key, counter);

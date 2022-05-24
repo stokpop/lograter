@@ -16,26 +16,19 @@
 package nl.stokpop.lograter.processor;
 
 import nl.stokpop.lograter.counter.CounterKey;
+import nl.stokpop.lograter.counter.CounterKeyMetaData;
 import nl.stokpop.lograter.logentry.LogEntry;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public interface CounterKeyCreator<T extends LogEntry> {
-    char SEP_CHAR = ',';
 
-    default CounterKey constructCounterKey(LogEntry entry, String baseKey, List<String> groupByFields) {
-        StringBuilder key = new StringBuilder(baseKey);
-        for (String groupByField : groupByFields) {
-            String field = entry.getField(groupByField);
-            String sanitizedField = field.replace(",", "_");
-            key.append(SEP_CHAR).append(sanitizedField);
-        }
-        Map<String, String> fields = groupByFields.stream().collect(Collectors.toMap(Function.identity(), entry::getField));
-        return CounterKey.of(key.toString(), fields);
+    default CounterKey constructCounterKey(LogEntry entry, String baseName, List<String> groupByFields) {
+        List<String> fieldValues = groupByFields.stream().map(entry::getField).collect(Collectors.toList());
+        CounterKeyMetaData metaData = new CounterKeyMetaData(groupByFields, fieldValues);
+        return CounterKey.createCounterKeyWithFieldsInName(baseName, metaData);
     }
 
     CounterKey createCounterKey(T logEntry);

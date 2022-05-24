@@ -1,26 +1,41 @@
 package nl.stokpop.lograter.counter;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 public class CounterKey implements Comparable<CounterKey> {
 
+    public static final char SEP_CHAR = ',';
     private final String name;
-    private final Map<String, String> fields;
+    private final CounterKeyMetaData metaData;
 
-    private CounterKey(String name, Map<String, String> fields) {
+    private CounterKey(String name, CounterKeyMetaData meta) {
         this.name = name;
-        this.fields = Collections.unmodifiableMap(new HashMap<>(fields));
+        this.metaData = meta;
+    }
+
+
+    /**
+     * Adds comma separated list of fields to the name, in the order of the values of the fields in the Map.
+     */
+    @NotNull
+    public static CounterKey createCounterKeyWithFieldsInName(String baseName, CounterKeyMetaData metaData) {
+        StringBuilder builder = new StringBuilder(baseName);
+        for (String fieldValue : metaData.getValues()) {
+            String sanitizedField = fieldValue.replace(",", "_");
+            builder.append(SEP_CHAR).append(sanitizedField);
+        }
+        String key = builder.toString();
+        return of(key, metaData);
     }
 
     public String getName() {
         return name;
     }
 
-    public Map<String, String> getFields() {
-        return fields;
+    public CounterKeyMetaData getMetaData() {
+        return metaData;
     }
 
     @Override
@@ -29,17 +44,16 @@ public class CounterKey implements Comparable<CounterKey> {
     }
 
     public static CounterKey merge(CounterKey one, CounterKey two) {
-        Map<String, String> mergeMap = new HashMap<>(one.fields);
-        two.fields.forEach((k,v) -> mergeMap.merge(k, v, (value1,value2) -> (! value1.equals(value2)) ? value1 + "+" + value2 : value1));
-        return new CounterKey(String.join("-", one.getName(), two.getName(), "merged"), mergeMap);
+        CounterKeyMetaData merged = CounterKeyMetaData.merge(one.getMetaData(), two.getMetaData());
+        return new CounterKey(String.join("-", one.getName(), two.getName(), "merged"), merged);
     }
 
     public static CounterKey of(String name) {
-        return new CounterKey(name, Collections.emptyMap());
+        return new CounterKey(name, CounterKeyMetaData.EMPTY_META_DATA);
     }
 
-    public static CounterKey of(String name, Map<String, String> fields) {
-        return new CounterKey(name, fields);
+    public static CounterKey of(String name, CounterKeyMetaData metaData) {
+        return new CounterKey(name, metaData);
     }
 
     @Override

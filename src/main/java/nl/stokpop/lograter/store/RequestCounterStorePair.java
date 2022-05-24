@@ -87,7 +87,7 @@ public class RequestCounterStorePair {
 	public void addSuccess(CounterKey key, long timestamp, int durationInMillis) {
 		storeSuccess.add(key, timestamp, durationInMillis);
 		if (!storeFailure.contains(key)) {
-			storeFailure.addEmptyCounterIfNotExists(key);
+			storeFailure.addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(key);
 			//assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}
@@ -95,7 +95,7 @@ public class RequestCounterStorePair {
 	public void addFailure(CounterKey key, long timestamp, int durationInMillis) {
 		storeFailure.add(key, timestamp, durationInMillis);
 		if (!storeSuccess.contains(key)) {
-			storeSuccess.addEmptyCounterIfNotExists(key);
+			storeSuccess.addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(key);
             //assert storeSuccess.isOverflowing() == storeFailure.isOverflowing();
 		}
 	}

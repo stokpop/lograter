@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyser;
 import nl.stokpop.lograter.analysis.ResponseTimeAnalyserFailureUnaware;
 import nl.stokpop.lograter.counter.CounterKey;
+import nl.stokpop.lograter.counter.CounterKeyMetaData;
 import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import org.junit.Assert;
@@ -49,8 +50,8 @@ public class LogCounterJsonReportTest {
 
     @Before
     public void init() {
-        Map<String, String> fields = Collections.singletonMap("isThisInReport", "boo");
-        this.counter = new RequestCounter(CounterKey.of("TestCounter", fields), new TimeMeasurementStoreInMemory());
+        CounterKeyMetaData meta = new CounterKeyMetaData(Collections.singletonList("isThisInReport"), Collections.singletonList("boo"));
+        this.counter = new RequestCounter(CounterKey.of("TestCounter", meta), new TimeMeasurementStoreInMemory());
         this.reportRootNode = factory.objectNode();
     }
 

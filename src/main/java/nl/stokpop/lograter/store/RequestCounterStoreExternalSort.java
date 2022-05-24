@@ -30,8 +30,8 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	private final Map<CounterKey, RequestCounter> counters = new HashMap<>();
 	private final String name;
 	private final TimePeriod timePeriod;
-	private RequestCounter totalRequestCounter;
-	private File rootStorageDir;
+	private final RequestCounter totalRequestCounter;
+	private final File rootStorageDir;
 
 	RequestCounterStoreExternalSort(File rootStorageDir, String storeName, CounterKey totalRequestKey, TimePeriod timePeriod) {
 		this.name = storeName;
@@ -41,7 +41,7 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	}
 	
 	public void add(CounterKey counterKey, long timestamp, int durationMillis) {
-		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
+		RequestCounter counter = addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
 		counter.incRequests(timestamp, durationMillis);
 		totalRequestCounter.incRequests(timestamp, durationMillis);
 	}
@@ -66,7 +66,7 @@ public class RequestCounterStoreExternalSort implements RequestCounterStore {
 	}
 	
     @Override
-	public RequestCounter addEmptyCounterIfNotExists(CounterKey counterKey) {
+	public RequestCounter addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(CounterKey counterKey) {
 		if (!counters.containsKey(counterKey)) {
 			RequestCounter counter = new RequestCounter(counterKey, new TimeMeasurementStoreToFiles(rootStorageDir, name, counterKey.getName(), BUFFER_SIZE));
 			counters.put(counterKey, counter);

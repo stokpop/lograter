@@ -179,7 +179,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	}
 
 	public void add(CounterKey counterKey, long logTimestamp, int durationMillis) {
-		RequestCounter counter = addEmptyCounterIfNotExists(counterKey);
+		RequestCounter counter = addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(counterKey);
 		counter.incRequests(logTimestamp, durationMillis);
 		totalRequestCounter.incRequests(logTimestamp, durationMillis);
 	}
@@ -239,7 +239,7 @@ public class RequestCounterStoreSqLite implements RequestCounterStore {
 	}
 
     @Override
-	public RequestCounter addEmptyCounterIfNotExists(CounterKey key) {
+	public RequestCounter addEmptyCounterIfNotExistsOrOverflowCounterWhenFull(CounterKey key) {
 		try {
 			if (!counterKeyToDbCounterIdMapper.containsKey(key)) {
 				String counterName = key.getName();

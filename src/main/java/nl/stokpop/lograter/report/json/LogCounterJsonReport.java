@@ -116,7 +116,7 @@ class LogCounterJsonReport {
         node.put("name", key.getName());
 
         // add additional nodes
-        key.getFields().forEach(node::put);
+        key.getMetaData().putAll(node::put);
 
         long hits = analyser.totalHits();
         node.put("hits", nfNoDecimals.format(hits));
