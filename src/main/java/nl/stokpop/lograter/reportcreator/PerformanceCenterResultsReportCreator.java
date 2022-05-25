@@ -66,7 +66,7 @@ public class PerformanceCenterResultsReportCreator implements ReportCreatorWithC
 			throw new LogRaterException("Expected a Results database name that ends with either .mdb (Access database) or .db (sqlite3 database)");
 		}
 
-		PerformanceCenterResultsData data = reader.readResultsData();
+		PerformanceCenterResultsData data = reader.readResultsData(cmdPCResults.maxUniqueCounters);
 
 		PerformanceCenterConfig config = new PerformanceCenterConfig();
 		config.setRunId(cmdMain.runId);

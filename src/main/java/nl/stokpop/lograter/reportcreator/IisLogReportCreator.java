@@ -153,7 +153,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 		if (cmdIisLog.doGroupByHttpStatus) { additionalColumns++; }
 		final String totalCounterName = RequestCounter.createCounterNameThatAlignsInTextReport("TOTAL", additionalColumns);
 
-		RequestCounterStorePair totalRequestCounterStorePair = AccessLogReader.addTotalRequestCounterStoreToLogFileParser(csFactory, iisLogParser, totalCounterName);
+		RequestCounterStorePair totalRequestCounterStorePair = AccessLogReader.addTotalRequestCounterStoreToLogFileParser(csFactory, iisLogParser, totalCounterName, cmdIisLog.maxUniqueCounters);
 
 		requestCounterStorePairs.addAll(AccessLogReader.createAccessLogCounterProcessors(iisLogParser, config, csFactory));
 

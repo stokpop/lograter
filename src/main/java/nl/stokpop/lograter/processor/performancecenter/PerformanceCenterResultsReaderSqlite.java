@@ -34,7 +34,7 @@ import static nl.stokpop.lograter.processor.performancecenter.PerformanceCenterA
  */
 public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCenterResultsReader {
 
-    private final static Logger log = LoggerFactory.getLogger(PerformanceCenterResultsReaderSqlite.class);
+	private static final Logger log = LoggerFactory.getLogger(PerformanceCenterResultsReaderSqlite.class);
 
 	public PerformanceCenterResultsReaderSqlite(File resultsDatabaseFile) {
 		super(resultsDatabaseFile);
@@ -74,33 +74,31 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 				eventMap.put(eventID, event);
 				log.debug("Added event: {}", event);
 			}
-			resultSet.close();
-			preparedStatement.close();
 			return eventMap;
 		}
 	}
 
 	@Override
-	public PerformanceCenterResultsData readResultsData() {
+	public PerformanceCenterResultsData readResultsData(int maxUniqueCounters) {
 		File resultsDatabaseFile = getResultsDatabaseFile();
 		if (!resultsDatabaseFile.exists()) {
             throw new LogRaterException("Sqlite database file not found [" + resultsDatabaseFile + "]");
         }
 		try {
-			return readResultsData(resultsDatabaseFile);
+			return readResultsData(resultsDatabaseFile, maxUniqueCounters);
 		} catch (Exception e) {
 			throw new LogRaterException("Unable to process sqlite database file [" + resultsDatabaseFile + "]", e);
 		}
 	}
 
-	public PerformanceCenterResultsData readResultsData(File resultsDatabaseFile) throws SQLException {
+	public PerformanceCenterResultsData readResultsData(File resultsDatabaseFile, int maxUniqueCounters) throws SQLException {
 
         RequestCounterStoreFactory factory = new RequestCounterStoreFactory(CounterStorageType.Memory);
 
         Connection connection = getDatabaseConnection(resultsDatabaseFile);
 		PerformanceCenterAggregationGranularity granularity = createPerformanceCenterAggregationGranularity(connection);
 
-		PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity);
+		PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity, maxUniqueCounters);
 
         long testStartTimeInSecondsEpoch = getTestStartTimeInSecondsEpoch(connection);
 
@@ -143,9 +141,6 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 			double granularityInSeconds = granularityInSeconds(sql, resultSet);
 
 			log.info("Found PROBABLY FAULTY ESTIMATION of granularity in access database: [{}] seconds.", granularityInSeconds);
-
-			resultSet.close();
-			preparedStatement.close();
 
 			return (long) (granularityInSeconds * 1000.0);
 		}

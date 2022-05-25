@@ -117,7 +117,7 @@ public abstract class BasicCounterLogConfig extends BasicLogConfig {
         this.reportPercentiles = reportPercentiles;
     }
     
-    public int getMaxUniqueRequests() {
+    public int getMaxUniqueCounters() {
         return maxUniqueRequests;
     }
 

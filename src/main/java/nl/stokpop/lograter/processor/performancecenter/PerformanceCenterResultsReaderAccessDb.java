@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class PerformanceCenterResultsReaderAccessDb extends AbstractPerformanceCenterResultsReader {
 
-	private final static Logger log = LoggerFactory.getLogger(PerformanceCenterResultsReaderAccessDb.class);
+    private static final Logger log = LoggerFactory.getLogger(PerformanceCenterResultsReaderAccessDb.class);
 
 	public PerformanceCenterResultsReaderAccessDb(File resultsDatabaseFile) {
 		super(resultsDatabaseFile);
@@ -48,21 +48,21 @@ public class PerformanceCenterResultsReaderAccessDb extends AbstractPerformanceC
 	}
 
 	@Override
-	public PerformanceCenterResultsData readResultsData() {
+	public PerformanceCenterResultsData readResultsData(int maxUniqueCounters) {
 		try {
-			return readResultsData(getResultsDatabaseFile());
+			return readResultsData(getResultsDatabaseFile(), maxUniqueCounters);
 		} catch (IOException e) {
 			throw new LogRaterException("Unable to process Access database file " + getResultsDatabaseFile(), e);
 		}
 	}
 
-	private PerformanceCenterResultsData readResultsData(File resultsDatabaseFile) throws IOException {
+	private PerformanceCenterResultsData readResultsData(File resultsDatabaseFile, int maxUniqueCounters) throws IOException {
 
         RequestCounterStoreFactory factory = new RequestCounterStoreFactory(CounterStorageType.Memory);
 
         Database database = DatabaseBuilder.open(resultsDatabaseFile);
         PerformanceCenterAggregationGranularity granularity = createPerformanceCenterAggregationGranularity(database);
-        PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity);
+        PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity, maxUniqueCounters);
 
         long testStartTimeSecEpoch = getTestStartTimeSecEpoch(database);
 

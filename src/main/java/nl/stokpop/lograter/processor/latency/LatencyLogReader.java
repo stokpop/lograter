@@ -53,7 +53,7 @@ public class LatencyLogReader {
         LogbackParser<LatencyLogEntry> lineParser = createLatencyLogEntryLogbackParser(logPattern, config);
 
         RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(config.getCounterStorage());
-        LatencyLogData data = new LatencyLogData(csFactory);
+        LatencyLogData data = new LatencyLogData(csFactory, config.getMaxUniqueCounters());
 
         // the first element is used in the mapper, should not be a ('random') field in the key
         List<String> groupByFieldsWithoutFirstElement = listWithoutFirstElement(config.getCounterFields());

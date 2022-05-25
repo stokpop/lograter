@@ -23,8 +23,8 @@ public class PerformanceCenterResultsData extends PerformanceCenterData {
 
     private final DataTimePeriod dataTimePeriod = new DataTimePeriod();
 
-    public PerformanceCenterResultsData(RequestCounterStoreFactory csFactory, PerformanceCenterAggregationGranularity granularity) {
-		super(csFactory, granularity);
+    public PerformanceCenterResultsData(RequestCounterStoreFactory csFactory, PerformanceCenterAggregationGranularity granularity, int maxUniqueCounters) {
+		super(csFactory, granularity, maxUniqueCounters);
     }
 
     public void addSuccess(CounterKey key, long timestamp, int duration) {

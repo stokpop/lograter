@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor;
 
+import nl.stokpop.lograter.command.AbstractCommandBasic;
 import nl.stokpop.lograter.counter.CounterKey;
 import nl.stokpop.lograter.counter.CounterStorageType;
 import nl.stokpop.lograter.counter.RequestCounter;
@@ -27,6 +28,7 @@ import nl.stokpop.lograter.store.RequestCounterStorePair;
 import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import org.junit.Test;
 
+import static nl.stokpop.lograter.command.AbstractCommandBasic.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -35,8 +37,8 @@ public class AccessLogUrlMapperProcessorTest {
     @Test
     public void testProcessEntry() {
         RequestCounterStoreFactory type = new RequestCounterStoreFactory(CounterStorageType.Memory);
-        RequestCounterStore mappersSuccess = type.newInstance("mappers");
-        RequestCounterStore mappersFailure = type.newInstance("mappers");
+        RequestCounterStore mappersSuccess = type.newInstance("mappers", MAX_UNIQUE_COUNTERS);
+        RequestCounterStore mappersFailure = type.newInstance("mappers", MAX_UNIQUE_COUNTERS);
         LineMapperSection lineMapperSection = new LineMapperSection("linemappertable");
         lineMapperSection.addMapperRule("(.*)bar(.*)", "$1 $2 test");
         AccessLogCounterKeyCreator keyCreator = new AccessLogCounterKeyCreator();

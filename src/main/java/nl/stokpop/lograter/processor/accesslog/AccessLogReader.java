@@ -146,7 +146,7 @@ public class AccessLogReader {
         final String totalCounterName = RequestCounter.createCounterNameThatAlignsInTextReport("TOTAL", additionalColumns);
 
         RequestCounterStorePair totalRequestCounterStorePair =
-		        addTotalRequestCounterStoreToLogFileParser(csFactory, accessLogParser, totalCounterName);
+		        addTotalRequestCounterStoreToLogFileParser(csFactory, accessLogParser, totalCounterName, config.getMaxUniqueCounters());
 
         requestCounterStoresPairs.addAll(createAccessLogCounterProcessors(accessLogParser, config, csFactory));
 
@@ -191,8 +191,8 @@ public class AccessLogReader {
     	List<RequestCounterStorePair> requestCounterStorePairs = new ArrayList<>();
 
         if (config.isShowBasicUrls()) {
-            RequestCounterStore urlCounterStoreSuccess = csFactory.newInstance("url-success");
-            RequestCounterStore urlCounterStoreFailure = csFactory.newInstance("url-failure");
+            RequestCounterStore urlCounterStoreSuccess = csFactory.newInstance("url-success", config.getMaxUniqueCounters());
+            RequestCounterStore urlCounterStoreFailure = csFactory.newInstance("url-failure", config.getMaxUniqueCounters());
 
             RequestCounterStorePair urlStorePair = new RequestCounterStorePair(urlCounterStoreSuccess, urlCounterStoreFailure);
 
@@ -203,8 +203,8 @@ public class AccessLogReader {
             requestCounterStorePairs.add(urlStorePair);
         }
         if (config.isShowUserAgents()) {
-            RequestCounterStore userAgentCounterStoreSuccess = csFactory.newInstance("userAgent-success");
-            RequestCounterStore userAgentCounterStoreFailure = csFactory.newInstance("userAgent-failure");
+            RequestCounterStore userAgentCounterStoreSuccess = csFactory.newInstance("userAgent-success", config.getMaxUniqueCounters());
+            RequestCounterStore userAgentCounterStoreFailure = csFactory.newInstance("userAgent-failure", config.getMaxUniqueCounters());
 
             RequestCounterStorePair userAgentStorePair = new RequestCounterStorePair(userAgentCounterStoreSuccess, userAgentCounterStoreFailure);
 
@@ -215,8 +215,8 @@ public class AccessLogReader {
             requestCounterStorePairs.add(userAgentStorePair);
         }
         if (config.isShowReferers()) {
-            RequestCounterStore referersCounterStoreSuccess = csFactory.newInstance("referer-success");
-            RequestCounterStore referersCounterStoreFailure = csFactory.newInstance("referer-failure");
+            RequestCounterStore referersCounterStoreSuccess = csFactory.newInstance("referer-success", config.getMaxUniqueCounters());
+            RequestCounterStore referersCounterStoreFailure = csFactory.newInstance("referer-failure", config.getMaxUniqueCounters());
 
             RequestCounterStorePair referersStorePair = new RequestCounterStorePair(referersCounterStoreSuccess, referersCounterStoreFailure);
 
@@ -229,9 +229,9 @@ public class AccessLogReader {
         return requestCounterStorePairs;
     }
 
-    public static RequestCounterStorePair addTotalRequestCounterStoreToLogFileParser(RequestCounterStoreFactory csFactory, LogFileParser<AccessLogEntry> logFileParser, final String totalCounterName) {
-        RequestCounterStore totalCounterStoreSuccess = csFactory.newInstance(String.join("-", totalCounterName, "success"));
-        RequestCounterStore totalCounterStoreFailure = csFactory.newInstance(String.join("-", totalCounterName, "failure"));
+    public static RequestCounterStorePair addTotalRequestCounterStoreToLogFileParser(RequestCounterStoreFactory csFactory, LogFileParser<AccessLogEntry> logFileParser, final String totalCounterName, int maxUniqueCounters) {
+        RequestCounterStore totalCounterStoreSuccess = csFactory.newInstance(String.join("-", totalCounterName, "success"), maxUniqueCounters);
+        RequestCounterStore totalCounterStoreFailure = csFactory.newInstance(String.join("-", totalCounterName, "failure"), maxUniqueCounters);
 
         RequestCounterStorePair totalStorePair = new RequestCounterStorePair(totalCounterStoreSuccess, totalCounterStoreFailure);
 

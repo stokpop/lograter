@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class LatencyLogEntry extends LogbackLogEntry {
 
-	public static LogEntrySuccessFactor<LatencyLogEntry> ALWAYS_SUCCESS = entry -> true;
+	public static final LogEntrySuccessFactor<LatencyLogEntry> ALWAYS_SUCCESS = entry -> true;
 
 	private final LogEntrySuccessFactor<LatencyLogEntry> logEntrySuccessFactor;
 
@@ -133,7 +133,7 @@ public class LatencyLogEntry extends LogbackLogEntry {
 	}
 
 	public static LogEntrySuccessFactor<LatencyLogEntry> successFactorInstance(String failureField, FailureFieldType type, Pattern failureFieldRegexp) {
-		if (type == FailureFieldType.regexp && failureFieldRegexp == null) throw new LogRaterException("failureFieldReqexp cannot be null when failureFieldType is regexp");
+		if (type == FailureFieldType.regexp && failureFieldRegexp == null) { throw new LogRaterException("failureFieldReqexp cannot be null when failureFieldType is regexp"); }
 	    return entry -> successFactor(entry, failureField, type, failureFieldRegexp);
 	}
 

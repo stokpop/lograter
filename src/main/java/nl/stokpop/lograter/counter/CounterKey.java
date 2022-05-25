@@ -15,7 +15,6 @@ public class CounterKey implements Comparable<CounterKey> {
         this.metaData = meta;
     }
 
-
     /**
      * Adds comma separated list of fields to the name, in the order of the values of the fields in the Map.
      */
@@ -67,5 +66,13 @@ public class CounterKey implements Comparable<CounterKey> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return "CounterKey{" +
+                "name='" + name + '\'' +
+                ", metaData=" + metaData +
+                '}';
     }
 }

@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.util.stream.IntStream;
 
+import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTERS;
 import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -64,7 +65,7 @@ public class RequestCounterStoreTest {
 	    
         DatabaseBootstrap.instance().bootstrapDatabase(true);
 
-        RequestCounterStore counterStore = new RequestCounterStoreFactory(CounterStorageType.Database).newInstance("MyDbRequestStore");
+        RequestCounterStore counterStore = new RequestCounterStoreFactory(CounterStorageType.Database).newInstance("MyDbRequestStore", MAX_UNIQUE_COUNTERS);
 
         CounterKey myTestCounterKey = CounterKey.of("MyTestCounter");
         counterStore.add(myTestCounterKey, 1000, 2000);

@@ -6,6 +6,7 @@ import nl.stokpop.lograter.LogRaterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Keeps a list of ordered field names and ordered list of values.
@@ -94,5 +95,26 @@ public class CounterKeyMetaData {
             }
         }
         return new CounterKeyMetaData(mergedFields, mergedValues);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CounterKeyMetaData metaData = (CounterKeyMetaData) o;
+        return fields.equals(metaData.fields) && values.equals(metaData.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fields, values);
+    }
+
+    @Override
+    public String toString() {
+        return "CounterKeyMetaData{" +
+                "fields=" + fields +
+                ", values=" + values +
+                '}';
     }
 }

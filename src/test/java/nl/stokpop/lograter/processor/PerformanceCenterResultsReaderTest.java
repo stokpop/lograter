@@ -28,7 +28,7 @@ public class PerformanceCenterResultsReaderTest {
     public void readResultsData() {
 
         File databaseFile = new File("Results.mdb");
-        new PerformanceCenterResultsReaderAccessDb(databaseFile).readResultsData();
+        new PerformanceCenterResultsReaderAccessDb(databaseFile).readResultsData(512);
 
     }
 }

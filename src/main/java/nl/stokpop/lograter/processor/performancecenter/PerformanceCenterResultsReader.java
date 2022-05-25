@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public interface PerformanceCenterResultsReader {
 
-	PerformanceCenterResultsData readResultsData();
+	PerformanceCenterResultsData readResultsData(int maxUniqueCounters);
 
 	void addEventsToResultsData(EventMeter eventMeter, PerformanceCenterResultsData data, Map<Integer, PerformanceCenterEvent> eventMap, long testStartTimeInSecondsEpoch, long granularityInMillis);
 }

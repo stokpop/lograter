@@ -48,7 +48,7 @@ public class JMeterLogReader {
 
         List<JMeterUrlMapperProcessor> urlMapperProcessors = LineMapperUtils.createUrlMapperProcessors(csFactory, config);
 
-        RequestCounterStorePair totalStorePair = addTotalRequestCounterStoreToLogFileParser(csFactory, jMeterParser, "total-counter");
+        RequestCounterStorePair totalStorePair = addTotalRequestCounterStoreToLogFileParser(csFactory, jMeterParser, "total-counter", config.getMaxUniqueCounters());
 
         // collect the results
         List<RequestCounterStorePair> requestCounterStorePairs = new ArrayList<>();
@@ -98,9 +98,10 @@ public class JMeterLogReader {
 
     private RequestCounterStorePair addTotalRequestCounterStoreToLogFileParser(RequestCounterStoreFactory csFactory,
                                                                                LogFileParser<JMeterLogEntry> logFileParser,
-                                                                               String totalCounterName) {
-        RequestCounterStore totalCounterStoreSuccess = csFactory.newInstance(String.join("-", totalCounterName, "success"));
-        RequestCounterStore totalCounterStoreFailure = csFactory.newInstance(String.join("-", totalCounterName, "failure"));
+                                                                               String totalCounterName,
+                                                                               int maxUniqueCounters) {
+        RequestCounterStore totalCounterStoreSuccess = csFactory.newInstance(String.join("-", totalCounterName, "success"), maxUniqueCounters);
+        RequestCounterStore totalCounterStoreFailure = csFactory.newInstance(String.join("-", totalCounterName, "failure"), maxUniqueCounters);
 
         RequestCounterStorePair totalStorePair = new RequestCounterStorePair(totalCounterStoreSuccess, totalCounterStoreFailure);
 

@@ -26,17 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.sql.Connection;
 
-import static nl.stokpop.lograter.command.AbstractCommandBasic.MAX_UNIQUE_COUNTERS;
-
 public class RequestCounterStoreFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
 
-    private CounterStorageType type;
+    private final CounterStorageType type;
 	private Connection con;
-	private File storageRootDir;
+	private final File storageRootDir;
 
-	private TimePeriod timePeriod;
+	private final TimePeriod timePeriod;
 
 	public RequestCounterStoreFactory(CounterStorageType type, TimePeriod timePeriod, File storageRootDir) {
         log.info(
@@ -89,8 +87,8 @@ public class RequestCounterStoreFactory {
 		return new RequestCounterStoreMaxCounters(store, maxUniqueCounters);
 	}
 
-	public RequestCounterStore newInstance(String storeName) {
-		return newInstance(storeName, CounterKey.of(storeName + "-total"), MAX_UNIQUE_COUNTERS);
+	public RequestCounterStore newInstance(String storeName, int maxUniqueCounters) {
+		return newInstance(storeName, CounterKey.of(storeName + "-total"), maxUniqueCounters);
 	}
 
 }

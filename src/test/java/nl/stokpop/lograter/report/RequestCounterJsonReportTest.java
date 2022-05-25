@@ -53,7 +53,8 @@ import static org.junit.Assert.assertTrue;
 
 public class RequestCounterJsonReportTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+	public static final int MAX_UNIQUE_COUNTERS = 12;
+	private final ObjectMapper mapper = new ObjectMapper();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -62,8 +63,8 @@ public class RequestCounterJsonReportTest {
     public void testEmptyReport() throws Exception {
 
     	RequestCounterStoreFactory factory = new RequestCounterStoreFactory(CounterStorageType.Memory);
-	    RequestCounterStore requestCounterStoreSuccess = factory.newInstance("storeName");
-	    RequestCounterStore requestCounterStoreFailure = factory.newInstance("storeName");
+	    RequestCounterStore requestCounterStoreSuccess = factory.newInstance("storeName", 12);
+	    RequestCounterStore requestCounterStoreFailure = factory.newInstance("storeName", 12);
 
         RequestCounterStorePair totalPair = new RequestCounterStorePair(requestCounterStoreSuccess, requestCounterStoreFailure);
 
@@ -79,12 +80,13 @@ public class RequestCounterJsonReportTest {
     	RequestCounterStoreFactory factory = new RequestCounterStoreFactory(CounterStorageType.ExternalSort, temporaryFolder.getRoot());
 
     	String storeName1 = "test-sub-store-1";
-		RequestCounterStore store1 = factory.newInstance(storeName1);
+
+		RequestCounterStore store1 = factory.newInstance(storeName1, MAX_UNIQUE_COUNTERS);
 		String storeName2 = "test-sub-store-2";
-		RequestCounterStore store2 = factory.newInstance(storeName2);
+		RequestCounterStore store2 = factory.newInstance(storeName2, MAX_UNIQUE_COUNTERS);
 		String totalStoreName = "total-store";
-		RequestCounterStore totalStoreSuccess = factory.newInstance(String.join("-", totalStoreName, "success"));
-		RequestCounterStore totalStoreFailure = factory.newInstance(String.join("-", totalStoreName, "failure"));
+		RequestCounterStore totalStoreSuccess = factory.newInstance(String.join("-", totalStoreName, "success"), MAX_UNIQUE_COUNTERS);
+		RequestCounterStore totalStoreFailure = factory.newInstance(String.join("-", totalStoreName, "failure"), MAX_UNIQUE_COUNTERS);
 
 		RequestCounterStorePair totalPair = new RequestCounterStorePair(totalStoreSuccess, totalStoreFailure);
 
@@ -92,8 +94,8 @@ public class RequestCounterJsonReportTest {
 		fillStore(store1, totalStoreSuccess, numberOfElements);
 		fillStore(store2, totalStoreSuccess, numberOfElements);
 
-		RequestCounterStorePair pair1 = new RequestCounterStorePair(store1, factory.newInstance("failure1"));
-		RequestCounterStorePair pair2 = new RequestCounterStorePair(store2, factory.newInstance("failure2"));
+		RequestCounterStorePair pair1 = new RequestCounterStorePair(store1, factory.newInstance("failure1", MAX_UNIQUE_COUNTERS));
+		RequestCounterStorePair pair2 = new RequestCounterStorePair(store2, factory.newInstance("failure2", MAX_UNIQUE_COUNTERS));
 		List<RequestCounterStorePair> list = new ArrayList<>();
 		list.add(pair1);
 		list.add(pair2);
@@ -126,11 +128,11 @@ public class RequestCounterJsonReportTest {
     public void testOneCounterReport() throws Exception {
         RequestCounterStoreFactory factory = new RequestCounterStoreFactory(CounterStorageType.Memory);
         String storeName1 = "test-sub-store-1";
-        RequestCounterStore storeSuccess1 = factory.newInstance(storeName1);
-        RequestCounterStore storeFailure1 = factory.newInstance(storeName1);
+        RequestCounterStore storeSuccess1 = factory.newInstance(storeName1, MAX_UNIQUE_COUNTERS);
+        RequestCounterStore storeFailure1 = factory.newInstance(storeName1, MAX_UNIQUE_COUNTERS);
         String storeName2 = "test-sub-store-2";
-        RequestCounterStore storeSuccess2 = factory.newInstance(storeName2);
-        RequestCounterStore storeFailure2 = factory.newInstance(storeName2);
+        RequestCounterStore storeSuccess2 = factory.newInstance(storeName2, MAX_UNIQUE_COUNTERS);
+        RequestCounterStore storeFailure2 = factory.newInstance(storeName2, MAX_UNIQUE_COUNTERS);
 
 		CounterKey key1 = CounterKey.of("counter-key-1");
 		CounterKey key2 = CounterKey.of("counter-key-2");
@@ -175,7 +177,8 @@ public class RequestCounterJsonReportTest {
 
 		PerformanceCenterData data = new PerformanceCenterData(
 				new RequestCounterStoreFactory(CounterStorageType.Memory),
-				new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS));
+				new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS),
+				MAX_UNIQUE_COUNTERS);
 
         RequestCounterStorePair pair = data.getRequestCounterStorePair();
         RequestCounterStore storeSuccess = pair.getRequestCounterStoreSuccess();
@@ -232,7 +235,8 @@ public class RequestCounterJsonReportTest {
 	public void allCountersArePresentTest() throws IOException {
         PerformanceCenterData data = new PerformanceCenterData(
                 new RequestCounterStoreFactory(CounterStorageType.Memory),
-                new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS));
+                new PerformanceCenterAggregationGranularity(1000, DATABASE_GUESS),
+				MAX_UNIQUE_COUNTERS);
 
         RequestCounterStorePair counterStorePair = data.getRequestCounterStorePair();
 		CounterKey successKey = CounterKey.of("counter-key-success-only");

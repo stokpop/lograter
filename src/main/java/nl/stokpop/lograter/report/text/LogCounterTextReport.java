@@ -23,6 +23,7 @@ import nl.stokpop.lograter.counter.RequestCounter;
 import nl.stokpop.lograter.counter.RequestCounterPair;
 import nl.stokpop.lograter.processor.BasicCounterLogConfig;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
+import nl.stokpop.lograter.store.TimeMeasurementStoreInMemory;
 import nl.stokpop.lograter.util.StringUtils;
 import nl.stokpop.lograter.util.linemapper.LineMap;
 import nl.stokpop.lograter.util.time.DateUtils;
@@ -32,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+
+import static nl.stokpop.lograter.store.RequestCounterStoreMaxCounters.OVERFLOW_COUNTER_NAME;
 
 abstract class LogCounterTextReport extends LogTextReport {
 
@@ -74,7 +77,14 @@ abstract class LogCounterTextReport extends LogTextReport {
 			CounterKey counterKey = successCounter.getCounterKey();
 			RequestCounter failureCounter = counterStorePair.getRequestCounterStoreFailure().get(counterKey);
             if (failureCounter == null) {
-                throw new LogRaterException("No failure counter found for " + counterKey + " in " + counterStorePair);
+				// WORKAROUND: seems to happen now for complex OVERFLOW counters, e.g. with http status and method
+				// these are not added to both failure and success counters during overflow: FIX!
+				if (counterKey.getName().contains(OVERFLOW_COUNTER_NAME)) {
+					failureCounter =  new RequestCounter(counterKey, new TimeMeasurementStoreInMemory());
+				}
+				else {
+					throw new LogRaterException("No failure counter found for " + counterKey + " in " + counterStorePair);
+				}
             }
 			ResponseTimeAnalyser myAnalyser = ResponseTimeAnalyserFactory.createAnalyser(config, analysisPeriod, new RequestCounterPair(counterKey, successCounter, failureCounter));
 

@@ -15,6 +15,7 @@
  */
 package nl.stokpop.lograter.processor.performancecenter;
 
+import nl.stokpop.lograter.store.RequestCounterStore;
 import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 import nl.stokpop.lograter.store.RequestCounterStorePair;
 
@@ -23,8 +24,10 @@ public class PerformanceCenterData {
 	private final PerformanceCenterAggregationGranularity pcAggregationGranularity;
 	private final RequestCounterStorePair requestCounterStorePair;
 
-	public PerformanceCenterData(RequestCounterStoreFactory csFactory, PerformanceCenterAggregationGranularity granularity) {
-		this.requestCounterStorePair = new RequestCounterStorePair(csFactory.newInstance("performance-center-counter-store-success"), csFactory.newInstance("performance-center-counter-store-failure"));
+	public PerformanceCenterData(RequestCounterStoreFactory csFactory, PerformanceCenterAggregationGranularity granularity, int maxUniqueCounters) {
+		RequestCounterStore storeSuccess = csFactory.newInstance("performance-center-counter-store-success", maxUniqueCounters);
+		RequestCounterStore storeFailure = csFactory.newInstance("performance-center-counter-store-failure", maxUniqueCounters);
+		this.requestCounterStorePair = new RequestCounterStorePair(storeSuccess, storeFailure);
 		this.pcAggregationGranularity = granularity;
 	}
 

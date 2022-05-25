@@ -24,9 +24,9 @@ import nl.stokpop.lograter.store.RequestCounterStorePair;
 public class LatencyLogData extends BasicLogData {
 	private final RequestCounterStorePair counterStorePair;
 
-	public LatencyLogData(RequestCounterStoreFactory csFactory) {
-		RequestCounterStore requestCounterStoreSuccess = csFactory.newInstance("latency-log-counterstore-success");
-		RequestCounterStore requestCounterStoreFailure = csFactory.newInstance("latency-log-counterstore-failure");
+	public LatencyLogData(RequestCounterStoreFactory csFactory, int maxUniqueCounters) {
+		RequestCounterStore requestCounterStoreSuccess = csFactory.newInstance("latency-log-counterstore-success", maxUniqueCounters);
+		RequestCounterStore requestCounterStoreFailure = csFactory.newInstance("latency-log-counterstore-failure", maxUniqueCounters);
 		this.counterStorePair = new RequestCounterStorePair(requestCounterStoreSuccess, requestCounterStoreFailure);
 	}
 	
