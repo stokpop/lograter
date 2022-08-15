@@ -8,31 +8,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: Set tag name
         run: |
           VERSION=$(cat ./VERSION)
           echo "TAG_NAME=$VERSION" >> $GITHUB_ENV
+      # if no tag exists, this is expected to fail
+      - name: Switch to git tag for release
+        if: contains(env.TAG_NAME, 'SNAPSHOT') != true
+        run: |
+          git fetch --all --tags
+          git checkout tags/${{ env.TAG_NAME }} -b ${{ env.TAG_NAME }}-tmp-branch
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Decode secrets file
-        env:
-          SECRETS_PROPERTIES: ${{ secrets.SECRETS_PROPERTIES }}
-          SECRING_ASC_GPG: ${{ secrets.SECRING_ASC_GPG }}
-        run: |
-          echo "$SECRETS_PROPERTIES" | base64 -d >> ./gradle.properties
-          echo "$SECRING_ASC_GPG" | base64 -d > ./secring.asc.gpg
-      - name: Upload archives with Gradle
+      - name: Publish snapshot with Gradle
         if: contains(env.TAG_NAME, 'SNAPSHOT') == true
-        run: ./gradlew --info -Prelease uploadArchives
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
+        run: ./gradlew --info clean publishToSonatype
       - name: Close and release repository with Gradle
         if: contains(env.TAG_NAME, 'SNAPSHOT') != true
-        run: ./gradlew --info -Prelease uploadArchives closeAndReleaseSonatypeStagingRepository
-      - name: Delete secrets
-        run: |
-          rm ./gradle.properties
-          rm ./secring.asc.gpg
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
+        run: ./gradlew --info publishToSonatype closeAndReleaseSonatypeStagingRepository
