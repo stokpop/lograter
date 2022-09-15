@@ -23,14 +23,16 @@ import org.junit.Test;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JmxMemoryParserTest {
 
     @Test
-    public void getMemoryMetricsEntriesFromFileTes() {
+    public void getMemoryMetricsEntriesFromFileTest() {
         TimePeriod timePeriod = TimePeriod.createExcludingEndTime(1572875922000L, 1572875950000L);
         List<MemoryMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFile(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log"), timePeriod);
 
@@ -38,13 +40,25 @@ public class JmxMemoryParserTest {
     }
 
     @Test
-    public void getMemoryMetricsEntriesFromFilesTes() {
+    public void getMemoryMetricsEntriesFromFilesTest() {
         TimePeriod timePeriod = TimePeriod.MAX_TIME_PERIOD;
         List<File> files = Arrays.asList(getFile("jmx/jvm-heap-metrics-mark-sweep-compact.log"), getFile("jmx/jvm-heap-metrics-G1.log"));
 
         List<MemoryMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFiles(files, timePeriod);
 
         assertEquals(14, memoryMetrics.size());
+    }
+
+    @Test
+    public void testShenandoah() {
+        TimePeriod timePeriod = TimePeriod.MAX_TIME_PERIOD;
+
+        List<File> files = Collections.singletonList(getFile("jmx/gc_shenandoah.log"));
+
+        List<MemoryMetrics> memoryMetrics = JmxMemoryParser.INSTANCE.getMemoryMetricsEntriesFromFiles(files, timePeriod);
+
+        assertEquals(1019, memoryMetrics.size());
+        assertTrue("all low gc times 😀", memoryMetrics.stream().allMatch(m -> m.getGcDurationMs() < 300));
     }
 
     private File getFile(String filePath) {

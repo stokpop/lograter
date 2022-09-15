@@ -37,7 +37,13 @@ public enum GcAlgorithm {
     PARALLEL("PSMarkSweep", "Parallel Scavenge", MemoryParallelGc.class,
             "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,PSOldGen,PSEdenSpace,CompressedClassSpace,CodeCache,PSSurvivorSpace"),
     PARALLEL_JAVA_11("PSMarkSweep", "Parallel Scavenge", MemoryParallelGcJava11.class,
-            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,CodeHeap'non-nmethods',PSOldGen,CodeHeap'profilednmethods',CompressedClassSpace,PSSurvivorSpace,PSEdenSpace,CodeHeap'non-profilednmethods'");
+            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,PSMarkSweep,PSScavenge,Metaspace,CodeHeap'non-nmethods',PSOldGen,CodeHeap'profilednmethods',CompressedClassSpace,PSSurvivorSpace,PSEdenSpace,CodeHeap'non-profilednmethods'"),
+
+    SHENANDOAH("Shenandoah-no-young", "Shenandoah", MemoryShenandoah.class,
+            "Timestamp,HeapMemoryUsage,NonHeapMemoryUsage,ShenandoahPauses,ShenandoahCycles,Metaspace,CodeHeap'non-nmethods',CodeHeap'profilednmethods',CompressedClassSpace,CodeHeap'non-profilednmethods',Shenandoah");
+
+
+
 
 
     private final String youngGenerationGcAlgorithm;
