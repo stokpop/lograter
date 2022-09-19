@@ -28,6 +28,7 @@ import java.sql.Connection;
 
 public class RequestCounterStoreFactory {
 
+	public static final int DEFAULT_MAX_UNIQUE_REQUESTS = 512;
 	private static final Logger log = LoggerFactory.getLogger(RequestCounterStoreFactory.class);
 
     private final CounterStorageType type;
@@ -64,7 +65,11 @@ public class RequestCounterStoreFactory {
         this(type, TimePeriod.MAX_TIME_PERIOD, storageRootDir);
     }
 
-    public RequestCounterStore newInstance(String storeName, CounterKey totalRequestsKey, int maxUniqueCounters) {
+    public RequestCounterStore newInstance(String storeName, CounterKey totalRequestsKey) {
+		return newInstance(storeName, totalRequestsKey, DEFAULT_MAX_UNIQUE_REQUESTS);
+	}
+
+	public RequestCounterStore newInstance(String storeName, CounterKey totalRequestsKey, int maxUniqueCounters) {
 	    RequestCounterStore store;
 	    switch (type) {
 			case Memory:
@@ -89,6 +94,10 @@ public class RequestCounterStoreFactory {
 
 	public RequestCounterStore newInstance(String storeName, int maxUniqueCounters) {
 		return newInstance(storeName, CounterKey.of(storeName + "-total"), maxUniqueCounters);
+	}
+
+	public RequestCounterStore newInstance(String storeName) {
+		return newInstance(storeName, CounterKey.of(storeName + "-total"), DEFAULT_MAX_UNIQUE_REQUESTS);
 	}
 
 }

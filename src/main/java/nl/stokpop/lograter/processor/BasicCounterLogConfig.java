@@ -17,6 +17,7 @@ package nl.stokpop.lograter.processor;
 
 import nl.stokpop.lograter.command.BaseUnit;
 import nl.stokpop.lograter.counter.CounterStorageType;
+import nl.stokpop.lograter.store.RequestCounterStoreFactory;
 
 /**
  * Sets defaults for Basic analysis to:
@@ -30,14 +31,14 @@ import nl.stokpop.lograter.counter.CounterStorageType;
  */
 public abstract class BasicCounterLogConfig extends BasicLogConfig {
 
-	private boolean calculateStdDev = false;
+    private boolean calculateStdDev = false;
 	private boolean calculateHitsPerSecond = false;
 	private boolean calculateConcurrentCalls = false;
 	private boolean calculateStubDelays = false;
 	private CounterStorageType counterStorage = CounterStorageType.Memory;
 	private boolean includeMapperRegexpColumn = false;
     private Double[] reportPercentiles = { 99d };
-    private int maxUniqueRequests = 512;
+    private int maxUniqueRequests = RequestCounterStoreFactory.DEFAULT_MAX_UNIQUE_REQUESTS;
     private BaseUnit baseUnit = BaseUnit.milliseconds;
     private String counterStorageDir = ".";
     private boolean failureAwareAnalysis = true;
