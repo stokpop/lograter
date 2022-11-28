@@ -148,7 +148,7 @@ a log pattern yourself and make use of "placeholders" such as "`%{name}X`" for t
  
 Take this line for example:
 
-    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.stokpop.nl - [2020-01-29T15:45:44.813+0000] \"GET /delay?duration=200 HTTP/1.1\" 200 0 85 \"-\" \"curl/7.64.1\" response_time:0.477786246 x_b3_parentspanid:\"-\" b3:\"woiertu\"";
+    2020-01-29T16:45:45.29+0100 [RTR/1] OUT afterburner-cpu.stokpop.nl - [2020-01-29T15:45:44.813+0000] "GET /delay?duration=200 HTTP/1.1" 200 0 85 "-" "curl/7.64.1" response_time:0.477786246 x_b3_parentspanid:"-" b3:"abc123"
 
 To parse a line like this, you can use this log pattern:
 
@@ -156,7 +156,7 @@ To parse a line like this, you can use this log pattern:
 
 LogRater will use the literals to parse the line (first is "` - `" so all before that character sequence is "read" into `%{one}X`). 
 
-Notice the second timestamp in the log line is actually being parsing. 
+Notice the second timestamp in the log line is actually being parsed. 
 
 The `%r` is used to get the url (%r is actually the triplet <http command, url, and http version>).
 
