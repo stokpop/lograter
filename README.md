@@ -53,7 +53,7 @@ The available commands:
 * `access`      parse an access log file
 * `pc`          parse a performance center results database
 * `application` parse an (Java logback) application log file
-* `latency`     parse a log file that contains latency/duration numbers
+* `latency`     parse a log file that contains latency/duration numbers, based on logback syntax
 * `alloc`       parse WebSphere application server logs with large allocation 
 * `gc`          parse WebSphere verbose garbage collection log files
 * `accessToCsv` transform an access log to a csv file
@@ -125,11 +125,15 @@ For each request see the average response time and the percentiles.
 
 For each type of request, see how many concurrent requests there are.
 
-Lograter can scan following web or access logs:
+LogRater can scan following web or access logs:
 * `apache`: apache web server access logs
 * `nginx`: nginx access logs
 * `iis`:  Microsoft IIS servers access logs
 * `latency`: any log file that contains timestamp, url and latency
+
+Latency is the 'all-purpose' parser, but it cannot use access log directives such as `%r`.
+The `latency` command uses the first of the `--counter-fields` to apply line mappings to. 
+Example: `-- counter-fields operation,status` the line mappings are applied to `operation`.
 
 Use the log pattern to define your log line structure. LogRater needs at least:
  * a timestamp
@@ -143,8 +147,8 @@ In apache access log these are defined by these directives:
 * `%d` (milliseconds) or `%D` (microseconds) or `%T` (seconds)
 * `%s` 
 
-You can directly copy the log pattern definition from the http.conf file. If the original log pattern is unknown or non-existend, you can create
-a log pattern yourself and make use of "placeholders" such as "`%{name}X`" for the parts that are not needed.
+You can directly copy the log pattern definition from the http.conf file. If the original log pattern is unknown 
+or non-existent, you can create a log pattern yourself and make use of "placeholders" such as "`%{name}X`" for the parts that are not needed.
  
 Take this line for example:
 

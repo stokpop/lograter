@@ -19,7 +19,10 @@ import nl.stokpop.lograter.command.LatencyUnit;
 import nl.stokpop.lograter.logentry.LatencyLogEntry;
 import nl.stokpop.lograter.processor.latency.LatencyLogConfig;
 import nl.stokpop.lograter.processor.latency.LatencyLogReader;
+import nl.stokpop.lograter.util.linemapper.LineMapperSection;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,5 +46,31 @@ public class LatencyParserTest {
         assertEquals("/whatever/nl/", entry.getField("operation"));
         assertEquals("304", entry.getField("http-code"));
         assertEquals(18, entry.getDurationInMillis());
+    }
+
+    @Test
+    public void testParseLatency() {
+
+        String pattern = "\"%d{MMM dd, yyyy @ HH:mm:ss.SSS}\",\"%X{duration}\",%X{status},%{method},\"%X{path}\",%{size}";
+
+        String logline = "\"Sep 30, 2022 @ 17:00:57.000\",\"654,275,032\",200,POST,\"/api/xyz-abc-xup/bar/\",36";
+
+        LatencyLogConfig config = new LatencyLogConfig();
+
+        LineMapperSection lineMapperSection = new LineMapperSection("test");
+        lineMapperSection.addMapperRule("/api/(.*)/bar/", "api bar");
+        List<LineMapperSection> mappers = List.of(lineMapperSection);
+        config.setLineMappers(mappers);
+        config.setCounterFields("path");
+        config.setLatencyField("duration");
+        config.setLatencyUnit(LatencyUnit.nanoseconds);
+        LogbackParser<LatencyLogEntry> latencyParser = LatencyLogReader.createLatencyLogEntryLogbackParser(pattern, config);
+
+		LatencyLogEntry entry = latencyParser.parseLogLine(logline);
+
+        assertEquals(logline, entry.getLogline());
+        assertEquals("/api/xyz-abc-xup/bar/", entry.getField("path"));
+        assertEquals("200", entry.getField("status"));
+        assertEquals(654, entry.getDurationInMillis());
     }
 }

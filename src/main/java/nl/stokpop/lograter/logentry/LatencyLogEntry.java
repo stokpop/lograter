@@ -85,10 +85,16 @@ public class LatencyLogEntry extends LogbackLogEntry {
 				return (int) (durationAsIs * 1000);
 			}
 			case microseconds: {
+				if (!durationAsString.isEmpty()) {
+					durationAsString = durationAsString.replace(",", "");
+				}
 				int durationAsIs = Integer.parseInt(durationAsString);
 				return durationAsIs / 1000;
 			}
 			case nanoseconds: {
+				if (!durationAsString.isEmpty()) {
+					durationAsString = durationAsString.replace(",", "");
+				}
 				long durationAsIs = Long.parseLong(durationAsString);
 				return (int) (durationAsIs / 1_000_000);
 			}

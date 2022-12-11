@@ -170,8 +170,14 @@ public class LogbackParser<T extends LogbackLogEntry> {
             }
             if (isParameter && c == '}') {
                 isParameter = false;
-                ((LogbackDirective) elements.get(elements.size() - 1)).setVariable(literal.toString());
-                literal.setLength(0);
+				LogbackElement logbackElement = elements.get(elements.size() - 1);
+				if (logbackElement instanceof LogbackDirective) {
+					((LogbackDirective) logbackElement).setVariable(literal.toString());
+					literal.setLength(0);
+				}
+				else {
+					throw new LogRaterException("Expected a Directive but have " + logbackElement + " for " + literal);
+				}
                 continue;
             }
             // ignore format modifiers, such as: %-20.30logger
