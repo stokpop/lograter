@@ -170,14 +170,14 @@ public class LogGraphCreator extends AbstractGraphCreator {
         }
 
         if (graphConfig.isGraphRequested()) {
-            String htmlGraphName = String.format("%s-html-graphs", analyser.getCounterKey());
+            String htmlGraphName = String.format("%s-html-graphs", analyser.getCounterKey().toHumanFriendlyString());
             log.debug("Starting html graphs: {}", htmlGraphName);
             chartFiles.add(HtmlGraphCreator.writeHtmlGoogleGraphFile(subDirJsGraphs, analyser, graphConfig.getBaseUnit()));
         }
     }
 
     private ChartFile createPercentileGraph(File subDirGraphs, RequestCounterStoreType counterType, ResponseTimeAnalyser analyser) {
-        String percentileGraphName = String.format("%s-%s-percentiles.min(%d).max(%d)", counterType, analyser.getCounterKey(), analyser.min(), analyser.max());
+        String percentileGraphName = String.format("%s-%s-percentiles.min(%d).max(%d)", counterType, analyser.getCounterKey().toHumanFriendlyString(), analyser.min(), analyser.max());
         log.debug("Starting graph: {}", percentileGraphName);
         // get 99th percentile as maximum to avoid extreme max values to hide all other percentiles
         File file = showPercentileGraph(subDirGraphs, percentileGraphName, analyser.percentiles(99));
@@ -186,7 +186,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
 
     private List<ChartFile> createHistoGraphs(TimePeriod timePeriodFilter, File subDirGraphs, RequestCounterStoreType counterType, RequestCounter timeSlicedCounter, ResponseTimeAnalyser analyser) {
         List<ChartFile> files = new ArrayList<>();
-        String histoGraphName = String.format("%s-%s-histogram.min(%d).max(%d)", counterType, analyser.getCounterKey(), analyser.min(), analyser.max());
+        String histoGraphName = String.format("%s-%s-histogram.min(%d).max(%d)", counterType, analyser.getCounterKey().toHumanFriendlyString(), analyser.min(), analyser.max());
         log.debug("Starting graph: {}", histoGraphName);
 
         HistogramData histogram = analyser.histogramForRelevantValues(ResponseTimeAnalyserFailureUnaware.GRAPH_HISTO_NUMBER_OF_RANGES);
@@ -224,7 +224,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
 
         List<MetricPoint> metricPoints = analyser.metricPoints();
 
-        String counterNameTps = String.format("%s-%s-tps.%s", counterType, timeSlicedCounter.getCounterKey(), tpsGraphName);
+        String counterNameTps = String.format("%s-%s-tps.%s", counterType, timeSlicedCounter.getCounterKey().toHumanFriendlyString(), tpsGraphName);
 
         log.debug("Create graph: {} with {} points", counterNameTps, metricPoints.size());
         long maxTPS = analyser.maxHitsPerDuration(1000).getMaxHitsPerDuration();
@@ -235,7 +235,7 @@ public class LogGraphCreator extends AbstractGraphCreator {
     private ChartFile createResponseTimesGraph(TimePeriod timePeriodFilter, File subDirGraphs, RequestCounterStoreType counterType, RequestCounter timeSlicedCounter, ResponseTimeAnalyser analyser) {
         RequestCounter reducedCounter = null;
         if (timeSlicedCounter.getHits() > GRAPH_AGGREGATION_CUTOFF_NR_HITS) {
-            final String reducedCounterName = String.format("%s-%s-duration.avgPerSec(%d)", counterType, timeSlicedCounter.getCounterKey(), graphConfig.getAggregateDurationInSeconds());
+            final String reducedCounterName = String.format("%s-%s-duration.avgPerSec(%d)", counterType, timeSlicedCounter.getCounterKey().toHumanFriendlyString(), graphConfig.getAggregateDurationInSeconds());
             reducedCounter = new RequestCounter(CounterKey.of(reducedCounterName), new TimeMeasurementStoreInMemory());
             RequestCounter.fillReducedCounter(timeSlicedCounter, reducedCounter, graphConfig.getAggregateDurationInSeconds());
         }
@@ -243,13 +243,13 @@ public class LogGraphCreator extends AbstractGraphCreator {
         long maxDurationGraphView = analyser.percentilePlus(99.0) * 5;
 
         if (reducedCounter == null) {
-            String counterNameDuration = String.format("%s-%s-duration",  counterType, timeSlicedCounter.getCounterKey());
+            String counterNameDuration = String.format("%s-%s-duration",  counterType, timeSlicedCounter.getCounterKey().toHumanFriendlyString());
             log.debug("Starting graph: {}", counterNameDuration);
             File file = writeResponseGraphFile(subDirGraphs, counterNameDuration, timeSlicedCounter, timePeriodFilter, maxDurationGraphView);
             return new ChartFile(counterNameDuration, file);
         } else {
             CounterKey key = reducedCounter.getCounterKey();
-            String graphName = key.getName();
+            String graphName = key.toHumanFriendlyString();
             log.debug("Starting graph: {}", graphName);
             File file = writeResponseGraphFile(subDirGraphs, graphName, reducedCounter, timePeriodFilter, maxDurationGraphView);
             return new ChartFile(graphName, file);

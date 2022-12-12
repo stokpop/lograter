@@ -15,9 +15,11 @@
  */
 package nl.stokpop.lograter.counter;
 
+import com.healthmarketscience.jackcess.util.OleBlob;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CounterKey implements Comparable<CounterKey> {
 
@@ -89,5 +91,15 @@ public class CounterKey implements Comparable<CounterKey> {
                 "name='" + name + '\'' +
                 ", metaData=" + metaData +
                 '}';
+    }
+
+    public String toHumanFriendlyString() {
+        String keyValueString = metaData.toKeyValueString();
+        if (keyValueString.isEmpty()) {
+            return name;
+        }
+        else {
+            return String.join("-", name, keyValueString);
+        }
     }
 }

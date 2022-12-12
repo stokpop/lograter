@@ -34,8 +34,12 @@ public class ChartFile {
         this.type = type;
     }
 
+    public ChartFile(String name, String title, File file) {
+        this(name, title, file, ChartType.PNG);
+    }
+
     public ChartFile(String name, File file) {
-        this(name, name, file, ChartType.PNG);
+        this(name, name, file);
     }
 
     public String getTitle() {

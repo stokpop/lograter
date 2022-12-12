@@ -142,7 +142,7 @@ public class HtmlGraphCreator {
 
     public static ChartFile writeHtmlGoogleGraphFile(File dir, ResponseTimeAnalyser analyser, BaseUnit baseUnit) {
 
-        String title = analyser.getCounterKey().getName();
+        String title = analyser.getCounterKey().toHumanFriendlyString();
         List<MetricPoint> points = analyser.metricPoints();
 
         String template = CHART_HTML_TEMPLATE;

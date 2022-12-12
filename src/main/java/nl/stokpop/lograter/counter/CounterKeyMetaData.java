@@ -18,10 +18,8 @@ package nl.stokpop.lograter.counter;
 import net.jcip.annotations.Immutable;
 import nl.stokpop.lograter.LogRaterException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Keeps a list of ordered field names and ordered list of values.
@@ -33,12 +31,19 @@ public class CounterKeyMetaData {
     private final List<String> fields;
     private final List<String> values;
 
+    private final Map<String, String> fieldValueMap;
+
     public CounterKeyMetaData(List<String> fields, List<String> values) {
-        this.fields = Collections.unmodifiableList(new ArrayList<>(fields));
-        this.values = Collections.unmodifiableList(new ArrayList<>(values));
+        this.fields = List.copyOf(fields);
+        this.values = List.copyOf(values);
         if (fields.size() != values.size()) {
             throw new LogRaterException("Number of fields (" + fields.size() + ") need to be equal to number of values (" + values.size() + ")");
         }
+        Map<String,String> newMap = new HashMap<>();
+        for (int i = 0; i < fields.size(); i++) {
+            newMap.put(fields.get(i), values.get(i));
+        }
+        this.fieldValueMap = Collections.unmodifiableMap(newMap);
     }
 
     public List<String> getFields() {
@@ -47,6 +52,10 @@ public class CounterKeyMetaData {
 
     public List<String> getValues() {
         return values;
+    }
+
+    public Map<String, String> getFieldValueMap() {
+        return fieldValueMap;
     }
 
     /**
@@ -131,5 +140,11 @@ public class CounterKeyMetaData {
                 "fields=" + fields +
                 ", values=" + values +
                 '}';
+    }
+
+    public String toKeyValueString() {
+        return this.fieldValueMap.entrySet().stream()
+                .map(e -> String.join("=", e.getKey(), e.getValue()))
+                .collect(Collectors.joining(","));
     }
 }
