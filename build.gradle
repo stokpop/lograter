@@ -68,7 +68,7 @@ dependencies {
         implementation('org.apache.commons:commons-text:1.10.0') {
             because 'version 1.9 has Arbitrary Code Execution bug in StringUtils.replace'
         }
-        implementation('com.jidesoft:jide-oss:2.5.8') {
+        implementation('com.jidesoft:jide-oss:3.6.18') {
             because 'version 2.4.8 has corruption in pom: \'dependencies.dependency.systemPath\' for aqua:aqua:jar must specify an absolute path but is ${basedir}/libs/laf.jar in com.jidesoft:jide-oss:2.4.8'
         }
     }
