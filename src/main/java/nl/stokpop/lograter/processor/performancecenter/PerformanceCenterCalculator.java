@@ -79,7 +79,7 @@ public final class PerformanceCenterCalculator {
         // the offset is bigger because it seems HP is adding DST to epoch time???
         final long dayLightSavingsOffset = isDayLightSavingActive ? -3600 : 0;
 
-        final long localStartTimeSecEpoch = testStartTimeSecEpoch + dayLightSavingsOffset;
+        final long localStartTimeSecEpoch = testStartTimeSecEpoch + timeZoneOffset + dayLightSavingsOffset;
 
         log.info("In [{}] {}: " +
                         "StartTimeSecEpoch [{}] timeZoneOffset [{}] makes start time of test data [{}] ([{}] seconds since epoch)",
