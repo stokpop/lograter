@@ -18,11 +18,11 @@ You can download a pre-build jar here: https://github.com/stokpop/lograter/relea
 
 with curl: 
 
-    curl -O -L https://github.com/stokpop/lograter/releases/download/1.4.4/lograter-exec-1.4.4.jar
+    curl -O -L https://github.com/stokpop/lograter/releases/download/1.5.2/lograter-exec-1.5.2.jar
 
-use java 8+ to run lograter:
+use java 11+ to run lograter:
 
-    java -jar lograter-exec-1.4.4.jar
+    java -jar lograter-exec-1.5.2.jar
 
 download an example dataset:
 
@@ -30,7 +30,7 @@ download an example dataset:
   
 process this file:
 
-     java -jar lograter-exec-1.4.4.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
+     java -jar lograter-exec-1.5.2.jar access -gt -single-mapper NASA_access_log_Jul95.gz  
 
 (Note: there are some errors for some lines that contain invalid urls with unexpected quotes. These can be ignored.)
    
@@ -63,7 +63,7 @@ The available commands:
 
 The order of the options on the command line is important. There are general options and command specific options.
 
-    java -jar lograter-exec-1.4.4 [general options] [command] [command options] [input file(s)]
+    java -jar lograter-exec-1.5.2 [general options] [command] [command options] [input file(s)]
 
 When you get errors that input files cannot be found, make sure the order of the general options is correct.
 
@@ -114,7 +114,7 @@ The counters are based on unique combinations of the `counter-fields`. The first
 
 Now call LogRater as:
 
-    java -jar lograter-exec-1.4.4.jar @latency.options cloud-foundry.log  
+    java -jar lograter-exec-1.5.2.jar @latency.options cloud-foundry.log  
 
 ## Uses
 
@@ -293,7 +293,7 @@ To use LogRater from Maven or Gradle: find the latest LogRater jar in [Maven Cen
 
 ### LogRater command line options
 
-    LogRater version: 1.4.4
+    LogRater version: 1.5.2
 
     Usage: nl.stokpop.lograter.LogRater [options] [command] [command options]
       Options:
