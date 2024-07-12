@@ -33,12 +33,12 @@ public class CsvFileParserTest {
                 .parse(getFile("jmx/jvm-heap-metrics-concurrent-mark-sweep.log")).collect(Collectors.toList());
 
         assertEquals(5, memoryMetrics.size());
-        assertEquals(14266424, memoryMetrics.get(4).getHeapMemoryUsedBytes());
-        assertEquals(562416, memoryMetrics.get(4).getOldGenerationUsedBytes());
-        assertEquals(0, memoryMetrics.get(4).getYoungGenerationGcTime());
-        assertEquals(120, memoryMetrics.get(4).getOldGenerationGcTime());
-        assertEquals(120, (long) memoryMetrics.get(4).getGcDurationMs());
-        assertEquals(562416, memoryMetrics.get(4).getOldGenerationUsedBytes());
+        MemoryMetrics memoryMetric5 = memoryMetrics.get(4);
+        assertEquals(14266424, memoryMetric5.getHeapMemoryUsedBytes());
+        assertEquals(562416, memoryMetric5.getOldGenerationUsedBytes());
+        assertEquals(0, memoryMetric5.getYoungGenerationGcTime());
+        assertEquals(120, memoryMetric5.getOldGenerationGcTime());
+        assertEquals(120, (long) memoryMetric5.getGcDurationMs());
     }
 
     @Test
@@ -47,12 +47,42 @@ public class CsvFileParserTest {
                 .parse(getFile("jmx/jvm-heap-metrics-G1.log")).collect(Collectors.toList());
 
         assertEquals(4, memoryMetrics.size());
-        assertEquals(13816320, memoryMetrics.get(3).getHeapMemoryUsedBytes());
-        assertEquals(3330560, memoryMetrics.get(3).getOldGenerationUsedBytes());
-        assertEquals(100, memoryMetrics.get(3).getYoungGenerationGcTime());
-        assertEquals(500, memoryMetrics.get(3).getOldGenerationGcTime());
-        assertEquals(600, (long) memoryMetrics.get(3).getGcDurationMs());
-        assertEquals(3330560, memoryMetrics.get(3).getOldGenerationUsedBytes());
+        MemoryMetrics memoryMetric4 = memoryMetrics.get(3);
+        assertEquals(13816320, memoryMetric4.getHeapMemoryUsedBytes());
+        assertEquals(3330560, memoryMetric4.getOldGenerationUsedBytes());
+        assertEquals(100, memoryMetric4.getYoungGenerationGcTime());
+        assertEquals(500, memoryMetric4.getOldGenerationGcTime());
+        assertEquals(600, (long) memoryMetric4.getGcDurationMs());
+    }
+
+    @Test
+    public void parseG1Java17Test() {
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
+                .parse(getFile("jmx/jvm-heap-metrics-G1-java-17.log")).collect(Collectors.toList());
+
+        assertEquals(9, memoryMetrics.size());
+        MemoryMetrics memoryMetric4 = memoryMetrics.get(3);
+        assertEquals(246450016, memoryMetric4.getHeapMemoryUsedBytes());
+        assertEquals(193232384, memoryMetric4.getOldGenerationUsedBytes());
+        assertEquals(73, memoryMetric4.getYoungGenerationGcTime());
+        assertEquals(0, memoryMetric4.getOldGenerationGcTime());
+        assertEquals(73, (long) memoryMetric4.getGcDurationMs());
+        assertEquals(70947072, memoryMetric4.getCodeCacheUsedBytes());
+    }
+
+    @Test
+    public void parseG1Java21Test() {
+        List<MemoryMetrics> memoryMetrics = CsvFileParser.INSTANCE
+                .parse(getFile("jmx/jvm-heap-metrics-G1-java-21.log")).collect(Collectors.toList());
+
+        assertEquals(9, memoryMetrics.size());
+        MemoryMetrics memoryMetric4 = memoryMetrics.get(3);
+        assertEquals(176521200, memoryMetric4.getHeapMemoryUsedBytes());
+        assertEquals(125140976, memoryMetric4.getOldGenerationUsedBytes());
+        assertEquals(70, memoryMetric4.getYoungGenerationGcTime());
+        assertEquals(0, memoryMetric4.getOldGenerationGcTime());
+        assertEquals(70, (long) memoryMetric4.getGcDurationMs());
+        assertEquals(42027008, memoryMetric4.getCodeCacheUsedBytes());
     }
 
     @Test

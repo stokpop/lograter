@@ -36,11 +36,11 @@ public class MemoryG1Java10 implements MemoryMetrics {
     private long oldGenerationGcTime;
     @CsvBindByName
     private long metaspace;
-    @CsvBindByName
+    @CsvBindByName(column = "G1OldGen")
     private long tenuredGen;
-    @CsvBindByName
+    @CsvBindByName(column = "G1EdenSpace")
     private long edenSpace;
-    @CsvBindByName
+    @CsvBindByName(column = "G1SurvivorSpace")
     private long survivorSpace;
     @CsvBindByName
     private long compressedClassSpace;
