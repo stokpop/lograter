@@ -15,39 +15,104 @@
  */
 package nl.stokpop.lograter.processor.performancecenter;
 
+import nl.stokpop.lograter.LogRaterException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
 public class AbstractPerformanceCenterResultsReaderTest {
 
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
     @Test
-    public void calculateLocalStartTimeInSecondsEpochWinterTime() {
-        // LRE logic for time in the results db uses zone-based time instead of UTC.
-        // Same table also contains time zone offset.
+    public void calculateStartTimeSecEpochWithDayLightSavingActive() throws IOException {
+        final long scenarioStartTime = 1512653687;
+        final long daylightSavingSecsAddition = 3600;
+
+        File stubLraFile = tempFolder.newFile("day-light-saving-active.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "ScenarioStartTime=%s\nDaylightSavingSecsAddition=%s\n",
+                        scenarioStartTime, daylightSavingSecsAddition
+                ).getBytes()
+        );
 
         // The actual start time is 14:34:47 "Europe/Amsterdam" zone time (winter time)
         // date --date=@1512653687
         // Thu Dec  7 14:34:47 CET 2017
 
-        final long startTimeInSecondsEpoch = 1512653687;
-        final long timeZoneOffset = -3600;
-        final long expectedResult = startTimeInSecondsEpoch + timeZoneOffset;
-        long startTime = PerformanceCenterCalculator.calculateLocalStartTimeSecEpoch(startTimeInSecondsEpoch, timeZoneOffset);
+        final long expectedResult = scenarioStartTime - daylightSavingSecsAddition;
+        long startTime = PerformanceCenterCalculator.calculateStartTimeSecEpoch(tempFolder.getRoot().toPath());
         assertEquals(expectedResult, startTime);
     }
 
     @Test
-    public void calculateLocalStartTimeInSecondsEpochSummerTime() {
-        // The actual start time is 1:27:22 "Europe/Amsterdam" zone time (summer time)
-        // date --date=@1508887642
-        // Wed Oct  25 1:27:22 DST 2017
+    public void calculateStartTimeSecEpochWithDayLightSavingInactive() throws IOException {
+        final long scenarioStartTime = 1512653687;
+        final long daylightSavingSecsAddition = 0;
 
-        final long startTimeInSecondsEpoch = 1508887642;
-        final long timeZoneOffset = -3600;
-        final long dayLightTimeOffset = -3600;
-        final long expectedResult = startTimeInSecondsEpoch + timeZoneOffset + dayLightTimeOffset;
-        long startTime = PerformanceCenterCalculator.calculateLocalStartTimeSecEpoch(startTimeInSecondsEpoch, timeZoneOffset);
-        assertEquals(expectedResult, startTime);
+        File stubLraFile = tempFolder.newFile("day-light-saving-inactive.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "ScenarioStartTime=%s\nDaylightSavingSecsAddition=%s\n",
+                        scenarioStartTime, daylightSavingSecsAddition
+                ).getBytes()
+        );
+
+        // The actual start time is 14:34:47 "Europe/Amsterdam" zone time (winter time)
+        // date --date=@1512653687
+        // Thu Dec  7 14:34:47 CET 2017
+
+        long startTime = PerformanceCenterCalculator.calculateStartTimeSecEpoch(tempFolder.getRoot().toPath());
+        assertEquals(scenarioStartTime, startTime);
+    }
+
+    @Test
+    public void shouldFailIfScenarioStartTimeIsMissing() throws IOException {
+        final long daylightSavingSecsAddition = 0;
+
+        File stubLraFile = tempFolder.newFile("ScenarioStartTime-missing.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "ScenarioStartTime=\nDaylightSavingSecsAddition=%s\n",
+                        daylightSavingSecsAddition
+                ).getBytes()
+        );
+
+        try {
+            PerformanceCenterCalculator.calculateStartTimeSecEpoch(tempFolder.getRoot().toPath());
+        } catch (LogRaterException e) {
+            assertEquals("Missing setting 'ScenarioStartTime' in '" + stubLraFile + "'", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldFailIfDaylightSavingSecsAdditionIsMissing() throws IOException {
+        final long scenarioStartTime = 1512653687;
+
+        File stubLraFile = tempFolder.newFile("DaylightSavingSecsAddition-missing.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "ScenarioStartTime=%s\nDaylightSavingSecsAddition=\n",
+                        scenarioStartTime
+                ).getBytes()
+        );
+
+        try {
+            PerformanceCenterCalculator.calculateStartTimeSecEpoch(tempFolder.getRoot().toPath());
+        } catch (LogRaterException e) {
+            assertEquals("Missing setting 'DaylightSavingSecsAddition' in '" + stubLraFile + "'", e.getMessage());
+        }
     }
 }
