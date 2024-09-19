@@ -64,7 +64,8 @@ public class PerformanceCenterResultsReaderAccessDb extends AbstractPerformanceC
         PerformanceCenterAggregationGranularity granularity = createPerformanceCenterAggregationGranularity(database);
         PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity, maxUniqueCounters);
 
-        long testStartTimeSecEpoch = getTestStartTimeSecEpoch(database);
+        long testStartTimeSecEpoch =
+                PerformanceCenterCalculator.calculateStartTimeSecEpoch(resultsDatabaseFile);
 
         Map<Integer, PerformanceCenterEvent> eventMap = createEventMap(database);
 
@@ -120,23 +121,6 @@ public class PerformanceCenterResultsReaderAccessDb extends AbstractPerformanceC
             log.debug("Added event: {}", event);
         }
         return eventMap;
-    }
-
-    private long getTestStartTimeSecEpoch(Database database) throws IOException {
-        long testStartTimeSecEpoch = -1;
-	    long timeZoneOffset = 0;
-        Table resultTable = database.getTable("Result");
-
-        for (Row row : resultTable) {
-            testStartTimeSecEpoch = row.getInt("Start Time");
-	        timeZoneOffset = row.getInt("Time Zone");
-            log.info("Column 'Start Time' in table 'Result' has value: {}", testStartTimeSecEpoch);
-        }
-
-        if (testStartTimeSecEpoch == -1) {
-            throw new LogRaterException("Start time was not found in Result table in database " + database);
-        }
-        return PerformanceCenterCalculator.calculateLocalStartTimeSecEpoch(testStartTimeSecEpoch, timeZoneOffset);
     }
 
 	private long determineGranularityInMillis(Database database) throws IOException {
