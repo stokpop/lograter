@@ -16,13 +16,12 @@
 package nl.stokpop.lograter.processor.performancecenter;
 
 import nl.stokpop.lograter.LogRaterException;
-import nl.stokpop.lograter.util.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.ZoneId;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,37 +60,30 @@ public final class PerformanceCenterCalculator {
      * @return null when the aggregation period cannot be determined, otherwise the aggregation period in seconds
      */
     public static Integer determineAggregationPeriod(File resultsDatabaseFile) {
-        int aggregationPeriodInSeconds;
         try {
-             aggregationPeriodInSeconds = PerformanceCenterFileParser.fetchAnalysisAggregationPeriodInSeconds(resultsDatabaseFile.getAbsoluteFile().getParentFile());
-        } catch (IOException | LogRaterException e) {
+            return ResultConfigReader
+                    .read(resultsDatabaseFile.getAbsoluteFile().getParentFile())
+                    .getAggSecGran();
+        } catch (IOException e) {
             log.warn("Unable to read aggregation period from lra file: {}", e.getMessage());
             return null;
         }
-        return aggregationPeriodInSeconds;
     }
 
-    public static long calculateLocalStartTimeSecEpoch(long testStartTimeSecEpoch, long timeZoneOffset) {
-
-        final long startTimeMs = testStartTimeSecEpoch * 1000;
-        final ZoneId zoneId = ZoneId.systemDefault();
-        final boolean isDayLightSavingActive = DateUtils.isDayLightSavingActive(startTimeMs, zoneId);
-        // the offset is bigger because it seems HP is adding DST to epoch time???
-        final long dayLightSavingsOffset = isDayLightSavingActive ? -3600 : 0;
-
-        final long localStartTimeSecEpoch = testStartTimeSecEpoch + timeZoneOffset + dayLightSavingsOffset;
-
-        log.info("In [{}] {}: " +
-                        "StartTimeSecEpoch [{}] timeZoneOffset [{}] makes start time of test data [{}] ([{}] seconds since epoch)",
-                zoneId.getId(),
-                isDayLightSavingActive ? "summer time (daylight saving time)   " : "winter time (no daylight saving time)",
-                testStartTimeSecEpoch,
-                timeZoneOffset,
-                DateUtils.formatToStandardDateTimeString(localStartTimeSecEpoch * 1000),
-                localStartTimeSecEpoch);
-
-        return localStartTimeSecEpoch;
-	}
+    public static long calculateStartTimeSecEpoch(File resultsDatabaseFile) {
+        try {
+            ResultConfig resultConfig = ResultConfigReader.read(resultsDatabaseFile.getAbsoluteFile().getParentFile());
+            String resultConfigFileName = resultConfig.getConfigPath().getFileName().toString();
+            log.info(
+                    "Start time (UTC): <{}>.ScenarioStartTime - <{}>.DaylightSavingSecsAddition",
+                    resultConfigFileName, resultConfigFileName
+            );
+            return resultConfig.getScenarioStartTime() - resultConfig.getDaylightSavingSecsAddition();
+        } catch (IOException e) {
+            log.warn("Unable to read start time from lra file: {}", e.getMessage());
+            throw new LogRaterException("");
+        }
+    }
 
     public static double calculateGranularitySec(Double endTimeFirst, Double endTimeSecond) {
         return endTimeSecond - endTimeFirst;

@@ -15,24 +15,16 @@
  */
 package nl.stokpop.lograter.processor.performancecenter;
 
-import nl.stokpop.lograter.util.LogRaterRunTestUtil;
-import org.junit.Test;
+import lombok.Builder;
+import lombok.Value;
 
-import java.io.File;
+import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-
-public class PerformanceCenterFileParserTest {
-
-    @Test
-    public void fetchAnalysisAggregationPeriodInSeconds() throws Exception {
-
-        File resultsUnzippedDir = LogRaterRunTestUtil.convertTestResourceIntoFile(getClass(), "results-unzipped");
-
-        int aggregationPeriodInSec = PerformanceCenterFileParser.fetchAnalysisAggregationPeriodInSeconds(resultsUnzippedDir);
-
-        assertEquals(34, aggregationPeriodInSec);
-
-    }
-
+@Value
+@Builder
+public class ResultConfig {
+    Path configPath;
+    long scenarioStartTime;
+    int daylightSavingSecsAddition;
+    int aggSecGran;
 }

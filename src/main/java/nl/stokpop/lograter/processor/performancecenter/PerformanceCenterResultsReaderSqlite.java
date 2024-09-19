@@ -100,7 +100,8 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 
 		PerformanceCenterResultsData data = new PerformanceCenterResultsData(factory, granularity, maxUniqueCounters);
 
-        long testStartTimeInSecondsEpoch = getTestStartTimeInSecondsEpoch(connection);
+        long testStartTimeInSecondsEpoch =
+				PerformanceCenterCalculator.calculateStartTimeSecEpoch(resultsDatabaseFile);
 
         Map<Integer, PerformanceCenterEvent> eventMap = createEventMap(connection);
 
@@ -162,32 +163,6 @@ public class PerformanceCenterResultsReaderSqlite extends AbstractPerformanceCen
 
 		return endTimeSecond - endTimeFirst;
 	}
-
-	private long getTestStartTimeInSecondsEpoch(Connection con) {
-
-        long testStartTimeInSecondsEpoch;
-
-        try (
-			PreparedStatement queryStartTime = con.prepareStatement("select [Start Time], [Time Zone] from Result");
-			ResultSet resultSet = queryStartTime.executeQuery()
-		) {
-            if (resultSet.next()) {
-                testStartTimeInSecondsEpoch = resultSet.getLong("Start Time");
-	            long timeZoneOffset = resultSet.getLong("Time Zone");
-                return PerformanceCenterCalculator.calculateLocalStartTimeSecEpoch(testStartTimeInSecondsEpoch, timeZoneOffset);
-            } else {
-                throw new LogRaterException("Cannot get Start Time from database, no records in Result table.");
-            }
-        } catch (SQLException e) {
-            throw new LogRaterException("Cannot get Start Time from database", e);
-        } finally {
-            try {
-                con.commit();
-            } catch (SQLException e) {
-                log.warn("Error closing resultset for getting Start Time from Result table");
-            }
-        }
-    }
 
 	private PerformanceCenterAggregationGranularity createPerformanceCenterAggregationGranularity(Connection connection) throws SQLException {
 		Integer pcAggregationPeriodSec = getPcAggregationPeriodSec();

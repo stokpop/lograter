@@ -15,14 +15,138 @@
  */
 package nl.stokpop.lograter.processor.performancecenter;
 
+import nl.stokpop.lograter.LogRaterException;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class PerformanceCenterCalculatorTest {
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    private File databaseFile;
+
+    @Before
+    public void setUp() throws Exception {
+        databaseFile = tempFolder.newFile("any-database-file.db");
+    }
+
+    @Test
+    public void calculateAggSecGran() throws IOException {
+        final Integer originalValue = 123;
+
+        File stubLraFile = tempFolder.newFile("AggSecGran.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "AggSecGran=%s\nScenarioStartTime=0\nDaylightSavingSecsAddition=0\n",
+                        originalValue
+                ).getBytes()
+        );
+
+        Integer actualValue = PerformanceCenterCalculator.determineAggregationPeriod(databaseFile);
+        assertEquals(originalValue, actualValue);
+    }
+
+    @Test
+    public void calculateStartTimeSecEpochWithDayLightSavingActive() throws IOException {
+        final long scenarioStartTime = 1512653687;
+        final long daylightSavingSecsAddition = 3600;
+
+        File stubLraFile = tempFolder.newFile("day-light-saving-active.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "AggSecGran=0\nScenarioStartTime=%s\nDaylightSavingSecsAddition=%s\n",
+                        scenarioStartTime, daylightSavingSecsAddition
+                ).getBytes()
+        );
+
+        // The actual start time is 14:34:47 "Europe/Amsterdam" zone time (winter time)
+        // date --date=@1512653687
+        // Thu Dec  7 14:34:47 CET 2017
+
+        final long expectedResult = scenarioStartTime - daylightSavingSecsAddition;
+        long startTime = PerformanceCenterCalculator.calculateStartTimeSecEpoch(databaseFile);
+        assertEquals(expectedResult, startTime);
+    }
+
+    @Test
+    public void calculateStartTimeSecEpochWithDayLightSavingInactive() throws IOException {
+        final long scenarioStartTime = 1512653687;
+        final long daylightSavingSecsAddition = 0;
+
+        File stubLraFile = tempFolder.newFile("day-light-saving-inactive.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                String.format(
+                        "AggSecGran=0\nScenarioStartTime=%s\nDaylightSavingSecsAddition=%s\n",
+                        scenarioStartTime, daylightSavingSecsAddition
+                ).getBytes()
+        );
+
+        // The actual start time is 14:34:47 "Europe/Amsterdam" zone time (winter time)
+        // date --date=@1512653687
+        // Thu Dec  7 14:34:47 CET 2017
+
+        long startTime = PerformanceCenterCalculator.calculateStartTimeSecEpoch(databaseFile);
+        assertEquals(scenarioStartTime, startTime);
+    }
+
+    @Test
+    public void shouldFailIfScenarioStartTimeValueIsMissing() throws IOException {
+        File stubLraFile = tempFolder.newFile("ScenarioStartTime-missing.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                "AggSecGran=0\nScenarioStartTime=\nDaylightSavingSecsAddition=0\n".getBytes()
+        );
+
+        try {
+            PerformanceCenterCalculator.calculateStartTimeSecEpoch(databaseFile);
+        } catch (LogRaterException e) {
+            assertEquals("Setting 'ScenarioStartTime' in '" + stubLraFile + "' is missing value", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldFailIfDaylightSavingSecsAdditionValueIsMissing() throws IOException {
+        File stubLraFile = tempFolder.newFile("DaylightSavingSecsAddition-missing.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                "AggSecGran=0\nScenarioStartTime=0\nDaylightSavingSecsAddition=\n".getBytes()
+        );
+
+        try {
+            PerformanceCenterCalculator.calculateStartTimeSecEpoch(databaseFile);
+        } catch (LogRaterException e) {
+            assertEquals("Setting 'DaylightSavingSecsAddition' in '" + stubLraFile + "' is missing value", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldFailIfAggSecGranValueIsMissing() throws IOException {
+        File stubLraFile = tempFolder.newFile("AggSecGran-missing.lra");
+        Files.write(
+                stubLraFile.toPath(),
+                "AggSecGran=\nScenarioStartTime=0\nDaylightSavingSecsAddition=0\n".getBytes()
+        );
+
+        try {
+            PerformanceCenterCalculator.calculateStartTimeSecEpoch(databaseFile);
+        } catch (LogRaterException e) {
+            assertEquals("Setting 'AggSecGran' in '" + stubLraFile + "' is missing value", e.getMessage());
+        }
+    }
 
     @Test
     public void createDataSet1() {
@@ -43,7 +167,7 @@ public class PerformanceCenterCalculatorTest {
         numbers.add(9);
         check(numbers);
     }
-    
+
     @Test
     public void createDataSet3() {
 
@@ -75,7 +199,7 @@ public class PerformanceCenterCalculatorTest {
         List<Double> dataSet = PerformanceCenterCalculator.createDataSet(numbers.size(), min, max, avgNumbers);
 
         assertEquals(numbers.size(), dataSet.size());
-        
+
         double avgDataset = dataSet.stream().mapToDouble(Double::doubleValue).average().orElse(-2);
 
         assertEquals(avgNumbers, avgDataset, 0.0001d);
