@@ -68,7 +68,7 @@ public class  IisLogReportCreator implements ReportCreatorWithCommand<CommandIis
 
 		List<LineMapperSection> lineMappers = cmdIisLog.useSingleMapper ? LineMapperSection.SINGLE_MAPPER : LineMapperUtils.createLineMapper(cmdIisLog.mapperFile);
 
-		RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(cmdMain.storage);
+		RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(cmdMain.storage, new File(cmdMain.storageDir));
 
 		AccessLogConfig config = new AccessLogConfig();
 		config.setRunId(cmdMain.runId);

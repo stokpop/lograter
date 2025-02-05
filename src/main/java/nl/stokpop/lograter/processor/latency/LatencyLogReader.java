@@ -36,6 +36,7 @@ import nl.stokpop.lograter.util.linemapper.LineMapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class LatencyLogReader {
         String logPattern = config.getLogPattern();
         LogbackParser<LatencyLogEntry> lineParser = createLatencyLogEntryLogbackParser(logPattern, config);
 
-        RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(config.getCounterStorage());
+        RequestCounterStoreFactory csFactory = new RequestCounterStoreFactory(config.getCounterStorage(), new File(config.getCounterStorageDir()));
         LatencyLogData data = new LatencyLogData(csFactory, config.getMaxUniqueCounters());
 
         // the first element is used in the mapper, should not be a ('random') field in the key
