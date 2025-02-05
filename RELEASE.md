@@ -1,5 +1,11 @@
 ## LogRater Release Notes
 
+## version 1.5.4
+
+Feb 2025
+
+- Enable storing counters to disk for latency and iis reports
+
 ## version 1.5.3
 
 October 2024
