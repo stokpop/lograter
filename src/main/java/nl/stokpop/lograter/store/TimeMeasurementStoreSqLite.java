@@ -38,10 +38,11 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 	private Connection con;
 	
 	private String name;
-	
-	private static final int BUFFERSIZE = 100000;
-	private long[] timestampsBuffer = new long[BUFFERSIZE];
-	private int[] durationsBuffer = new int[BUFFERSIZE];
+
+	private static final int BUFFER_SIZE = Integer.parseInt(System.getenv().getOrDefault("nl.stokpop.lograter.store.TimeMeasurementStoreSqLite.BUFFER_SIZE", "2048"));
+
+	private long[] timestampsBuffer = new long[BUFFER_SIZE];
+	private int[] durationsBuffer = new int[BUFFER_SIZE];
 	private int bufferIdx = 0;
 
 	private boolean isDirty = true;
@@ -68,7 +69,7 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 		bufferIdx++;
 		size++;
 	
-		if (bufferIdx == BUFFERSIZE) {
+		if (bufferIdx == BUFFER_SIZE) {
 			flushBuffer();
 		}
 
