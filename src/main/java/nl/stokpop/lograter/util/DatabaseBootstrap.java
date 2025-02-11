@@ -117,6 +117,10 @@ public class DatabaseBootstrap {
             SQLiteConfig config = new SQLiteConfig();
             config.setReadOnly(readOnly);
             config.setSharedCache(true);
+			// rollback not needed
+			config.setJournalMode(SQLiteConfig.JournalMode.OFF);
+			// no need for synchronous writes
+			config.setSynchronous(SQLiteConfig.SynchronousMode.OFF);
             Connection con = DriverManager.getConnection(databaseName, config.toProperties());
 			con.setAutoCommit(false);
 			con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
