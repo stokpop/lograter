@@ -73,6 +73,8 @@ public class DatabaseBootstrap {
                 connection.commit();
             }
 
+			createIndexes();
+
 	    } catch (Exception e) {
             throw new LogRaterException("Cannot create database.", e);
 	    }
@@ -84,8 +86,7 @@ public class DatabaseBootstrap {
 			Connection connection = getDatabaseConnection();
             try (Statement statement = connection.createStatement()) {
                 log.info("about to create indexes");
-                //statement.executeUpdate("create index IF NOT EXISTS timestamp_index ON measurement (timestamp)");
-                statement.executeUpdate("create index IF NOT EXISTS counter_id_index ON measurement (counter_id)");
+                statement.executeUpdate("create index IF NOT EXISTS counter_id_timestamp_index ON measurement (counter_id, timestamp)");
                 log.info("indexes created");
             } finally {
                 connection.commit();
@@ -100,8 +101,7 @@ public class DatabaseBootstrap {
 			Connection connection = getDatabaseConnection();
             try (Statement statement = connection.createStatement()) {
                 log.info("about to drop indexes");
-                //statement.executeUpdate("drop index IF EXISTS timestamp_index");
-                statement.executeUpdate("drop index IF EXISTS counter_id_index");
+                statement.executeUpdate("drop index IF EXISTS counter_id_timestamp_index");
                 log.info("indexes dropped");
             } finally {
                 connection.commit();
