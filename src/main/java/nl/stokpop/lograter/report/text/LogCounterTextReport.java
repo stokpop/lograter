@@ -200,6 +200,9 @@ abstract class LogCounterTextReport extends LogTextReport {
     }
 
     private String reportLine(ResponseTimeAnalyser analyser, long maxTpmStartTimeStamp, long totalHits, BasicCounterLogConfig config, int insertColumns, Map<CounterKey, LineMap> counterKeyToLineMapMap) {
+
+		log.info("Create report line for counter: {} with hits count: {}", analyser.getCounterKey(), analyser.getCounter().getHits());
+
 		StringBuilder report = new StringBuilder(256);
 
 		CounterKey counterKey = analyser.getCounterKey();

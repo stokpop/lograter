@@ -152,7 +152,7 @@ public class TimeMeasurementStoreSqLite extends AbstractTimeMeasurementStore {
 			try (ResultSet resultSetCount = queryCount.executeQuery()) {
 				if (resultSetCount.next()) {
 					long count = resultSetCount.getLong(1);
-					log.info("Number of {} measurements to get: {}", dbCounterId, count);
+					log.debug("Number of {} measurements to get: {}", dbCounterId, count);
 					size = count;
 					return count;
 				} else {
