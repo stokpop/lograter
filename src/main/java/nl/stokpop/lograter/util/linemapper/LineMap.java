@@ -24,18 +24,49 @@ import java.util.regex.Pattern;
 public class LineMap {
 
 	private Logger log = LoggerFactory.getLogger(LineMap.class);
-	
+
+	private static final char[] REGEXP_CHARS = {'[', '(', '{', '.', '*', '+', '?', '|', '^', '$'};
+
 	private final Pattern pattern;
 	private final String regExpPattern;
+	private final String regExpPrefix;
 	private final String name;
 
 	public LineMap(String regExpPattern, String name) {
 		this.regExpPattern = regExpPattern;
+		this.regExpPrefix = extractPrefixToMatch(regExpPattern);
 		this.pattern = Pattern.compile(regExpPattern);
         this.name = sanityCheckReplacementGroups(regExpPattern, name, pattern);
     }
 
-    private String sanityCheckReplacementGroups(String regExpPattern, String name, Pattern pattern) {
+	private String extractPrefixToMatch(String regExpPattern) {
+		if (regExpPattern.startsWith("^")) {
+			regExpPattern = regExpPattern.substring(1);
+		}
+		int index = -1;
+		for (int i = 0; i < regExpPattern.length(); i++) {
+			char c = regExpPattern.charAt(i);
+			if (c == '\\') {
+				// Skip the next character if it is escaped by a backslash
+				i++;
+			} else {
+				for (char regExpChar : REGEXP_CHARS) {
+					if (c == regExpChar) {
+						index = i;
+						break;
+					}
+				}
+			}
+			if (index != -1) {
+				break;
+			}
+		}
+		String prefixToReturn = index == -1 ? regExpPattern : regExpPattern.substring(0, index);
+		// remove backslashes from the prefix
+		return prefixToReturn.replace("\\", "");
+	}
+
+	private String sanityCheckReplacementGroups(String regExpPattern, String name, Pattern pattern) {
         Matcher matcher = pattern.matcher(regExpPattern);
         try {
 			String ignore = matcher.replaceFirst(name);
@@ -52,6 +83,13 @@ public class LineMap {
 	}
 	
 	boolean isMatch(String line) {
+
+		// if does not seem like a match, return fast
+		if (!line.startsWith(regExpPrefix)) {
+			return false;
+		}
+
+		// check with full regexp match
 		boolean match = pattern.matcher(line).matches();
 		if (match) {
 			log.debug("Match for mapper: [{}] on line: [{}]", name, line);
