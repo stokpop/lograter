@@ -29,8 +29,21 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 	private final Logger log = LoggerFactory.getLogger(DateLogEntryMapper.class);
 	
 	private final DateTimeFormatter dateFormatter;
-	
+	private final EpochFormat epochFormat;
+
+	private enum EpochFormat {
+		NONE,
+		MILLIS,
+		SECONDS
+	}
+
 	public DateLogEntryMapper(String dateFormat) {
+		epochFormat = determineEpochFormat(dateFormat);
+		if (epochFormat != EpochFormat.NONE) {
+			dateFormatter = null;
+			return;
+		}
+
 		DateTimeFormatter tempDateTimeFormatter;
 		try {
 			if ("ISO8601".equalsIgnoreCase(dateFormat)) {
@@ -49,12 +62,37 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 		}
 		dateFormatter = tempDateTimeFormatter;
 	}
-	
+
+	private static EpochFormat determineEpochFormat(String dateFormat) {
+		if (dateFormat == null) {
+			return EpochFormat.NONE;
+		}
+		String df = dateFormat.trim().toLowerCase();
+		// supported aliases
+		if ("epoch".equals(df) || "epoch_millis".equals(df) || "epochmillis".equals(df) || "epochmilliseconds".equals(df)) {
+			return EpochFormat.MILLIS;
+		}
+		if ("epoch_second".equals(df) || "epoch_seconds".equals(df) || "epochsecond".equals(df) || "epochseconds".equals(df)) {
+			return EpochFormat.SECONDS;
+		}
+		return EpochFormat.NONE;
+	}
+
 	protected long dateParser(String value) {
         try {
-            return dateFormatter.parseMillis(value);
-        } catch (IllegalArgumentException e) {
-            throw new LogRaterException("Could not parse date.", e);
+			if (epochFormat == EpochFormat.MILLIS) {
+				return Long.parseLong(value);
+			}
+			if (epochFormat == EpochFormat.SECONDS) {
+				return Math.multiplyExact(Long.parseLong(value), 1000L);
+			}
+			return dateFormatter.parseMillis(value);
+		} catch (NumberFormatException e) {
+			throw new LogRaterException("Could not parse epoch date.", e);
+		} catch (IllegalArgumentException e) {
+			throw new LogRaterException("Could not parse date.", e);
+		} catch (ArithmeticException e) {
+			throw new LogRaterException("Epoch seconds value overflows millis range.", e);
         }
     }
 

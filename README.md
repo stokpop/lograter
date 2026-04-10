@@ -141,6 +141,22 @@ Use the log pattern to define your log line structure. LogRater needs at least:
  * the duration of that call
  * optionally the http status code 
 
+For logback-style patterns the timestamp directive supports special epoch formats:
+* `%d{epoch}`: epoch milliseconds (e.g. `1712749095123`)
+* `%d{epoch_seconds}`: epoch seconds (e.g. `1712749095`)
+
+Example patterns:
+
+* Epoch millis timestamp:
+
+      -lp
+      %d{epoch} %X{operation} %X{latency}%n
+
+* Epoch seconds timestamp:
+
+      -lp
+      %d{epoch_seconds} %X{operation} %X{latency}%n
+
 In apache access log these are defined by these directives: 
 * `%t`
 * `%r`
