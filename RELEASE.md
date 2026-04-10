@@ -1,5 +1,11 @@
 ## LogRater Release Notes
 
+## version 1.5.6
+
+April 2026
+- Upgrade of dependencies
+- Added %{epoch} and %{epoch_seconds} to log format patterns to parse timestamp in millis or seconds since epoch (Unix time)
+
 ## version 1.5.5
 
 March 2025
