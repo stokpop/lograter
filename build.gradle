@@ -118,7 +118,7 @@ void sign(Project project) {
 // https://docs.gradle.org/current/userguide/maven_plugin.html#sec:maven_pom_generation
 project.plugins.withType(MavenPublishPlugin).all {
     PublishingExtension publishing = project.extensions.getByType(PublishingExtension)
-    publishing.publications.withType(MavenPublication).all { mavenPublication ->
+    publishing.publications.withType(MavenPublication).configureEach { mavenPublication ->
         mavenPublication.pom {
             name = "${project.group}:${project.name}"
             description = name
@@ -178,7 +178,7 @@ jacocoTestReport {
     reports {
         xml.required = true
         csv.required = false
-        html.outputLocation = file("${buildDir}/jacocoHtml")
+        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
     }
 }
 
@@ -186,7 +186,7 @@ spotbugs {
     ignoreFailures.set(true)
 }
 
-task customFatJar(type: Jar) {
+tasks.register('customFatJar', Jar) {
 
     manifest {
         attributes "Main-Class": "nl.stokpop.lograter.LogRater"
@@ -196,6 +196,6 @@ task customFatJar(type: Jar) {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     with jar
 }
