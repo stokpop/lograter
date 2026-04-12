@@ -39,11 +39,11 @@ jobs:
           git fetch --all --tags
           git checkout tags/${{ env.VERSION }} -b ${{ env.VERSION }}-tmp-branch
 
-      - name: Set up JDK 11
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Publish to Maven Central (snapshot)

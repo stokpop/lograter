@@ -71,12 +71,10 @@ mavenPublishing {
 java {
     withJavadocJar()
     withSourcesJar()
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
 }
 
 tasks.withType(JavaCompile).configureEach {
+    options.release = 11
     options.encoding = 'UTF-8'
 }
 
