@@ -1,14 +1,10 @@
 import org.gradle.internal.os.OperatingSystem
 
-import java.time.Duration
-
 plugins {
     id 'java'
     id 'java-library'
-    id 'signing'
-    id 'maven-publish'
     id 'jacoco'
-    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
+    id 'com.vanniktech.maven.publish' version '0.36.0'
     // check dependency updates: ./gradlew dependencyUpdates -Drevision=release
     id 'com.github.ben-manes.versions' version '0.53.0'
     id 'com.github.hierynomus.license' version '0.16.1'
@@ -21,7 +17,6 @@ repositories {
 }
 
 group = 'nl.stokpop'
-version = file("VERSION").readLines().first()
 description = 'LogRater'
 
 dependencies {
@@ -44,10 +39,31 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.44'
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    pom {
+        name = "${project.group}:${project.name}"
+        description = 'LogRater'
+        url = "https://github.com/stokpop/lograter.git"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        }
+        developers {
+            developer {
+                id = 'stokpop'
+                name = 'Peter Paul Bakker'
+                email = 'peter.paul.bakker@stokpop.nl'
+            }
+        }
+        scm {
+            connection = 'scm:git:https://github.com/stokpop/lograter.git'
+            developerConnection = 'scm:git:git@github.com:stokpop/lograter.git'
+            url = 'https://github.com/stokpop/lograter.git'
         }
     }
 }
@@ -91,67 +107,6 @@ license {
     }
     ignoreFailures = false
     strictCheck = true
-}
-
-// https://docs.gradle.org/current/userguide/signing_plugin.html
-// this only configures signing if the key is found
-def hasSigningKey = project.hasProperty("signingKeyId") || project.hasProperty("signingKey")
-if(hasSigningKey) {
-    sign(project)
-}
-void sign(Project project) {
-    project.signing {
-        required { project.gradle.taskGraph.hasTask("publish") }
-        def signingKeyId = project.findProperty("signingKeyId")
-        def signingKey = project.findProperty("signingKey")
-        def signingPassword = project.findProperty("signingPassword")
-        if (signingKeyId) {
-            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-        } else if (signingKey) {
-            useInMemoryPgpKeys(signingKey, signingPassword)
-        }
-        sign publishing.publications.maven
-    }
-}
-
-// customize the pom so it complies to Maven central requirements https://central.sonatype.org/pages/requirements.html
-// https://docs.gradle.org/current/userguide/maven_plugin.html#sec:maven_pom_generation
-project.plugins.withType(MavenPublishPlugin).all {
-    PublishingExtension publishing = project.extensions.getByType(PublishingExtension)
-    publishing.publications.withType(MavenPublication).configureEach { mavenPublication ->
-        mavenPublication.pom {
-            name = "${project.group}:${project.name}"
-            description = name
-            url = "https://github.com/stokpop/lograter.git"
-            licenses {
-                license {
-                    name = "The Apache License, Version 2.0"
-                    url = "https://www.apache.org/licenses/LICENSE-2.0"
-                }
-            }
-            developers {
-                developer {
-                    id = 'stokpop'
-                    name = 'Peter Paul Bakker'
-                    email = 'peter.paul.bakker@stokpop.nl'
-                }
-            }
-            scm {
-                connection = 'scm:git:https://github.com/stokpop/lograter.git'
-                developerConnection = 'scm:git:git@github.com:stokpop/lograter.git'
-                url = 'https://github.com/stokpop/lograter.git'
-            }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype()
-    }
-    // Prevent "java.net.SocketTimeoutException: timeout", when Sonatype is slow.
-    connectTimeout = Duration.ofMinutes(3)
-    clientTimeout = Duration.ofMinutes(3)
 }
 
 processResources {

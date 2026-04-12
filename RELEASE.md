@@ -1,33 +1,26 @@
-## LogRater Release Notes
+# Publishing LogRater
 
-## version 1.5.6
+## Prerequisites
 
-April 2026
-- Upgrade of dependencies
-- Added %{epoch} and %{epoch_seconds} to log format patterns to parse timestamp in millis or seconds since epoch (Unix time)
+Configure these secrets in *Settings → Secrets and variables → Actions*:
 
-## version 1.5.5
+| Secret | Description |
+|---|---|
+| `MAVEN_CENTRAL_USERNAME` | Central Portal user token username (generate at [central.sonatype.com](https://central.sonatype.com) → Account → User Token) |
+| `MAVEN_CENTRAL_PASSWORD` | Central Portal user token password |
+| `GPG_SIGNING_KEY` | Armored PGP private key (`gpg --export-secret-keys --armor <key-id>`) |
+| `GPG_SIGNING_PASSWORD` | GPG passphrase |
 
-March 2025
+Allow the release workflow to push back to `master` after publishing (branch protection → add `github-actions[bot]` to the bypass list).
 
-- Upgrade of dependencies
-- Fixes use of external SQLite database to save total needed memory
-  - JournalMode.OFF and SynchronousMode.OFF
-  - Added missing index on measurement table
-  - Use `nl.stokpop.lograter.store.TimeMeasurementStoreSqLite.BUFFER_SIZE` to change buffer size for SQLite counters (default 2048)
-- Optimized regex matching of patterns, first checking for partial match before doing full match
+## Steps to release
 
-## version 1.5.4
+1. **Create a GitHub release** — go to *Releases → Draft a new release*, create a tag (e.g. `1.5.6`), and click **Publish release**.
+2. The [release workflow](.github/workflows/publish-maven-central.yml) triggers automatically: signs and uploads the artifact, bumps `gradle.properties` to the next `-SNAPSHOT`, and attaches JARs to the release.
+3. **Approve on Maven Central** — go to [central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments) and click **Publish**.
 
-Feb 2025
+> Maven Central releases are irreversible — verify the deployment before publishing.
 
-- Enable storing counters to disk for latency and iis reports
+## Snapshot releases
 
-## version 1.5.3
-
-October 2024
-
-- Fix for LoadRunner daylight savings time issue [#13](https://github.com/stokpop/lograter/issues/13)
-- Update dependencies
-
-Thanks to: [madkroll](https://github.com/madkroll) for the contribution.
+Trigger the workflow manually via *Actions → Release to Maven Central → Run workflow* and enter a version ending in `-SNAPSHOT` (e.g. `1.5.7-SNAPSHOT`). Snapshots publish automatically without a manual approval step.
