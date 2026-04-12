@@ -21,6 +21,15 @@ Allow the release workflow to push back to `master` after publishing (branch pro
 
 > Maven Central releases are irreversible — verify the deployment before publishing.
 
+## If the release build fails
+
+The workflow automatically runs a rollback job that deletes the GitHub release and tag. You only need to act on Maven Central:
+
+- If the build failed **before** `publishToMavenCentral`: nothing to do on Maven Central.
+- If the build failed **after** `publishToMavenCentral`: go to [central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments) and click **Drop** on the pending deployment.
+
+Once resolved, re-create the GitHub release with the same tag to re-trigger the workflow.
+
 ## Snapshot releases
 
 Trigger the workflow manually via *Actions → Release to Maven Central → Run workflow* and enter a version ending in `-SNAPSHOT` (e.g. `1.5.7-SNAPSHOT`). Snapshots publish automatically without a manual approval step.

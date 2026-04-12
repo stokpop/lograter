@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
@@ -24,13 +26,16 @@ jobs:
           ref: ${{ github.event.release.tag_name || '' }}
 
       - name: Set version
+        id: set-version
         run: |
           if [ -n "${{ github.event.release.tag_name }}" ]; then
             # Triggered by publishing a GitHub release — use the release tag
             echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           else
             # Manual dispatch — use the provided input version
             echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Switch to git tag for release (workflow_dispatch only)
@@ -101,3 +106,20 @@ jobs:
           bodyFile: CHANGELOG.md
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  rollback:
+    runs-on: ubuntu-latest
+    needs: build
+    if: failure() && !contains(needs.build.outputs.version, 'SNAPSHOT')
+    permissions:
+      contents: write
+    steps:
+      - name: Delete GitHub release and tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          echo "Rolling back: deleting GitHub release and tag for ${VERSION}"
+          gh release delete "${VERSION}" --repo ${{ github.repository }} --yes --cleanup-tag || true
+          echo "Done. If a deployment was uploaded to Maven Central, drop it manually at:"
+          echo "https://central.sonatype.com/publishing/deployments"
