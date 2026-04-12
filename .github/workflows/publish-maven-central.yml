@@ -17,7 +17,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           # release event: check out the exact tag; workflow_dispatch: default branch
@@ -40,7 +40,7 @@ jobs:
           git checkout tags/${{ env.VERSION }} -b ${{ env.VERSION }}-tmp-branch
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
