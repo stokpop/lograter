@@ -68,11 +68,10 @@ public abstract class DateLogEntryMapper<T extends LogEntry> implements LogEntry
 			return EpochFormat.NONE;
 		}
 		String df = dateFormat.trim().toLowerCase();
-		// supported aliases
-		if ("epoch".equals(df) || "epoch_millis".equals(df) || "epochmillis".equals(df) || "epochmilliseconds".equals(df)) {
+		if ("epoch_millis".equals(df)) {
 			return EpochFormat.MILLIS;
 		}
-		if ("epoch_second".equals(df) || "epoch_seconds".equals(df) || "epochsecond".equals(df) || "epochseconds".equals(df)) {
+		if ("epoch_seconds".equals(df)) {
 			return EpochFormat.SECONDS;
 		}
 		return EpochFormat.NONE;

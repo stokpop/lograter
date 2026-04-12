@@ -5,7 +5,7 @@
 April 2026
 
 - Upgrade of dependencies
-- Added `%{epoch}` and `%{epoch_seconds}` to log format patterns to parse timestamp in millis or seconds since epoch (Unix time)
+- Added `%{epoch_millis}` and `%{epoch_seconds}` to log format patterns to parse timestamps in milliseconds or seconds since epoch (Unix time)
 
 ## version 1.5.5
 

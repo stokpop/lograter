@@ -24,7 +24,7 @@ public class LogbackParserEpochDateTest {
 
     @Test
     public void testParseEpochMillis() {
-        String pattern = "%d{epoch} %m%n";
+        String pattern = "%d{epoch_millis} %m%n";
         LogbackParser<LogbackLogEntry> parser = LogbackParser.createLogbackParser(pattern);
 
         String logline = "1712749095123 hello";
